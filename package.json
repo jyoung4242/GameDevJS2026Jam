@@ -11,8 +11,8 @@
     "lint": "eslint \"**/*.{ts,tsx,js}\""
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Excalibur.js Contributors",
+  "license": "BSD-2-Clause",
   "type": "module",
   "devDependencies": {
     "json": "^11.0.0",
