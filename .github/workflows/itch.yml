@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  ITCH_USERNAME: Mookie4242
+  ITCH_USERNAME: CaliburnGames
   ITCH_GAME_ID: gamedevjs2026
 
 jobs:
