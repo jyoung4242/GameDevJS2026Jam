@@ -8,7 +8,7 @@ on:
 
 env:
   ITCH_USERNAME: CaliburnGames
-  ITCH_GAME_ID: gamedevjs2026
+  ITCH_GAME_ID: gamedevjs-jam-2026
 
 jobs:
   deploy:
