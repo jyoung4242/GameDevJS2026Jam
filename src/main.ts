@@ -6,15 +6,16 @@ import "./style.css";
 
 import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent } from "excalibur";
 
-import './main.screen';
+import "./main.screen";
 import { MainScreen } from "./main.screen";
+import { LootCollector } from "./Actors/Loot";
 
 // TODO move to scene
-const mainScreenEl = document.getElementsByTagName('main-screen')[0]! as MainScreen;
+const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
 mainScreenEl.visible = true;
 
 const game = new Engine({
-  canvasElementId: 'game',
+  canvasElementId: "game",
   width: 800, // the width of the canvas
   height: 600, // the height of the canvas
   displayMode: DisplayMode.Fixed, // the display mode
@@ -34,6 +35,7 @@ towerManager.createTower("power", new Vector(900, 500));
 gField.registerWaveManager(waveManager);
 gField.registerTowerManager(towerManager);
 towerManager.registerEWC(waveManager);
+gField.addChild(new LootCollector());
 
 console.log("Hit Spacebar to begin wave");
 
@@ -54,7 +56,7 @@ mainScreenEl.setDimensions(dimensions.width, dimensions.height);
 mainScreenEl.setPixelRatio(game.pixelRatio);
 mainScreenEl.setWaveManager(waveManager);
 
-game.screen.events.on('resize', () => {
+game.screen.events.on("resize", () => {
   const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
   mainScreenEl.setPos(topLeft.x, topLeft.y);
 });
