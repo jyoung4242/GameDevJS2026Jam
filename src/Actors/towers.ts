@@ -1,0 +1,259 @@
+import { Actor, Color, Engine, ExcaliburGraphicsContext, Graphic, vec, Vector } from "excalibur";
+import { towerColliderGroup } from "../CollisionGroups";
+import { TowerDamagedEvent, TowerManager } from "../Lib/TowerManager";
+import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
+import { LaserBeam } from "./SkillActors";
+
+const STARTING_TOWER_CAPACITY = 3;
+
+export abstract class Tower extends Actor {
+  healthBar: HealthBar;
+  tw: TowerManager;
+
+  constructor(pos: Vector, manager: TowerManager) {
+    super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup });
+    this.tw = manager;
+    this.healthBar = new HealthBar(vec(0, -60), vec(64, 32), 100);
+    this.addChild(this.healthBar);
+  }
+
+  takeDamage(damageAmount: number) {
+    this.healthBar.takeDamage(damageAmount);
+    this.tw.towerEmitter.emit("towerDamaged", new TowerDamagedEvent(this));
+    //renew health as a part of the demo
+    if (this.healthBar.currentHealth < 0) this.healthBar.currentHealth = this.healthBar.maxHealth;
+  }
+}
+
+export class PowerPlantTower extends Tower {
+  otherTowers: OtherTower[] = [];
+  private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
+  constructor(pos: Vector, manager: TowerManager) {
+    super(pos, manager);
+    this.graphics.color = Color.Yellow;
+  }
+
+  assignOtherTower(tower: OtherTower): boolean {
+    if (this.otherTowers.length >= this._numTowerCapacity) return false;
+    this.otherTowers.push(tower);
+    return true;
+  }
+
+  clearOtherTower(tower: OtherTower) {
+    this.otherTowers = this.otherTowers.filter(t => t !== tower);
+  }
+
+  getNumTowerCapacity() {
+    return this._numTowerCapacity;
+  }
+
+  get numOtherTowers() {
+    return this.otherTowers.length;
+  }
+}
+
+export class OtherTower extends Tower {
+  powerTower?: PowerPlantTower;
+  status: "powered" | "unpowered" = "powered";
+  oldStatus: "powered" | "unpowered" = "unpowered";
+  manager: TowerManager;
+  skillComponents: TowerSkill[] = [];
+  direction: Vector = new Vector(0, 0);
+
+  constructor(pos: Vector, manager: TowerManager, powerTower?: PowerPlantTower) {
+    super(pos, manager);
+    this.graphics.color = Color.Orange;
+    this.powerTower = powerTower;
+    this.manager = manager;
+  }
+
+  onAdd(engine: Engine): void {
+    // NOTE Debugging different skills here
+    this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
+    this.skillComponents.push(new HomingMissileTowerSkill(this.manager.ewc!));
+    this.skillComponents.push(new LaserBeamTowerSkill(this.manager.ewc!));
+    this.skillComponents.push(new LaunchDroneSkill(this.manager.ewc!));
+
+    this.addComponent(this.skillComponents[0]);
+    this.skillComponents[0].setState("active");
+
+    this.addComponent(this.skillComponents[1]);
+    this.skillComponents[1].setState("active");
+
+    this.addComponent(this.skillComponents[2]);
+    this.skillComponents[2].setState("active");
+
+    this.addComponent(this.skillComponents[3]);
+    this.skillComponents[3].setState("active");
+
+    let entities = engine.currentScene.entities;
+    //find power plant
+    console.log(entities);
+
+    let pplants = entities.filter(e => e instanceof PowerPlantTower);
+    // get closest plant
+    let closestPlant = undefined;
+    let closestDistance = Infinity;
+    for (const pplant of pplants) {
+      let distance = pplant.pos.distance(this.pos);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestPlant = pplant;
+      }
+    }
+    this.direction = this.pos.sub(closestPlant!.pos).normalize();
+  }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    if (!this.powerTower) {
+      this.status = "unpowered";
+    }
+
+    if (this.oldStatus !== this.status) {
+      if (this.status === "unpowered" || !this.powerTower) {
+        this.graphics.current!.tint = Color.DarkGray;
+      } else {
+        this.graphics.current!.tint = Color.White;
+      }
+      this.oldStatus = this.status;
+    }
+  }
+}
+
+/******************************
+ Our Custom Graphic
+*******************************/
+class HealthBarGraphic extends Graphic {
+  backgroundColor: Color = Color.Black;
+  borderColor: Color = Color.White;
+  safeColor: Color = Color.Green;
+  warningColor: Color = Color.Yellow;
+  criticalColor: Color = Color.Red;
+  borderSize: number = 2;
+
+  drawScale = 10; // This will help us inject extra pixels into the offline canvas to draw mo' pretty
+  cnv: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D | null;
+
+  // dirty flag to trigger a redraw so we don't redraw every frame
+  dirtyFlag: boolean = true;
+  percent: number = 1.0;
+  newpercent: number = 1.0;
+  changeRate: number = 0.01;
+
+  constructor() {
+    super({
+      width: 36, //hard-coded for this example, matching the child actor dims, you can pass this in to the graphic IRL
+      height: 6,
+    });
+
+    //setup offscreen Canvas
+    this.cnv = document.createElement("canvas");
+    this.cnv.width = this.width * this.drawScale;
+    this.cnv.height = this.height * this.drawScale;
+    this.ctx = this.cnv.getContext("2d");
+  }
+
+  updatePercent(percentfill: number) {
+    this.newpercent = percentfill;
+    if (this.newpercent === this.percent) return;
+    this.dirtyFlag = true;
+  }
+
+  clone(): HealthBarGraphic {
+    return new HealthBarGraphic();
+  }
+
+  protected _drawImage(ex: ExcaliburGraphicsContext, x: number, y: number): void {
+    if (this.dirtyFlag && this.ctx) {
+      const ctx = this.ctx;
+      const s = this.drawScale;
+
+      // === Interpolation (smoothing transition) ===
+      if (this.newpercent != this.percent) {
+        if (this.newpercent > this.percent) {
+          this.percent += this.changeRate;
+        } else {
+          this.percent -= this.changeRate;
+        }
+        // when close, set equal and clear dirty flag
+        if (Math.abs(this.newpercent - this.percent) < this.changeRate) {
+          this.percent = this.newpercent;
+          this.dirtyFlag = false;
+        }
+      }
+
+      // === Clear canvas and scale ===
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, this.cnv.width, this.cnv.height);
+      ctx.scale(s, s);
+
+      // === Background ===
+      ctx.fillStyle = this.backgroundColor.toString();
+      ctx.fillRect(0, 0, this.width, this.height);
+
+      // === Health fill ===
+      const border = this.borderSize;
+      const inset = border / 2; // or border if you prefer full padding
+      const fillWidth = (this.width - border) * this.percent;
+      const fillHeight = this.height - border; // stay inside border
+
+      // === Changing colors ===
+      if (this.percent > 0.5) {
+        ctx.fillStyle = this.safeColor.toString();
+      } else if (this.percent < 0.25) {
+        ctx.fillStyle = this.criticalColor.toString();
+      } else {
+        ctx.fillStyle = this.warningColor.toString();
+      }
+
+      ctx.fillRect(
+        inset, // x
+        inset, // y
+        fillWidth, // width
+        fillHeight, // height
+      );
+
+      // === Border ===
+      ctx.lineWidth = this.borderSize;
+      ctx.strokeStyle = this.borderColor.toString();
+      ctx.strokeRect(0, 0, this.width, this.height);
+    }
+
+    // === Draw canvas === (forcing canvas to update)
+    this.cnv.setAttribute("forceUpload", "true");
+    ex.save();
+    ex.scale(1 / this.drawScale, 1 / this.drawScale);
+    ex.drawImage(this.cnv, x * this.drawScale, y * this.drawScale);
+    ex.restore();
+  }
+}
+
+/******************************
+ Our Child Actor
+*******************************/
+export class HealthBar extends Actor {
+  currentHealth: number;
+  maxHealth: number;
+
+  constructor(pos: Vector, dims: Vector, maxHealth: number) {
+    super({
+      pos,
+      width: dims.x,
+      height: dims.y,
+    });
+    this.currentHealth = maxHealth; //<--- track the player's health
+    this.maxHealth = maxHealth;
+    this.graphics.use(new HealthBarGraphic());
+  }
+
+  takeDamage(damageAmount: number) {
+    this.currentHealth -= damageAmount;
+
+    //renew health as a part of the demo
+    if (this.currentHealth < 0) this.currentHealth = this.maxHealth;
+
+    let percent = this.currentHealth / this.maxHealth;
+    (this.graphics.current as HealthBarGraphic).updatePercent(percent);
+  }
+}
