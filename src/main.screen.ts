@@ -10,6 +10,10 @@ export class MainScreen extends LitElement {
       color: black;
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
     .container {
       position: absolute;
       visibility: hidden;
@@ -20,13 +24,20 @@ export class MainScreen extends LitElement {
       color: white;
       font-size: 24px;
       transform-origin: 0 0;
-      // transform: translate(-50%, 200%) scale(calc(var(--ex-pixel-ratio)), calc(var(--ex-pixel-ratio)));
+      // transform: translate(0, 0) scale(calc(var(--ex-pixel-ratio)), calc(var(--ex-pixel-ratio)));
+    }
+
+    .header {
+      display: flex;
+      width: 100%;
+      justify-content: flex-end;
+      padding: 20px;
     }
 
     .top-right {
-      position: absolute;
-      top: 0;
-      right: 0;
+      // justify-self: flex-end;
+      // top: 0;
+      // right: 0;
     }
 
     .bottom-left {
@@ -42,12 +53,19 @@ export class MainScreen extends LitElement {
   accessor health: number = 20;
 
   @property()
+  accessor wave: number = 1;
+
+  @property()
   accessor visible: boolean = false;
 
   left = 0;
   top = 0;
   width: number = 800;
   height: number = 600;
+  pixelRatio: number = 1.0;
+
+  // override to disable shadow dom for --ex-pixel-ratio
+  // override createRenderRoot() { return this; }
 
   public setPos(x: number, y: number) {
     this.left = x;
@@ -58,10 +76,18 @@ export class MainScreen extends LitElement {
   public setDimensions(width: number, height: number) {
     this.width = width;
     this.height = height;
+    this.requestUpdate();
+  }
+
+  public setPixelRatio(pixelRatio: number) {
+    this.pixelRatio = pixelRatio;
+    this.requestUpdate();
+
   }
 
   protected render(): unknown {
     const styles = {
+      '--ex-pixel-ratio': `${this.pixelRatio}`,
       visibility: this.visible ? 'visible' : 'hidden',
       left: `${this.left}px`,
       top: `${this.top}px`,
@@ -71,15 +97,16 @@ export class MainScreen extends LitElement {
 
     return html`
     <div class="container" style=${styleMap(styles)}>
+      <div class="header">
+        <div class="top-right">
+            <h2>Wave: ${this.wave}</h2>
+            <h3>Health: ${this.health}</h3>
+        </div>
+      </div>
 
       <div class="bottom-left">
         <button>Start Wave</button>
         <button>Shop</button>
-      </div>
-
-      <div class="top-right">
-          <h2>Wave 1</h2>
-          <h3>Health: ${this.health}</h3>
       </div>
 
     </div>`

@@ -18,6 +18,7 @@ const game = new Engine({
   width: 800, // the width of the canvas
   height: 600, // the height of the canvas
   displayMode: DisplayMode.Fixed, // the display mode
+  pixelRatio: 2,
   pixelArt: true,
 });
 
@@ -51,3 +52,6 @@ mainScreenEl.setPos(topLeft.x, topLeft.y);
 const dimensions = game.getWorldBounds();
 mainScreenEl.setDimensions(dimensions.width, dimensions.height);
 
+mainScreenEl.setPixelRatio(game.pixelRatio);
+
+//push test
