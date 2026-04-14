@@ -1,3 +1,8 @@
+declare module "*.css" {
+  const value: string;
+  export default value;
+}
+
 //define image types here
 
 declare module "*.css" {
