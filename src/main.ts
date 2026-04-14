@@ -6,7 +6,15 @@ import "./style.css";
 
 import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent } from "excalibur";
 
+import './main.screen';
+import { MainScreen } from "./main.screen";
+
+// TODO move to scene
+const mainScreenEl = document.getElementsByTagName('main-screen')[0]! as MainScreen;
+mainScreenEl.visible = true;
+
 const game = new Engine({
+  canvasElementId: 'game',
   width: 800, // the width of the canvas
   height: 600, // the height of the canvas
   displayMode: DisplayMode.Fixed, // the display mode
@@ -35,3 +43,11 @@ game.input.keyboard.on("press", (e: KeyEvent) => {
 });
 
 game.onPreUpdate = (engine: Engine, dt: number) => waveManager.update(dt);
+// TODO move to scene
+// const topLeft = game.screen.contentArea.topLeft;
+const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
+mainScreenEl.setPos(topLeft.x, topLeft.y);
+
+const dimensions = game.getWorldBounds();
+mainScreenEl.setDimensions(dimensions.width, dimensions.height);
+

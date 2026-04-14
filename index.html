@@ -1,23 +1,33 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
- 
-<head> 
-   <meta charset="UTF-8"> 
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
-   <link rel="icon" type="image/x-icon" href="./ex-logo.png" /> 
-   <title>Hello Excalibur</title>  
-   <script type="module" src="/src/main.ts"> </script>   
-</head> 
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="./ex-logo.png" />
+  <link rel="stylesheet" href="./src/style.css" />
+  <title>GameDev.js Jam 2026</title>
+</head>
 
 <body>
-	<style>
-		canvas{
+  <style>
+    canvas {
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%,-50%);
+      transform: translate(-50%, -50%);
     }
   </style>
-</body> 
 
-</html> 
+  <main>
+    <canvas id="game"></canvas>
+
+    <main-screen></main-screen>
+
+    <a id="commit-ref" href="https://github.com/jyoung4242/GameDevJS2026Jam/commit/commitRef">commitRefShort</a>
+  </main>
+
+  <script type="module" src="./src/main.ts"> </script>
+</body>
+
+</html>
