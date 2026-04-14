@@ -127,7 +127,7 @@ export class MainScreen extends LitElement {
       <div class="header">
         <div class="top-right">
             <h2>Wave: ${this.waveManager?.level}</h2>
-            <h3>Health: ${this.health}</h3>
+            <h3>♥️${this.health}</h3>
         </div>
       </div>
 
