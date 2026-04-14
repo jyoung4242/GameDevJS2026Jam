@@ -54,4 +54,9 @@ mainScreenEl.setDimensions(dimensions.width, dimensions.height);
 mainScreenEl.setPixelRatio(game.pixelRatio);
 mainScreenEl.setWaveManager(waveManager);
 
+game.screen.events.on('resize', () => {
+  const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
+  mainScreenEl.setPos(topLeft.x, topLeft.y);
+});
+
 //push test
