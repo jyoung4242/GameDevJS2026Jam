@@ -4,6 +4,8 @@ import { TowerManager } from "../Lib/TowerManager";
 import { enemyColliderGroup } from "../CollisionGroups";
 import { Tower } from "./towers";
 import { EnemyTypes, EnemyWaveController } from "../Lib/enemyWaveController";
+import { LootComponent, Rarity } from "../Components/LootComponent";
+import { BurstShells, DroneEngine, LaserOptics, MissleChassis, PowerCell, PowerCore, Servos } from "./Loot";
 
 export abstract class Enemy extends Actor {
   enemyType: EnemyTypes | null = null;
@@ -41,6 +43,21 @@ export abstract class Enemy extends Actor {
 
   onAdd(engine: Engine): void {
     this.actions.meet(this.towerManager.getclosestTower(), this.speed);
+
+    this.addComponent(
+      new LootComponent({
+        scatterRadius: 32,
+        entries: [
+          { factory: () => new MissleChassis(), weight: 5, rarity: Rarity.Uncommon },
+          { factory: () => new BurstShells(), weight: 5, rarity: Rarity.Uncommon },
+          { factory: () => new DroneEngine(), weight: 5, rarity: Rarity.Uncommon },
+          { factory: () => new LaserOptics(), weight: 5, rarity: Rarity.Uncommon },
+          { factory: () => new PowerCore(), weight: 20, rarity: Rarity.Common },
+          { factory: () => new PowerCell(), weight: 20, rarity: Rarity.Common },
+          { factory: () => new Servos(), weight: 20, rarity: Rarity.Common },
+        ],
+      }),
+    );
   }
 
   onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
@@ -57,7 +74,10 @@ export abstract class Enemy extends Actor {
     console.log("damage: ", damageAmount);
 
     this.hp -= damageAmount;
-    if (this.hp <= 0) this.waveManager.returnEnemyToPool(this);
+    if (this.hp <= 0) {
+      this.get(LootComponent).dropOne(this.gameField, this.pos);
+      this.waveManager.returnEnemyToPool(this);
+    }
   }
 }
 
