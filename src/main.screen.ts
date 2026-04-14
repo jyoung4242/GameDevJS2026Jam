@@ -18,7 +18,7 @@ export class MainScreen extends LitElement {
     .container {
       position: absolute;
       visibility: hidden;
-      // pointer-events: none;
+      pointer-events: none;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -45,6 +45,7 @@ export class MainScreen extends LitElement {
       position: absolute;
       display: flex;
       flex-direction: column;
+      pointer-events: auto;
       gap: 20px;
       left: 20px;
       bottom: 20px;
