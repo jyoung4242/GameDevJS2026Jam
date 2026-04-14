@@ -43,8 +43,21 @@ export class MainScreen extends LitElement {
 
     .bottom-left {
       position: absolute;
-      left: 0;
-      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      left: 20px;
+      bottom: 20px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 150px;
+      height: 100px;
+      background-color: black;
     }
 
   `;
@@ -120,6 +133,13 @@ export class MainScreen extends LitElement {
       <div class="bottom-left">
         <button @click=${this.startNextWave}>Start Wave</button>
         <button>Shop</button>
+        <button>Inventory</button>
+        <button>Settings</button>
+        <div class="stats">
+          <div class="money">Bank: $67</div>
+          <div class="energy">Energy: 101</div>
+        </div>
+        
       </div>
 
     </div>`
