@@ -51,7 +51,7 @@ mainScreenEl.setPos(topLeft.x, topLeft.y);
 
 const dimensions = game.getWorldBounds();
 mainScreenEl.setDimensions(dimensions.width, dimensions.height);
-
 mainScreenEl.setPixelRatio(game.pixelRatio);
+mainScreenEl.setWaveManager(waveManager);
 
 //push test

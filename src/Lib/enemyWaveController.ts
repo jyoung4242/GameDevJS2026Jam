@@ -50,6 +50,11 @@ export class EnemyWaveController {
     return this._gameField;
   }
 
+  get level() {
+    return this._currentLevel;
+
+  }
+
   init() {
     //setup enemy pools
     this._enemyPools.set(

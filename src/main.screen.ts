@@ -1,6 +1,7 @@
 import { css, html, LitElement, PropertyDeclarations } from "lit";
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { EnemyWaveController } from "./Lib/enemyWaveController";
 
 @customElement('main-screen')
 export class MainScreen extends LitElement {
@@ -63,6 +64,7 @@ export class MainScreen extends LitElement {
   width: number = 800;
   height: number = 600;
   pixelRatio: number = 1.0;
+  waveManager!: EnemyWaveController;
 
   // override to disable shadow dom for --ex-pixel-ratio
   // override createRenderRoot() { return this; }
@@ -82,7 +84,18 @@ export class MainScreen extends LitElement {
   public setPixelRatio(pixelRatio: number) {
     this.pixelRatio = pixelRatio;
     this.requestUpdate();
+  }
 
+  public setWaveManager(waveManager: EnemyWaveController) {
+    this.waveManager = waveManager;
+    this.requestUpdate();
+  }
+
+  public startNextWave() {
+    if (this.waveManager) {
+      this.waveManager.startNewWave();
+    }
+    this.requestUpdate();
   }
 
   protected render(): unknown {
@@ -99,13 +112,13 @@ export class MainScreen extends LitElement {
     <div class="container" style=${styleMap(styles)}>
       <div class="header">
         <div class="top-right">
-            <h2>Wave: ${this.wave}</h2>
+            <h2>Wave: ${this.waveManager?.level}</h2>
             <h3>Health: ${this.health}</h3>
         </div>
       </div>
 
       <div class="bottom-left">
-        <button>Start Wave</button>
+        <button @click=${this.startNextWave}>Start Wave</button>
         <button>Shop</button>
       </div>
 
