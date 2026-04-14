@@ -24,7 +24,9 @@ jobs:
         run: npm install
 
       - name: Build
-        run: npm run build
+        run: |
+          ./commit-sha.sh
+          npm run build
 
       - name: Extract version from package.json
         uses: sergeysova/jq-action@v2
