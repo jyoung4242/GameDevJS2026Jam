@@ -55,6 +55,7 @@ export class MainScreen extends LitElement {
       justify-content: center;
       align-items: center;
       flex-direction: column;
+      gap: 10px;
       width: 150px;
       height: 100px;
       background-color: black;
@@ -136,8 +137,8 @@ export class MainScreen extends LitElement {
         <button>Inventory</button>
         <button>Settings</button>
         <div class="stats">
-          <div class="money">Bank: $67</div>
-          <div class="energy">Energy: 101</div>
+          <div class="money">💰67</div>
+          <div class="energy"><span style="color:yellow">🗲</span>101</div>
         </div>
         
       </div>
