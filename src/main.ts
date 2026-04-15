@@ -9,6 +9,7 @@ import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent } from "excalibur";
 import "./main.screen";
 import { MainScreen } from "./main.screen";
 import { LootCollector } from "./Actors/Loot";
+import { loader } from "./resources";
 
 // TODO move to scene
 const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
@@ -23,7 +24,7 @@ const game = new Engine({
   pixelArt: true,
 });
 
-await game.start();
+await game.start(loader);
 
 let gField = new GameField(Vector.Zero, vec(1800, 1000));
 game.add(gField);

@@ -44,7 +44,7 @@ export class TowerWeapon extends Actor {
 export class TowerBurst extends TowerWeapon {
   speed: number = 200;
   _direction: Vector = new Vector(0, 0);
-  lifespan: number = 8000;
+  lifespan: number = 2000;
 
   type: WeoponTypes = "burst";
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
@@ -230,11 +230,20 @@ export class TowerDrone extends TowerWeapon {
     return this.isEnabled;
   }
 
+  onAdd(engine: Engine): void {
+    this.lifespan = 10000;
+  }
+
   fireWeapon(target: Actor) {
     //rent burst from ewc
     let burst = this.ewc.spawnWeapon("burst") as TowerBurst;
     //reset burst position to tower position
     burst.pos = this.pos;
+    if (!target || !burst) {
+      //bail on firing
+      this.ewc.returnWeaponToPool(this);
+      return;
+    }
     burst.direction = target.pos.sub(burst.pos).normalize();
     burst.strength = 1;
     this.ewc.gameField.addChild(burst);

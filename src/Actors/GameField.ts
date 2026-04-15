@@ -15,7 +15,7 @@ export class GameField extends Actor {
       pos,
       width: dims.x,
       height: dims.y,
-      color: Color.fromHex("#DEB887"),
+      color: Color.fromHex("#5d682f"),
       anchor: Vector.Zero,
       collisionType: CollisionType.PreventCollision,
     });
@@ -49,6 +49,9 @@ export class GameField extends Actor {
 
     // set enemy position before adding
     type.pos = spawnPoint;
+    if (type.parent) {
+      type.parent.removeChild(type);
+    }
     this.addChild(type);
   }
 

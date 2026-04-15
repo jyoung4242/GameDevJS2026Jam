@@ -52,7 +52,6 @@ export class EnemyWaveController {
 
   get level() {
     return this._currentLevel;
-
   }
 
   init() {
@@ -62,6 +61,9 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("tank", Vector.Zero, this, this._gameField, this._towerManager),
         enemy => {
+          if (enemy.parent) {
+            enemy.parent.removeChild(enemy);
+          }
           return enemy;
         },
         POOL_SIZE,
@@ -72,6 +74,9 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("fast", Vector.Zero, this, this._gameField, this._towerManager),
         enemy => {
+          if (enemy.parent) {
+            enemy.parent.removeChild(enemy);
+          }
           return enemy;
         },
         POOL_SIZE,
@@ -82,6 +87,9 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("ranged", Vector.Zero, this, this._gameField, this._towerManager),
         enemy => {
+          if (enemy.parent) {
+            enemy.parent.removeChild(enemy);
+          }
           return enemy;
         },
         POOL_SIZE,
@@ -93,7 +101,12 @@ export class EnemyWaveController {
       "burst",
       new RentalPool<TowerWeapon>(
         () => WeaponFactory("burst", Vector.Zero, this, this._gameField, this._towerManager),
-        weapon => weapon,
+        weapon => {
+          if (weapon.parent) {
+            weapon.parent.removeChild(weapon);
+          }
+          return weapon;
+        },
         POOL_SIZE,
       ),
     );
@@ -101,7 +114,12 @@ export class EnemyWaveController {
       "missle",
       new RentalPool<TowerWeapon>(
         () => WeaponFactory("missle", Vector.Zero, this, this._gameField, this._towerManager),
-        weapon => weapon,
+        weapon => {
+          if (weapon.parent) {
+            weapon.parent.removeChild(weapon);
+          }
+          return weapon;
+        },
         POOL_SIZE,
       ),
     );
@@ -109,7 +127,12 @@ export class EnemyWaveController {
       "beam",
       new RentalPool<TowerWeapon>(
         () => WeaponFactory("beam", Vector.Zero, this, this._gameField, this._towerManager),
-        weapon => weapon,
+        weapon => {
+          if (weapon.parent) {
+            weapon.parent.removeChild(weapon);
+          }
+          return weapon;
+        },
         POOL_SIZE,
       ),
     );
@@ -117,7 +140,12 @@ export class EnemyWaveController {
       "drone",
       new RentalPool<TowerWeapon>(
         () => WeaponFactory("drone", Vector.Zero, this, this._gameField, this._towerManager),
-        weapon => weapon,
+        weapon => {
+          if (weapon.parent) {
+            weapon.parent.removeChild(weapon);
+          }
+          return weapon;
+        },
         POOL_SIZE,
       ),
     );
@@ -172,6 +200,7 @@ export class EnemyWaveController {
 
   returnWeaponToPool(weapon: TowerWeapon) {
     this.gameField.removeChild(weapon);
+    if (weapon.parent) debugger;
     let pool = this._weaponPools.get(weapon.type!)!;
     pool.return(weapon);
   }

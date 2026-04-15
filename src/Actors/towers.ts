@@ -3,6 +3,7 @@ import { towerColliderGroup } from "../CollisionGroups";
 import { TowerDamagedEvent, TowerManager } from "../Lib/TowerManager";
 import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
 import { LaserBeam } from "./SkillActors";
+import { Resources } from "../resources";
 
 const STARTING_TOWER_CAPACITY = 3;
 
@@ -30,7 +31,7 @@ export class PowerPlantTower extends Tower {
   private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
   constructor(pos: Vector, manager: TowerManager) {
     super(pos, manager);
-    this.graphics.color = Color.Yellow;
+    this.graphics.use(Resources.powertower.toSprite());
   }
 
   assignOtherTower(tower: OtherTower): boolean {

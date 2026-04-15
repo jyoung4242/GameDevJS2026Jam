@@ -140,6 +140,7 @@ export class BurstTowerSkill extends TowerSkill {
     burst.pos = (this.owner! as Tower).pos;
     burst.direction = this.target!.pos.sub(burst.pos).normalize();
     burst.strength = this.skillStrength;
+    if (burst.parent) debugger;
     this.ewc.gameField.addChild(burst);
   }
 

@@ -1,5 +1,6 @@
 import { Actor, Vector, Color, CollisionType, ScreenElement, Engine, vec } from "excalibur";
 import { lootColliderGroup } from "../CollisionGroups";
+import { Resources } from "../resources";
 
 export class LootCollector extends Actor {
   constructor() {
@@ -53,11 +54,11 @@ export abstract class Loot extends Actor {
 export class MissleChassis extends Loot {
   constructor() {
     let pos: Vector = new Vector(0, 0);
-    let dims: Vector = new Vector(24, 9);
+    let dims: Vector = new Vector(64, 64);
     let shape: "circle" | "box" = "box";
     let color: Color = Color.DarkGray;
     super(pos, dims, shape);
-    this.graphics.color = color;
+    this.graphics.use(Resources.missleChassis.toSprite());
   }
 }
 
@@ -86,11 +87,11 @@ export class DroneEngine extends Loot {
 export class LaserOptics extends Loot {
   constructor() {
     let pos: Vector = new Vector(0, 0);
-    let dims: Vector = new Vector(10, 10);
+    let dims: Vector = new Vector(32, 32);
     let shape: "circle" | "box" = "circle";
     let color: Color = Color.fromHex("#194219");
     super(pos, dims, shape);
-    this.graphics.color = color;
+    this.graphics.use(Resources.laserOpticsDrop.toSprite());
   }
 }
 
