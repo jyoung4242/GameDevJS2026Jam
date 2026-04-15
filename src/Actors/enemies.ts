@@ -71,8 +71,6 @@ export abstract class Enemy extends Actor {
   }
 
   takeDamage(damageAmount: number) {
-    console.log("damage: ", damageAmount);
-
     this.hp -= damageAmount;
     if (this.hp <= 0) {
       this.get(LootComponent).dropOne(this.gameField, this.pos);

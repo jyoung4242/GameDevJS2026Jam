@@ -89,7 +89,6 @@ export class OtherTower extends Tower {
 
     let entities = engine.currentScene.entities;
     //find power plant
-    console.log(entities);
 
     let pplants = entities.filter(e => e instanceof PowerPlantTower);
     // get closest plant

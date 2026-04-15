@@ -156,8 +156,6 @@ export class LaserBeam extends TowerWeapon {
 
   onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
     if (other.owner instanceof Enemy) {
-      console.log("hitting enemy");
-
       let enemy = other.owner as Enemy;
       enemy.takeDamage(this.strength);
     }
@@ -176,7 +174,6 @@ export class LaserBeam extends TowerWeapon {
   }
 
   onAdd(engine: Engine): void {
-    console.log("adding beam");
     this.anchor = Vector.Zero;
     //using direction and sweepAngle, adjust position and rotation of laser beam
     this.rotation = Math.atan2(this.direction.y, this.direction.x) - this.sweepAngle / 2;
@@ -246,6 +243,9 @@ export class TowerDrone extends TowerWeapon {
     }
     burst.direction = target.pos.sub(burst.pos).normalize();
     burst.strength = 1;
+    if (burst.parent) {
+      burst.parent.removeChild(burst);
+    }
     this.ewc.gameField.addChild(burst);
   }
 
