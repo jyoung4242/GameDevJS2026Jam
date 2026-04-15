@@ -76,11 +76,11 @@ export class BurstShells extends Loot {
 export class DroneEngine extends Loot {
   constructor() {
     let pos: Vector = new Vector(0, 0);
-    let dims: Vector = new Vector(10, 10);
+    let dims: Vector = new Vector(32, 32);
     let shape: "circle" | "box" = "circle";
     let color: Color = Color.Green;
     super(pos, dims, shape);
-    this.graphics.color = color;
+    this.graphics.use(Resources.droneEngineDrop.toSprite());
   }
 }
 
