@@ -256,7 +256,6 @@ export class LaunchDroneSkill extends TowerSkill {
     drone.pos = (this.owner! as OtherTower).pos;
     drone.strength = this.skillStrength;
     drone.isEnabled = true;
-    console.log("setting target", this.target);
 
     drone.target = this.target!;
     this.ewc.gameField.addChild(drone);

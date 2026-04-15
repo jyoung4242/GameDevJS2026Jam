@@ -70,7 +70,6 @@ export class FireWeapon implements Action {
       this.isRunning = true;
       this.target = (this.owner as TowerDrone).target;
       // Fire Weapon
-      console.log("firing weapon");
 
       (this.owner as TowerDrone).fireWeapon(this.target!);
     }
@@ -154,8 +153,6 @@ export class FindEnemy implements Action {
   }
 
   findClosestEnemy(): Enemy | null {
-    console.log("in action finding closest enemy");
-
     let enemies = this.ewc.gameField.children.filter(e => e instanceof Enemy);
     let closestEnemy = null;
     let closestDistance = Infinity;

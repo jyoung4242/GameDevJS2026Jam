@@ -10,6 +10,7 @@ import "./main.screen";
 import { MainScreen } from "./main.screen";
 import { LootCollector } from "./Actors/Loot";
 import { loader } from "./resources";
+import { InventoryObject } from "./Lib/InventoryObject";
 
 // TODO move to scene
 const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
@@ -25,7 +26,7 @@ const game = new Engine({
 });
 
 await game.start(loader);
-
+const gameInventory = InventoryObject;
 let gField = new GameField(Vector.Zero, vec(1800, 1000));
 game.add(gField);
 
@@ -36,9 +37,11 @@ towerManager.createTower("power", new Vector(900, 500));
 gField.registerWaveManager(waveManager);
 gField.registerTowerManager(towerManager);
 towerManager.registerEWC(waveManager);
-gField.addChild(new LootCollector());
 
-console.log("Hit Spacebar to begin wave");
+//Wiring up loot collection to inventory
+let lootCollector = new LootCollector();
+gField.addChild(lootCollector);
+gameInventory.init(lootCollector.eventEmitter);
 
 game.input.keyboard.on("press", (e: KeyEvent) => {
   if (e.key === Keys.Space) {

@@ -1,8 +1,25 @@
-import { Actor, Vector, Color, CollisionType, ScreenElement, Engine, vec } from "excalibur";
+import { Actor, Vector, Color, CollisionType, ScreenElement, Engine, vec, GameEvent, EventEmitter } from "excalibur";
 import { lootColliderGroup } from "../CollisionGroups";
 import { Resources } from "../resources";
 
+export type LootCollectionEvents = {
+  LootCollected: LootCollectedEvent;
+};
+
+export type LootType = keyof typeof LootType;
+
+export const LootType = {
+  missleChassis: "missleChassis",
+  laserOptics: "laserOptics",
+  droneEngine: "droneEngine",
+  burstShells: "burstShells",
+  powerCore: "powerCore",
+  powerCell: "powerCell",
+  servos: "servos",
+} as const;
+
 export class LootCollector extends Actor {
+  eventEmitter: EventEmitter<LootCollectionEvents> = new EventEmitter<LootCollectionEvents>();
   constructor() {
     super({
       pos: vec(1760, 20),
@@ -48,10 +65,14 @@ export abstract class Loot extends Actor {
         duration: 750,
         pos: lootCollector?.pos ?? Vector.Zero,
       })
+      .callMethod(() => {
+        lootCollector?.eventEmitter.emit("LootCollected", this);
+      })
       .die();
   }
 }
 export class MissleChassis extends Loot {
+  name: string = "Missle Chassis";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(64, 64);
@@ -63,6 +84,7 @@ export class MissleChassis extends Loot {
 }
 
 export class BurstShells extends Loot {
+  name: string = "Burst Shells";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(10, 10);
@@ -74,6 +96,7 @@ export class BurstShells extends Loot {
 }
 
 export class DroneEngine extends Loot {
+  name: string = "Drone Engine";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(32, 32);
@@ -85,6 +108,7 @@ export class DroneEngine extends Loot {
 }
 
 export class LaserOptics extends Loot {
+  name: string = "Laser Optics";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(32, 32);
@@ -96,6 +120,7 @@ export class LaserOptics extends Loot {
 }
 
 export class PowerCore extends Loot {
+  name: string = "Power Core";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(25, 25);
@@ -107,6 +132,7 @@ export class PowerCore extends Loot {
 }
 
 export class PowerCell extends Loot {
+  name: string = "Power Cell";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(20, 20);
@@ -118,6 +144,7 @@ export class PowerCell extends Loot {
 }
 
 export class Servos extends Loot {
+  name: string = "Servos";
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(20, 20);
@@ -125,5 +152,11 @@ export class Servos extends Loot {
     let color: Color = Color.fromHex("#3a74f1");
     super(pos, dims, shape);
     this.graphics.color = color;
+  }
+}
+
+export class LootCollectedEvent extends GameEvent<LootCollectionEvents> {
+  constructor(public loot: LootType) {
+    super();
   }
 }
