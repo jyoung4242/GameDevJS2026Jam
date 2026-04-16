@@ -5,7 +5,7 @@ import { TowerManager } from "./Lib/TowerManager";
 import "./style.css";
 
 import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent } from "excalibur";
-
+import { buildTileGraph, buildTileMap, generateMapData } from "./Lib/mapGeneration";
 import "./main.screen";
 import { MainScreen } from "./main.screen";
 import { LootCollector } from "./Actors/Loot";
@@ -24,14 +24,19 @@ const game = new Engine({
   pixelRatio: 2,
   pixelArt: true,
 });
+//56 31
+const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
+const tileMap = buildTileMap(mapData, { tileSize: 32 });
+const navMap = buildTileGraph(tileMap);
+console.log(tileMap.tiles, navMap.graph);
 
 await game.start(loader);
 const gameInventory = InventoryObject;
-let gField = new GameField(Vector.Zero, vec(1800, 1000));
+let gField = new GameField(Vector.Zero, vec(1792, 992), tileMap);
 game.add(gField);
-
+gField.addChild(tileMap);
 let towerManager = new TowerManager(gField);
-let waveManager = new EnemyWaveController(towerManager, gField);
+let waveManager = new EnemyWaveController(towerManager, gField, navMap.graph);
 waveManager.init();
 towerManager.createTower("power", new Vector(900, 500));
 gField.registerWaveManager(waveManager);

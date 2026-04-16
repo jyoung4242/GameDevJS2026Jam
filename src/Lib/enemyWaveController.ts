@@ -1,8 +1,9 @@
-import { EventEmitter, GameEvent, Random, RentalPool, Vector } from "excalibur";
+import { EventEmitter, GameEvent, Graph, PositionNode, Random, RentalPool, Vector } from "excalibur";
 import { TowerManager } from "./TowerManager";
 import { GameField } from "../Actors/GameField";
 import { Enemy, FastEnemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { LaserBeam, Missle, TowerBurst, TowerDrone, TowerWeapon } from "../Actors/SkillActors";
+import { PositionNodeData } from "./mapGeneration";
 
 const POOL_SIZE = 500;
 const STARTING_SPAWN_INTERVAL = 500; // in milliseconds
@@ -24,6 +25,7 @@ export class EnemyWaveController {
   private _towerManager: TowerManager; // to reference tower instances to the enemies
   private _gameField: GameField; // to reference the game field for spawning enemies
 
+  private _navmap: Graph<PositionNodeData>;
   private _currentLevel: number = 1;
   private _numEnemeiesInWave: number = STARTING_NUM_ENEMIES;
   private _numberRemainaing: number = STARTING_NUM_ENEMIES;
@@ -37,9 +39,10 @@ export class EnemyWaveController {
 
   public waveEmitter: EventEmitter<WaveEvents> = new EventEmitter();
 
-  constructor(towerManager: TowerManager, gameField: GameField) {
+  constructor(towerManager: TowerManager, gameField: GameField, navmap: Graph<PositionNodeData>) {
     this._towerManager = towerManager;
     this._gameField = gameField;
+    this._navmap = navmap;
   }
 
   get tmanager() {
@@ -59,7 +62,7 @@ export class EnemyWaveController {
     this._enemyPools.set(
       "tank",
       new RentalPool<Enemy>(
-        () => EnemyFactory("tank", Vector.Zero, this, this._gameField, this._towerManager),
+        () => EnemyFactory("tank", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
@@ -72,7 +75,7 @@ export class EnemyWaveController {
     this._enemyPools.set(
       "fast",
       new RentalPool<Enemy>(
-        () => EnemyFactory("fast", Vector.Zero, this, this._gameField, this._towerManager),
+        () => EnemyFactory("fast", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
@@ -85,7 +88,7 @@ export class EnemyWaveController {
     this._enemyPools.set(
       "ranged",
       new RentalPool<Enemy>(
-        () => EnemyFactory("ranged", Vector.Zero, this, this._gameField, this._towerManager),
+        () => EnemyFactory("ranged", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
@@ -263,14 +266,15 @@ function EnemyFactory(
   waveManager: EnemyWaveController,
   gameField: GameField,
   towerManager: TowerManager,
+  navmap: Graph<PositionNodeData>,
 ): Enemy {
   switch (type) {
     case "tank":
-      return new TankEnemy(waveManager, gameField, towerManager, pos);
+      return new TankEnemy(waveManager, gameField, towerManager, pos, navmap);
     case "fast":
-      return new FastEnemy(waveManager, gameField, towerManager, pos);
+      return new FastEnemy(waveManager, gameField, towerManager, pos, navmap);
     case "ranged":
-      return new RangedEnemy(waveManager, gameField, towerManager, pos);
+      return new RangedEnemy(waveManager, gameField, towerManager, pos, navmap);
     default:
       throw new Error(`Unknown enemy type: ${type}`);
   }
