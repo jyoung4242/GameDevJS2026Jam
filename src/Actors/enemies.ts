@@ -129,6 +129,8 @@ export abstract class Enemy extends Actor {
   takeDamage(damageAmount: number) {
     this.hp -= damageAmount;
     if (this.hp <= 0) {
+      console.log("drop component", this, this.get(LootComponent));
+
       this.get(LootComponent).dropOne(this.gameField, this.pos);
       this.waveManager.returnEnemyToPool(this);
     }
@@ -197,6 +199,7 @@ export class TankEnemy extends Enemy {
   }
 
   onInitialize(engine: Engine): void {
+    super.onInitialize(engine);
     this.bt = createBehaviorTree(this, "Selector")
       .sequence("Has Target Tower")
       .condition("Target Exists and Alive", () => this.targetCheck())
@@ -231,6 +234,7 @@ export class RangedEnemy extends Enemy {
     this.range = 300;
   }
   onInitialize(engine: Engine): void {
+    super.onInitialize(engine);
     this.bt = createBehaviorTree(this, "Selector")
       .sequence("Has Target Tower")
       .condition("Target Exists and Alive", () => this.targetCheck())
@@ -267,6 +271,11 @@ export class FastEnemy extends Enemy {
     this.speed = 80; //75
     this.strength = 8;
     this.hp = 15;
+  }
+
+  onInitialize(engine: Engine): void {
+    super.onInitialize(engine);
+    //put bt here
   }
 }
 
