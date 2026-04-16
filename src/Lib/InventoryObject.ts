@@ -18,7 +18,6 @@ export class InventoryObject {
       if (InventoryObject._scrapItems.has(loot.name as string)) {
         //@ts-ignore
         InventoryObject._scrapItems.set(loot.name, InventoryObject.scrapItems.get(loot.name)! + 1);
-        console.log(InventoryObject.scrapItems);
       }
     });
   }
