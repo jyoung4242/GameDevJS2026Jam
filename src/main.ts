@@ -25,6 +25,10 @@ const game = new Engine({
   pixelArt: true,
 });
 
+
+let topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
+mainScreenEl.setPos(topLeft.x, topLeft.y);
+
 // Map Generation
 const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
 const tileMap = buildTileMap(mapData, { tileSize: 32 });
@@ -57,7 +61,7 @@ game.input.keyboard.on("press", (e: KeyEvent) => {
 game.onPreUpdate = (engine: Engine, dt: number) => waveManager.update(dt);
 // TODO move to scene
 // const topLeft = game.screen.contentArea.topLeft;
-const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
+topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
 mainScreenEl.setPos(topLeft.x, topLeft.y);
 
 const dimensions = game.getWorldBounds();
