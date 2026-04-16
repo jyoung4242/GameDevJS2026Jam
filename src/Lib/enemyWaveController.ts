@@ -64,6 +64,7 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("tank", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
+          enemy.targetTower = null;
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
           }
@@ -77,6 +78,7 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("fast", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
+          enemy.targetTower = null;
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
           }
@@ -90,6 +92,7 @@ export class EnemyWaveController {
       new RentalPool<Enemy>(
         () => EnemyFactory("ranged", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
+          enemy.targetTower = null;
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
           }

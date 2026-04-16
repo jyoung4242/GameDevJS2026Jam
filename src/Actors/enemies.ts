@@ -1,4 +1,17 @@
-import { Actor, Collider, CollisionContact, CollisionType, Color, Engine, Graph, PositionNode, Side, Vector } from "excalibur";
+import {
+  ActionCompleteEvent,
+  Actor,
+  Collider,
+  CollisionContact,
+  CollisionType,
+  Color,
+  Engine,
+  Graph,
+  MoveTo,
+  PositionNode,
+  Side,
+  Vector,
+} from "excalibur";
 import { GameField } from "./GameField";
 import { TowerManager } from "../Lib/TowerManager";
 import { enemyColliderGroup } from "../CollisionGroups";
@@ -16,7 +29,6 @@ export abstract class Enemy extends Actor {
   navmap: Graph<PositionNodeData>;
   targetTower: Tower | null = null;
   nodePath: PositionNode<PositionNodeData>[] = [];
-
   hp: number = 1;
   strength: number = 1;
   speed: number = 1;
@@ -47,9 +59,8 @@ export abstract class Enemy extends Actor {
     this.towerManager = TowerManager;
   }
 
-  onAdd(engine: Engine): void {
-    // this.actions.meet(this.towerManager.getclosestTower(), this.speed);
-
+  onInitialize(engine: Engine): void {
+    this.on("actioncomplete", this.actionHandler);
     this.addComponent(
       new LootComponent({
         scatterRadius: 32,
@@ -65,6 +76,42 @@ export abstract class Enemy extends Actor {
       }),
     );
   }
+
+  onAdd(engine: Engine): void {
+    // set target initially
+    debugger;
+    this.findTargetTower();
+    let targtNode = this.getGraphNode(this.targetTower!.pos);
+    let currentNode = this.getGraphNode(this.pos);
+    if (!currentNode || !targtNode) return;
+    let astar = this.navmap.aStar(currentNode, targtNode);
+    this.nodePath = astar.path!;
+    if (this.nodePath && this.nodePath.length > 0) {
+      this.actions.moveTo(this.nodePath[0].pos, this.speed);
+      this.nodePath.shift();
+    }
+  }
+
+  actionHandler = (e: ActionCompleteEvent) => {
+    if (e.action instanceof MoveTo) {
+      // log action completed
+      console.log("action completed", e.action);
+    }
+
+    if (!this.targetTower) {
+      this.findTargetTower();
+      let targtNode = this.getGraphNode(this.targetTower!.pos);
+      let currentNode = this.getGraphNode(this.pos);
+      if (!currentNode || !targtNode) return;
+      let astar = this.navmap.aStar(currentNode, targtNode);
+      this.nodePath = astar.path!;
+    }
+
+    if (this.nodePath && this.nodePath.length > 0) {
+      this.actions.moveTo(this.nodePath[0].pos, this.speed);
+      this.nodePath.shift();
+    }
+  };
 
   onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
     if (other.owner instanceof Tower) {
@@ -118,34 +165,36 @@ export abstract class Enemy extends Actor {
 
   onPreUpdate(engine: Engine, elapsed: number): void {
     // check if target tower is still viable
-
-    if (!this.targetTower) {
-      this.findTargetTower();
-      let targtNode = this.getGraphNode(this.targetTower!.pos);
-      let currentNode = this.getGraphNode(this.pos);
-      console.log(targtNode, currentNode);
-      if (!currentNode || !targtNode) return;
-      let astar = this.navmap.aStar(currentNode, targtNode);
-      console.log(astar);
-
-      this.nodePath = astar.path!;
-      console.log(this.nodePath);
-    }
-
-    // given pos vector of target tower, find closest graph node that corresponds
-
-    if (this.nodePath && this.nodePath.length > 1) {
-      this.actions
-        .moveTo(this.nodePath[0].pos, this.speed)
-        .toPromise()
-        .then(() => {
-          this.nodePath.shift();
-        });
-    } else if (this.nodePath && this.nodePath.length === 1) {
-      this.actions.moveTo(this.targetTower!.pos, this.speed);
-    }
+    // if (!this.targetTower) {
+    //   this.findTargetTower();
+    //   let targtNode = this.getGraphNode(this.targetTower!.pos);
+    //   let currentNode = this.getGraphNode(this.pos);
+    //   if (!currentNode || !targtNode) return;
+    //   let astar = this.navmap.aStar(currentNode, targtNode);
+    //   this.nodePath = astar.path!;
+    //   if (this.nodePath.length == 0) console.log(this.nodePath);
+    // }
+    // if (this.actions.getQueue().getActions().length !== 0) {
+    //   // action currently active
+    //   // console.log(this.actions.getQueue().getActions());
+    // } else {
+    //   // action not active
+    //   if (this.nodePath && this.nodePath.length > 0) {
+    //     console.log("setting moveTo", this.nodePath[0]);
+    //     this.actions.moveTo(this.nodePath[0].pos, this.speed);
+    //     this.nodePath.shift();
+    //     console.log("new nodepath", this.nodePath[0]);
+    //   }
+    // }
   }
 }
+
+// else if (this.nodePath && this.nodePath.length === 2) {
+//       this.actions.meet(this.targetTower!, this.speed);
+//     } else if (this.nodePath.length === 1) {
+//       this.actions.clearActions();
+//       this.targetTower = null;
+//     }
 
 export class TankEnemy extends Enemy {
   constructor(

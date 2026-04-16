@@ -24,11 +24,11 @@ const game = new Engine({
   pixelRatio: 2,
   pixelArt: true,
 });
-//56 31
+
+// Map Generation
 const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
 const tileMap = buildTileMap(mapData, { tileSize: 32 });
 const navMap = buildTileGraph(tileMap);
-console.log(tileMap.tiles, navMap.graph);
 
 await game.start(loader);
 const gameInventory = InventoryObject;
