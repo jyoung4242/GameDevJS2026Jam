@@ -7,7 +7,7 @@ import { PositionNodeData } from "./mapGeneration";
 
 const POOL_SIZE = 500;
 const STARTING_SPAWN_INTERVAL = 500; // in milliseconds
-const STARTING_NUM_ENEMIES = 10;
+const STARTING_NUM_ENEMIES = 1;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
@@ -206,7 +206,6 @@ export class EnemyWaveController {
 
   returnWeaponToPool(weapon: TowerWeapon) {
     this.gameField.removeChild(weapon);
-    if (weapon.parent) debugger;
     let pool = this._weaponPools.get(weapon.type!)!;
     pool.return(weapon);
   }
@@ -216,7 +215,7 @@ export class EnemyWaveController {
   }
 
   chooseEnemeyType(): EnemyTypes {
-    return this.rng.pickOne(["fast", "tank", "ranged"]);
+    return this.rng.pickOne(["ranged"]); //["fast", "tank", "ranged"]
   }
 
   returnEnemyToPool(enemy: Enemy) {

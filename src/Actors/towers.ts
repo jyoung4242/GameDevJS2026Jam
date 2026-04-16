@@ -12,7 +12,7 @@ export abstract class Tower extends Actor {
   tw: TowerManager;
 
   constructor(pos: Vector, manager: TowerManager) {
-    super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup });
+    super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup, z: 2 });
     this.tw = manager;
     this.healthBar = new HealthBar(vec(0, -60), vec(64, 32), 100);
     this.addChild(this.healthBar);

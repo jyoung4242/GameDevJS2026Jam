@@ -14,12 +14,14 @@ import {
 } from "excalibur";
 import { GameField } from "./GameField";
 import { TowerManager } from "../Lib/TowerManager";
-import { enemyColliderGroup } from "../CollisionGroups";
+import { enemyBurstColliderGroup, enemyColliderGroup } from "../CollisionGroups";
 import { Tower } from "./towers";
 import { EnemyTypes, EnemyWaveController } from "../Lib/enemyWaveController";
 import { LootComponent, Rarity } from "../Components/LootComponent";
 import { BurstShells, DroneEngine, LaserOptics, MissleChassis, PowerCell, PowerCore, Servos } from "./Loot";
 import { PositionNodeData } from "../Lib/mapGeneration";
+import { BehaviorTreeComponent, createBehaviorTree } from "../Components/BehaviorTree";
+import { FindClosestTower, MeleeAttackAction, MoveCloserToTower, RangedAttackAction } from "../Actions/enemyActions";
 
 export abstract class Enemy extends Actor {
   enemyType: EnemyTypes | null = null;
@@ -32,6 +34,8 @@ export abstract class Enemy extends Actor {
   hp: number = 1;
   strength: number = 1;
   speed: number = 1;
+  bt: BehaviorTreeComponent | null = null;
+  range: number = 1;
 
   constructor(
     waveManager: EnemyWaveController,
@@ -60,7 +64,7 @@ export abstract class Enemy extends Actor {
   }
 
   onInitialize(engine: Engine): void {
-    this.on("actioncomplete", this.actionHandler);
+    // this.on("actioncomplete", this.actionHandler);
     this.addComponent(
       new LootComponent({
         scatterRadius: 32,
@@ -79,17 +83,16 @@ export abstract class Enemy extends Actor {
 
   onAdd(engine: Engine): void {
     // set target initially
-    debugger;
-    this.findTargetTower();
-    let targtNode = this.getGraphNode(this.targetTower!.pos);
-    let currentNode = this.getGraphNode(this.pos);
-    if (!currentNode || !targtNode) return;
-    let astar = this.navmap.aStar(currentNode, targtNode);
-    this.nodePath = astar.path!;
-    if (this.nodePath && this.nodePath.length > 0) {
-      this.actions.moveTo(this.nodePath[0].pos, this.speed);
-      this.nodePath.shift();
-    }
+    // this.findTargetTower();
+    // let targtNode = this.getGraphNode(this.targetTower!.pos);
+    // let currentNode = this.getGraphNode(this.pos);
+    // if (!currentNode || !targtNode) return;
+    // let astar = this.navmap.aStar(currentNode, targtNode);
+    // this.nodePath = astar.path!;
+    // if (this.nodePath && this.nodePath.length > 0) {
+    //   this.actions.moveTo(this.nodePath[0].pos, this.speed);
+    //   this.nodePath.shift();
+    // }
   }
 
   actionHandler = (e: ActionCompleteEvent) => {
@@ -113,15 +116,15 @@ export abstract class Enemy extends Actor {
     }
   };
 
-  onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
-    if (other.owner instanceof Tower) {
-      let tower = other.owner as Tower;
-      (self.owner as Enemy).actions.clearActions();
-      tower.takeDamage(10);
-      // return to rental pool
-      this.waveManager.returnEnemyToPool(this);
-    }
-  }
+  // onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
+  //   if (other.owner instanceof Tower) {
+  //     let tower = other.owner as Tower;
+  //     (self.owner as Enemy).actions.clearActions();
+  //     tower.takeDamage(10);
+  //     // return to rental pool
+  //     this.waveManager.returnEnemyToPool(this);
+  //   }
+  // }
 
   takeDamage(damageAmount: number) {
     this.hp -= damageAmount;
@@ -147,6 +150,16 @@ export abstract class Enemy extends Actor {
     this.targetTower = closestTower;
   }
 
+  targetRangeCheck() {
+    if (!this.targetTower) return false;
+    //return false if out of range, return true if it is less than range
+    return this.targetTower.pos.distance(this.pos) < this.range;
+  }
+
+  targetCheck() {
+    return this.targetTower != null;
+  }
+
   getGraphNode(pos: Vector): PositionNode<PositionNodeData> | null {
     let clostestDistance = Infinity;
     let closestNode: PositionNode<PositionNodeData> | null = null;
@@ -163,38 +176,8 @@ export abstract class Enemy extends Actor {
     return closestNode;
   }
 
-  onPreUpdate(engine: Engine, elapsed: number): void {
-    // check if target tower is still viable
-    // if (!this.targetTower) {
-    //   this.findTargetTower();
-    //   let targtNode = this.getGraphNode(this.targetTower!.pos);
-    //   let currentNode = this.getGraphNode(this.pos);
-    //   if (!currentNode || !targtNode) return;
-    //   let astar = this.navmap.aStar(currentNode, targtNode);
-    //   this.nodePath = astar.path!;
-    //   if (this.nodePath.length == 0) console.log(this.nodePath);
-    // }
-    // if (this.actions.getQueue().getActions().length !== 0) {
-    //   // action currently active
-    //   // console.log(this.actions.getQueue().getActions());
-    // } else {
-    //   // action not active
-    //   if (this.nodePath && this.nodePath.length > 0) {
-    //     console.log("setting moveTo", this.nodePath[0]);
-    //     this.actions.moveTo(this.nodePath[0].pos, this.speed);
-    //     this.nodePath.shift();
-    //     console.log("new nodepath", this.nodePath[0]);
-    //   }
-    // }
-  }
+  onPreUpdate(engine: Engine, elapsed: number): void {}
 }
-
-// else if (this.nodePath && this.nodePath.length === 2) {
-//       this.actions.meet(this.targetTower!, this.speed);
-//     } else if (this.nodePath.length === 1) {
-//       this.actions.clearActions();
-//       this.targetTower = null;
-//     }
 
 export class TankEnemy extends Enemy {
   constructor(
@@ -210,6 +193,25 @@ export class TankEnemy extends Enemy {
     this.speed = 80; //10
     this.strength = 8;
     this.hp = 25;
+    this.range = 80;
+  }
+
+  onInitialize(engine: Engine): void {
+    this.bt = createBehaviorTree(this, "Selector")
+      .sequence("Has Target Tower")
+      .condition("Target Exists and Alive", () => this.targetCheck())
+      .selector("Has Target within Melee Range")
+      .sequence("In Attack Range")
+      .condition("In Range?", () => this.targetRangeCheck())
+      .action("MeleeAttackTower", new MeleeAttackAction(this, 2000))
+      .end()
+      .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
+      .end()
+      .end()
+      .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
+      .build();
+    this.addComponent(this.bt);
+    this.bt.logTree();
   }
 }
 export class RangedEnemy extends Enemy {
@@ -226,6 +228,29 @@ export class RangedEnemy extends Enemy {
     this.speed = 80; //30
     this.strength = 5;
     this.hp = 8;
+    this.range = 300;
+  }
+  onInitialize(engine: Engine): void {
+    this.bt = createBehaviorTree(this, "Selector")
+      .sequence("Has Target Tower")
+      .condition("Target Exists and Alive", () => this.targetCheck())
+      .selector("Has Target within Melee Range")
+      .sequence("In Attack Range")
+      .condition("In Range?", () => this.targetRangeCheck())
+      .action("RangeAttackTower", new RangedAttackAction(this, 1250))
+      .end()
+      .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
+      .end()
+      .end()
+      .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
+      .build();
+    this.addComponent(this.bt);
+    this.bt.logTree();
+  }
+
+  fireWeapon(target: Tower) {
+    let burst = this.waveManager.gameField.addChild(new EnemyBurst(this, target));
+    //reset burst position to tower position
   }
 }
 export class FastEnemy extends Enemy {
@@ -242,5 +267,36 @@ export class FastEnemy extends Enemy {
     this.speed = 80; //75
     this.strength = 8;
     this.hp = 15;
+  }
+}
+
+export class EnemyBurst extends Actor {
+  strength: number = 1;
+  target: Tower;
+  speed: number = 750;
+  owner: RangedEnemy;
+  constructor(owner: RangedEnemy, target: Tower) {
+    super({
+      pos: owner.pos,
+      radius: 6,
+      color: Color.fromHex("#9b8914"),
+      collisionGroup: enemyBurstColliderGroup,
+      collisionType: CollisionType.Passive,
+      z: 1,
+    });
+    this.owner = owner;
+    this.target = target;
+  }
+
+  onAdd(engine: Engine): void {
+    this.actions.meet(this.target, this.speed);
+  }
+
+  onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
+    if (other.owner instanceof Tower) {
+      let tower = other.owner as Tower;
+      tower.takeDamage(this.strength);
+      this.kill();
+    }
   }
 }
