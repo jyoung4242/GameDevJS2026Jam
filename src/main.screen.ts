@@ -15,6 +15,11 @@ export class MainScreen extends LitElement {
       box-sizing: border-box;
     }
 
+    h2, h3 {
+      margin: 0;
+      text-align: right;
+    }
+
     .container {
       position: absolute;
       visibility: hidden;
@@ -26,6 +31,26 @@ export class MainScreen extends LitElement {
       font-size: 24px;
       transform-origin: 0 0;
       // transform: translate(0, 0) scale(calc(var(--ex-pixel-ratio)), calc(var(--ex-pixel-ratio)));
+    }
+
+    .toggle-shop {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 1s ease-in-out; 
+    }
+
+    
+    .toggle-inventory {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 1s ease-in-out; 
+    }
+
+
+    .toggle-tower-details {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 1s ease-in-out; 
     }
 
     .header {
@@ -49,6 +74,15 @@ export class MainScreen extends LitElement {
       gap: 20px;
       left: 20px;
       bottom: 20px;
+    }
+  
+    .shop, .inventory, .tower-details {
+      z-index: 10;
+      position: absolute;
+      top: 10%;
+      width: 80%;
+      height: 80%;
+      background-color: gray;
     }
 
     .stats {
@@ -74,12 +108,16 @@ export class MainScreen extends LitElement {
   @property()
   accessor visible: boolean = false;
 
+
   left = 0;
   top = 0;
   width: number = 800;
   height: number = 600;
   pixelRatio: number = 1.0;
   waveManager!: EnemyWaveController;
+  isShopVisible: boolean = false;
+  isInventoryVisible: boolean = false;
+  isTowerDetailsVisible: boolean = false;
 
   // override to disable shadow dom for --ex-pixel-ratio
   // override createRenderRoot() { return this; }
@@ -113,6 +151,31 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
+  public showShop() {
+    this.isShopVisible = true;
+    this.requestUpdate();
+  }
+
+  public hideShop() {
+    this.isShopVisible = false;
+    this.requestUpdate();
+  }
+
+  public showInventory() {
+    this.isInventoryVisible = true;
+    this.requestUpdate();
+  }
+
+  public hideInventory() {
+    this.isInventoryVisible = false;
+    this.requestUpdate();
+  }
+
+  public hideAll() {
+    this.hideShop();
+    this.hideInventory();
+  }
+
   protected render(): unknown {
     const styles = {
       '--ex-pixel-ratio': `${this.pixelRatio}`,
@@ -123,6 +186,22 @@ export class MainScreen extends LitElement {
       height: `${this.height}px`,
     };
 
+    const toggleShopStyles = {
+      visibility: this.isShopVisible ? 'visible' : 'hidden',
+      opacity: this.isShopVisible ? 1 : 0,
+    }
+
+    const toggleInventoryStyles = {
+      visibility: this.isInventoryVisible ? 'visible' : 'hidden',
+      opacity: this.isInventoryVisible ? 1 : 0,
+    }
+
+
+    const toggleTowerDetailsStyles = {
+      visibility: this.isTowerDetailsVisible ? 'visible' : 'hidden',
+      opacity: this.isTowerDetailsVisible ? 1 : 0,
+    }
+
     return html`
     <div class="container" style=${styleMap(styles)}>
       <div class="header">
@@ -132,16 +211,31 @@ export class MainScreen extends LitElement {
         </div>
       </div>
 
+      <div class="shop toggle-shop" style=${styleMap(toggleShopStyles)} >
+        <h2>Shop</h2>
+
+      </div>
+
+      <div class="inventory toggle-inventory" style=${styleMap(toggleInventoryStyles)}>
+        <h2>Inventory</h2>
+
+      </div>
+
+      <div class="tower-details toggle-tower-details" style=${styleMap(toggleTowerDetailsStyles)}>
+        <h2>Tower Details</h2>
+
+      </div>
+
       <div class="bottom-left">
         <button @click=${this.startNextWave}>Start Wave</button>
-        <button>Shop</button>
-        <button>Inventory</button>
+        <button @click=${this.showShop}>Shop</button>
+        <button @click=${this.showInventory}>Inventory</button>
         <button>Settings</button>
         <div class="stats">
           <div class="money">💰67</div>
           <div class="energy"><span style="color:yellow">🗲</span>101</div>
         </div>
-        
+
       </div>
 
     </div>`
