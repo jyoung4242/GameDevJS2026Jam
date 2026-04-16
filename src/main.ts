@@ -12,9 +12,6 @@ import { LootCollector } from "./Actors/Loot";
 import { loader } from "./resources";
 import { InventoryObject } from "./Lib/InventoryObject";
 
-// TODO move to scene
-const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
-mainScreenEl.visible = true;
 
 const game = new Engine({
   canvasElementId: "game",
@@ -26,6 +23,8 @@ const game = new Engine({
 });
 
 
+// TODO move to scene
+const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
 let topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
 mainScreenEl.setPos(topLeft.x, topLeft.y);
 
@@ -35,10 +34,13 @@ const tileMap = buildTileMap(mapData, { tileSize: 32 });
 const navMap = buildTileGraph(tileMap);
 
 await game.start(loader);
+mainScreenEl.visible = true;
+
 const gameInventory = InventoryObject;
 let gField = new GameField(Vector.Zero, vec(1792, 992), tileMap);
 game.add(gField);
 gField.addChild(tileMap);
+
 let towerManager = new TowerManager(gField);
 let waveManager = new EnemyWaveController(towerManager, gField, navMap.graph);
 waveManager.init();

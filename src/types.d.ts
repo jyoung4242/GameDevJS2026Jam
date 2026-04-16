@@ -3,6 +3,11 @@ declare module "*.css" {
   export default value;
 }
 
+declare module "*.ttf?url" {
+  const value: string;
+  export default value;
+}
+
 //define image types here
 
 declare module "*.css" {
