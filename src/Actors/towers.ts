@@ -71,21 +71,21 @@ export class OtherTower extends Tower {
   onAdd(engine: Engine): void {
     // NOTE Debugging different skills here
     this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
-    this.skillComponents.push(new HomingMissileTowerSkill(this.manager.ewc!));
-    this.skillComponents.push(new LaserBeamTowerSkill(this.manager.ewc!));
-    this.skillComponents.push(new LaunchDroneSkill(this.manager.ewc!));
+    // this.skillComponents.push(new HomingMissileTowerSkill(this.manager.ewc!));
+    // this.skillComponents.push(new LaserBeamTowerSkill(this.manager.ewc!));
+    // this.skillComponents.push(new LaunchDroneSkill(this.manager.ewc!));
 
     this.addComponent(this.skillComponents[0]);
     this.skillComponents[0].setState("active");
 
-    this.addComponent(this.skillComponents[1]);
-    this.skillComponents[1].setState("active");
+    // this.addComponent(this.skillComponents[1]);
+    // this.skillComponents[1].setState("active");
 
-    this.addComponent(this.skillComponents[2]);
-    this.skillComponents[2].setState("active");
+    // this.addComponent(this.skillComponents[2]);
+    // this.skillComponents[2].setState("active");
 
-    this.addComponent(this.skillComponents[3]);
-    this.skillComponents[3].setState("active");
+    // this.addComponent(this.skillComponents[3]);
+    // this.skillComponents[3].setState("active");
 
     let entities = engine.currentScene.entities;
     //find power plant

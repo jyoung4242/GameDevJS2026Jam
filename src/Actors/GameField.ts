@@ -57,11 +57,11 @@ export class GameField extends Actor {
   spawnEnemy(type: Enemy, side: SpawnPoints) {
     let spawnPoint = this.getEdgeVector(side);
 
-    // set enemy position before adding
-    type.pos = spawnPoint!;
     if (type.parent) {
       type.parent.removeChild(type);
     }
+    type.pos = spawnPoint!;
+    type.actions.clearActions();
     this.addChild(type);
   }
 
@@ -109,28 +109,28 @@ export class GameField extends Actor {
 
     switch (side) {
       case "top":
-        tileXmin = 3;
-        tileXmax = cols - 3;
-        tileYmin = 3;
-        tileYmax = 3;
+        tileXmin = 2;
+        tileXmax = cols - 2;
+        tileYmin = 2;
+        tileYmax = 2;
         break;
       case "bottom":
-        tileXmin = 3;
-        tileXmax = cols - 3;
-        tileYmin = rows - 3;
-        tileYmax = rows - 3;
+        tileXmin = 2;
+        tileXmax = cols - 2;
+        tileYmin = rows - 2;
+        tileYmax = rows - 2;
         break;
       case "left":
-        tileXmin = 3;
-        tileXmax = 3;
-        tileYmin = 3;
-        tileYmax = rows - 3;
+        tileXmin = 2;
+        tileXmax = 2;
+        tileYmin = 2;
+        tileYmax = rows - 2;
         break;
       case "right":
-        tileXmin = cols - 3;
-        tileXmax = cols - 3;
-        tileYmin = 3;
-        tileYmax = rows - 3;
+        tileXmin = cols - 2;
+        tileXmax = cols - 2;
+        tileYmin = 2;
+        tileYmax = rows - 2;
         break;
     }
 

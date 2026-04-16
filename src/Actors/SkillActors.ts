@@ -48,7 +48,7 @@ export class TowerBurst extends TowerWeapon {
 
   type: WeoponTypes = "burst";
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
-    super(waveManager, gamefield, TowerManager, pos, vec(12, 12));
+    super(waveManager, gamefield, TowerManager, pos, vec(8, 8));
     this.graphics.color = Color.White;
     this.tm = TowerManager;
     this.ewc = waveManager;
@@ -147,7 +147,7 @@ export class LaserBeam extends TowerWeapon {
   angStep: number = 0;
 
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
-    super(waveManager, gamefield, TowerManager, pos, vec(200, 5), Vector.Zero);
+    super(waveManager, gamefield, TowerManager, pos, vec(300, 5), Vector.Zero);
     this.graphics.color = Color.Chartreuse;
     this.tm = TowerManager;
     this.ewc = waveManager;
@@ -200,7 +200,7 @@ export class TowerDrone extends TowerWeapon {
   isEnabled: boolean = false;
 
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
-    super(waveManager, gamefield, TowerManager, pos, vec(40, 40), Vector.Zero);
+    super(waveManager, gamefield, TowerManager, pos, vec(20, 20), Vector.Zero);
     this.graphics.color = Color.DarkGray;
     this.tm = TowerManager;
     this.ewc = waveManager;
