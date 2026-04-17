@@ -230,7 +230,9 @@ export class EnemyBurst extends Actor {
     if (!this.target) {
       this.kill();
     }
-    this.actions.meet(this.target, this.speed);
+    let direction = this.owner.pos.sub(this.target.pos).normalize().negate();
+    // this.actions.meet(this.target, this.speed);
+    this.vel = direction.scale(this.speed);
   }
 
   onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
