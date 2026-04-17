@@ -85,7 +85,18 @@ export class PowerPlantTower extends Tower {
   onAdd(engine: Engine): void {
     this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
     this.addComponent(this.skillComponents[0]);
+    this.tw.towerEmitter.on("towerDestroyed", this.handleTowerDestroyed);
   }
+
+  onRemove(engine: Engine): void {
+    this.tw.towerEmitter.off("towerDestroyed", this.handleTowerDestroyed);
+  }
+
+  handleTowerDestroyed = (e: TowerDestroyedEvent) => {
+    if (e.tower instanceof OtherTower && this.otherTowers.includes(e.tower)) {
+      this.otherTowers = this.otherTowers.filter(t => t !== e.tower);
+    }
+  };
 
   assignOtherTower(tower: OtherTower): boolean {
     if (this.otherTowers.length >= this._numTowerCapacity) return false;

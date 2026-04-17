@@ -7,7 +7,7 @@ import { PositionNodeData } from "./mapGeneration";
 
 const POOL_SIZE = 500;
 const STARTING_SPAWN_INTERVAL = 500; // in milliseconds
-const STARTING_NUM_ENEMIES = 10;
+const STARTING_NUM_ENEMIES = 5;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
