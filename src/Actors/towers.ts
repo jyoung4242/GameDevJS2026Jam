@@ -1,8 +1,7 @@
-import { Actor, Color, Engine, ExcaliburGraphicsContext, Graphic, vec, Vector } from "excalibur";
+import { Actor, Color, Engine, ExcaliburGraphicsContext, GameEvent, Graphic, vec, Vector } from "excalibur";
 import { towerColliderGroup } from "../CollisionGroups";
-import { TowerDamagedEvent, TowerManager } from "../Lib/TowerManager";
+import { TowerDamagedEvent, TowerDestroyedEvent, TowerManager } from "../Lib/TowerManager";
 import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
-import { LaserBeam } from "./SkillActors";
 import { Resources } from "../resources";
 
 const STARTING_TOWER_CAPACITY = 3;
@@ -22,7 +21,10 @@ export abstract class Tower extends Actor {
     this.healthBar.takeDamage(damageAmount);
     this.tw.towerEmitter.emit("towerDamaged", new TowerDamagedEvent(this));
     //renew health as a part of the demo
-    if (this.healthBar.currentHealth < 0) this.healthBar.currentHealth = this.healthBar.maxHealth;
+    if (this.healthBar.currentHealth <= 0) {
+      this.tw.towerEmitter.emit("towerDestroyed", new TowerDestroyedEvent(this));
+      this.kill();
+    }
   }
 }
 
@@ -249,10 +251,6 @@ export class HealthBar extends Actor {
 
   takeDamage(damageAmount: number) {
     this.currentHealth -= damageAmount;
-
-    //renew health as a part of the demo
-    if (this.currentHealth < 0) this.currentHealth = this.maxHealth;
-
     let percent = this.currentHealth / this.maxHealth;
     (this.graphics.current as HealthBarGraphic).updatePercent(percent);
   }

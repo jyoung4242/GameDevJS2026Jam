@@ -13,7 +13,7 @@ import {
   Vector,
 } from "excalibur";
 import { GameField } from "./GameField";
-import { TowerManager } from "../Lib/TowerManager";
+import { TowerDestroyedEvent, TowerManager } from "../Lib/TowerManager";
 import { enemyBurstColliderGroup, enemyColliderGroup } from "../CollisionGroups";
 import { Tower } from "./towers";
 import { EnemyTypes, EnemyWaveController } from "../Lib/enemyWaveController";
@@ -65,6 +65,7 @@ export abstract class Enemy extends Actor {
 
   onInitialize(engine: Engine): void {
     // this.on("actioncomplete", this.actionHandler);
+    this.towerManager.towerEmitter.on("towerDestroyed", e => this.towerDiedHandler(e));
     this.addComponent(
       new LootComponent({
         scatterRadius: 32,
@@ -80,6 +81,12 @@ export abstract class Enemy extends Actor {
       }),
     );
   }
+
+  towerDiedHandler = (e: TowerDestroyedEvent) => {
+    if (this.targetTower === e.tower) {
+      this.targetTower = null;
+    }
+  };
 
   onAdd(engine: Engine): void {
     // set target initially
@@ -129,7 +136,7 @@ export abstract class Enemy extends Actor {
   takeDamage(damageAmount: number) {
     this.hp -= damageAmount;
     if (this.hp <= 0) {
-      console.log("drop component", this, this.get(LootComponent));
+      // console.log("drop component", this, this.get(LootComponent));
 
       this.get(LootComponent).dropOne(this.gameField, this.pos);
       this.waveManager.returnEnemyToPool(this);
@@ -214,7 +221,7 @@ export class TankEnemy extends Enemy {
       .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
       .build();
     this.addComponent(this.bt);
-    this.bt.logTree();
+    // this.bt.logTree();
   }
 }
 export class RangedEnemy extends Enemy {

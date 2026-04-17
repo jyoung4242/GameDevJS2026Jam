@@ -5,8 +5,8 @@ import { EnemyWaveController } from "./enemyWaveController";
 
 export type TowerEvents = {
   towerCreated: TowerCreatedEvent;
-  towerDestroyed: TowerCreatedEvent;
-  towerDamaged: TowerCreatedEvent;
+  towerDestroyed: TowerDestroyedEvent;
+  towerDamaged: TowerDamagedEvent;
 };
 
 export class TowerManager {
@@ -53,13 +53,13 @@ export class TowerManager {
 }
 
 export class TowerCreatedEvent extends GameEvent<TowerEvents> {
-  constructor(tower: Tower) {
+  constructor(public tower: Tower) {
     super();
   }
 }
 
 export class TowerDestroyedEvent extends GameEvent<TowerEvents> {
-  constructor(tower: Tower) {
+  constructor(public tower: Tower) {
     super();
   }
 }

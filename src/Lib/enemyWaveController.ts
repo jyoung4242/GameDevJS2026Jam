@@ -7,7 +7,7 @@ import { PositionNodeData } from "./mapGeneration";
 
 const POOL_SIZE = 500;
 const STARTING_SPAWN_INTERVAL = 500; // in milliseconds
-const STARTING_NUM_ENEMIES = 1;
+const STARTING_NUM_ENEMIES = 10;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
@@ -215,7 +215,7 @@ export class EnemyWaveController {
   }
 
   chooseEnemeyType(): EnemyTypes {
-    return this.rng.pickOne(["ranged"]); //["fast", "tank", "ranged"]
+    return this.rng.pickOne(["ranged", "tank"]); //["fast", "tank", "ranged"]
   }
 
   returnEnemyToPool(enemy: Enemy) {

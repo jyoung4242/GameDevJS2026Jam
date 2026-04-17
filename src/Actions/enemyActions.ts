@@ -78,6 +78,7 @@ export class MeleeAttackAction implements Action {
       this.isRunning = true;
       this.owner.vel = Vector.Zero;
       // flash Player
+      if (!this.owner.targetTower) return;
       this.owner.targetTower!.takeDamage(this.owner.strength);
       this._total = this._duration;
       this._currentDuration = this._duration;
@@ -292,7 +293,12 @@ export class FindClosestTower implements Action {
           closestTower = tower;
         }
       }
+
+      if (!closestTower == null) return;
+
       this.owner.targetTower = closestTower;
+
+      if (!this.owner.targetTower) return;
       let targtNode = this.owner.getGraphNode(this.owner.targetTower!.pos);
       let currentNode = this.owner.getGraphNode(this.owner.pos);
       if (!currentNode || !targtNode) return;
