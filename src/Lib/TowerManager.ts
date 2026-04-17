@@ -27,7 +27,7 @@ export class TowerManager {
     return this.towers[0];
   }
 
-  createTower(type: "power" | "other", pos: Vector) {
+  createTower(type: "power" | "other", pos: Vector): Tower {
     let tower: Tower;
 
     switch (type) {
@@ -42,6 +42,8 @@ export class TowerManager {
     this.towers.push(tower);
     this.gf.spawnTower(tower);
     this.towerEmitter.emit("towerCreated", new TowerCreatedEvent(tower));
+
+    return tower;
   }
 
   destroyTower(tower: Tower) {

@@ -29,7 +29,7 @@ export class GameField extends Actor {
     engine.currentScene.camera.strategy.lockToActor(this);
     engine.currentScene.camera.zoom = 0.4;
 
-    this.on("pointerdown", this.touchHandler);
+    // this.on("pointerdown", this.touchHandler);
   }
 
   registerWaveManager(wm: EnemyWaveController) {

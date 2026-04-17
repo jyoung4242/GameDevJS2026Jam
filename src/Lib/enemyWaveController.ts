@@ -186,8 +186,6 @@ export class EnemyWaveController {
     this._numberRemainaing = this._numEnemeiesInWave;
   }
 
-  resetWave() {}
-
   spawnEnemy() {
     let enemyType = this.chooseEnemeyType();
     let pool = this._enemyPools.get(enemyType)!;
@@ -220,7 +218,6 @@ export class EnemyWaveController {
 
   returnEnemyToPool(enemy: Enemy) {
     let pool = this._enemyPools.get(enemy.enemyType!)!;
-
     this._currentEnemies.delete(enemy);
     this._gameField.removeEnemy(enemy);
     pool.return(enemy);

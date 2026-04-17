@@ -1,8 +1,9 @@
-import { Actor, Color, Engine, ExcaliburGraphicsContext, GameEvent, Graphic, vec, Vector } from "excalibur";
+import { Actor, Color, Engine, ExcaliburGraphicsContext, GameEvent, Graphic, PointerEvent, vec, Vector } from "excalibur";
 import { towerColliderGroup } from "../CollisionGroups";
 import { TowerDamagedEvent, TowerDestroyedEvent, TowerManager } from "../Lib/TowerManager";
 import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
 import { Resources } from "../resources";
+import { PowerTowerMenu } from "../UI/PowerTowerUI";
 
 const STARTING_TOWER_CAPACITY = 3;
 
@@ -29,12 +30,56 @@ export abstract class Tower extends Actor {
 }
 
 export class PowerPlantTower extends Tower {
+  // Tap/Hold config
+  private _holdDuration: number = 500; // ms to qualify as a hold
+  private _holdTimer: number | null = null;
+  private _holdFired: boolean = false;
+
+  ui: PowerTowerMenu | null = null;
+
   otherTowers: OtherTower[] = [];
   private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
   constructor(pos: Vector, manager: TowerManager) {
     super(pos, manager);
     this.graphics.use(Resources.powertower.toSprite());
   }
+
+  onInitialize(engine: Engine): void {
+    super.onInitialize(engine);
+    this.on("pointerdown", () => {
+      this._holdFired = false;
+
+      this._holdTimer = window.setTimeout(() => {
+        this._holdFired = true;
+        this.onHold?.();
+      }, this._holdDuration);
+    });
+
+    this.on("pointerup", () => {
+      if (this._holdTimer !== null) {
+        clearTimeout(this._holdTimer);
+        this._holdTimer = null;
+      }
+
+      if (!this._holdFired) {
+        this.onTap?.();
+      }
+    });
+
+    this.on("pointerleave", () => {
+      if (this._holdTimer !== null) {
+        clearTimeout(this._holdTimer);
+        this._holdTimer = null;
+        this._holdFired = false;
+      }
+    });
+  }
+
+  onTap = () => {};
+  onHold = () => {
+    this.ui = new PowerTowerMenu(this);
+    this.addChild(this.ui);
+  };
 
   assignOtherTower(tower: OtherTower): boolean {
     if (this.otherTowers.length >= this._numTowerCapacity) return false;
@@ -62,6 +107,7 @@ export class OtherTower extends Tower {
   manager: TowerManager;
   skillComponents: TowerSkill[] = [];
   direction: Vector = new Vector(0, 0);
+  _isPlacing: boolean = false;
 
   constructor(pos: Vector, manager: TowerManager, powerTower?: PowerPlantTower) {
     super(pos, manager);
@@ -69,6 +115,13 @@ export class OtherTower extends Tower {
     this.powerTower = powerTower;
     this.manager = manager;
   }
+
+  clickHandler = (evt: PointerEvent) => {
+    if (this._isPlacing) {
+      this._isPlacing = false;
+      this.pos = evt.worldPos;
+    }
+  };
 
   onAdd(engine: Engine): void {
     // NOTE Debugging different skills here
@@ -104,6 +157,8 @@ export class OtherTower extends Tower {
       }
     }
     this.direction = this.pos.sub(closestPlant!.pos).normalize();
+
+    this.on("pointerdown", this.clickHandler);
   }
 
   onPreUpdate(engine: Engine, elapsed: number): void {
@@ -119,6 +174,22 @@ export class OtherTower extends Tower {
       }
       this.oldStatus = this.status;
     }
+
+    if (this.isPlacing) {
+      this.graphics.opacity = 0.7;
+      let mousePos = this.scene?.engine.input.pointers.primary.lastWorldPos;
+      if (mousePos) {
+        this.pos = mousePos;
+      }
+    }
+  }
+
+  set isPlacing(isPlacing: boolean) {
+    this._isPlacing = isPlacing;
+  }
+
+  get isPlacing() {
+    return this._isPlacing;
   }
 }
 

@@ -1,17 +1,4 @@
-import {
-  ActionCompleteEvent,
-  Actor,
-  Collider,
-  CollisionContact,
-  CollisionType,
-  Color,
-  Engine,
-  Graph,
-  MoveTo,
-  PositionNode,
-  Side,
-  Vector,
-} from "excalibur";
+import { Actor, Collider, CollisionContact, CollisionType, Color, Engine, Graph, PositionNode, Side, Vector } from "excalibur";
 import { GameField } from "./GameField";
 import { TowerDestroyedEvent, TowerManager } from "../Lib/TowerManager";
 import { enemyBurstColliderGroup, enemyColliderGroup } from "../CollisionGroups";
@@ -88,75 +75,12 @@ export abstract class Enemy extends Actor {
     }
   };
 
-  onAdd(engine: Engine): void {
-    // set target initially
-    // this.findTargetTower();
-    // let targtNode = this.getGraphNode(this.targetTower!.pos);
-    // let currentNode = this.getGraphNode(this.pos);
-    // if (!currentNode || !targtNode) return;
-    // let astar = this.navmap.aStar(currentNode, targtNode);
-    // this.nodePath = astar.path!;
-    // if (this.nodePath && this.nodePath.length > 0) {
-    //   this.actions.moveTo(this.nodePath[0].pos, this.speed);
-    //   this.nodePath.shift();
-    // }
-  }
-
-  actionHandler = (e: ActionCompleteEvent) => {
-    if (e.action instanceof MoveTo) {
-      // log action completed
-      console.log("action completed", e.action);
-    }
-
-    if (!this.targetTower) {
-      this.findTargetTower();
-      let targtNode = this.getGraphNode(this.targetTower!.pos);
-      let currentNode = this.getGraphNode(this.pos);
-      if (!currentNode || !targtNode) return;
-      let astar = this.navmap.aStar(currentNode, targtNode);
-      this.nodePath = astar.path!;
-    }
-
-    if (this.nodePath && this.nodePath.length > 0) {
-      this.actions.moveTo(this.nodePath[0].pos, this.speed);
-      this.nodePath.shift();
-    }
-  };
-
-  // onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
-  //   if (other.owner instanceof Tower) {
-  //     let tower = other.owner as Tower;
-  //     (self.owner as Enemy).actions.clearActions();
-  //     tower.takeDamage(10);
-  //     // return to rental pool
-  //     this.waveManager.returnEnemyToPool(this);
-  //   }
-  // }
-
   takeDamage(damageAmount: number) {
     this.hp -= damageAmount;
     if (this.hp <= 0) {
-      // console.log("drop component", this, this.get(LootComponent));
-
       this.get(LootComponent).dropOne(this.gameField, this.pos);
       this.waveManager.returnEnemyToPool(this);
     }
-  }
-
-  findTargetTower() {
-    let towers: Tower[] | undefined = this.scene?.entities.filter(e => e instanceof Tower);
-    if (!towers) return;
-    // find closest tower
-    let closestTower = null;
-    let closestDistance = Infinity;
-    for (const tower of towers) {
-      let distance = tower.pos.distance(this.pos);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestTower = tower;
-      }
-    }
-    this.targetTower = closestTower;
   }
 
   targetRangeCheck() {
@@ -221,7 +145,6 @@ export class TankEnemy extends Enemy {
       .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
       .build();
     this.addComponent(this.bt);
-    // this.bt.logTree();
   }
 }
 export class RangedEnemy extends Enemy {
@@ -256,7 +179,6 @@ export class RangedEnemy extends Enemy {
       .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
       .build();
     this.addComponent(this.bt);
-    this.bt.logTree();
   }
 
   fireWeapon(target: Tower) {
@@ -305,6 +227,9 @@ export class EnemyBurst extends Actor {
   }
 
   onAdd(engine: Engine): void {
+    if (!this.target) {
+      this.kill();
+    }
     this.actions.meet(this.target, this.speed);
   }
 
