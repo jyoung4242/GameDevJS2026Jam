@@ -44,11 +44,6 @@ const PixelFont = new Font({
   size: 14,
 });
 
-const Arial = new Font({
-  family: "Arial",
-  size: 14,
-});
-
 const pt1labelconfig: UILabelConfig = {
   name: "PowerTowerMenu",
   width: 250,

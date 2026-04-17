@@ -34,14 +34,15 @@ export class PowerPlantTower extends Tower {
   private _holdDuration: number = 500; // ms to qualify as a hold
   private _holdTimer: number | null = null;
   private _holdFired: boolean = false;
-
+  skillComponents: TowerSkill[] = [];
   ui: PowerTowerMenu | null = null;
-
+  manager: TowerManager;
   otherTowers: OtherTower[] = [];
   private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
   constructor(pos: Vector, manager: TowerManager) {
     super(pos, manager);
     this.graphics.use(Resources.powertower.toSprite());
+    this.manager = manager;
   }
 
   onInitialize(engine: Engine): void {
@@ -80,6 +81,11 @@ export class PowerPlantTower extends Tower {
     this.ui = new PowerTowerMenu(this);
     this.addChild(this.ui);
   };
+
+  onAdd(engine: Engine): void {
+    this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
+    this.addComponent(this.skillComponents[0]);
+  }
 
   assignOtherTower(tower: OtherTower): boolean {
     if (this.otherTowers.length >= this._numTowerCapacity) return false;
