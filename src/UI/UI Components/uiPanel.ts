@@ -111,8 +111,6 @@ export class UIPanel extends DisplayUIComponent<UIPanelConfig, UIPanelEvents> im
    * @param engine - The engine instance.
    */
   onAdd(engine: Engine): void {
-    console.log("running parent onadd");
-
     // Ensure visibility state is correct
     if (!this._visible) {
       this.graphics.isVisible = false;
@@ -133,8 +131,6 @@ export class UIPanel extends DisplayUIComponent<UIPanelConfig, UIPanelEvents> im
   }
 
   public onHover = (evt: PointerEvent): void => {
-    console.log("base hover");
-
     if (!this._isHovered) {
       this._isHovered = true;
       this.emitter.emit("UIPanelHovered", { name: this.name, target: this, event: "hovered" });
@@ -583,7 +579,7 @@ const defaultNineSlicePanelConfig: Partial<UINineSlicePanelConfig> = {
  * Uses Excalibur's built-in NineSlice graphic.
  */
 export class UINineSlicePanel extends DisplayUIComponent<UINineSlicePanelConfig, UIPanelEvents> implements IHoverable {
-  _isHovered: boolean;
+  _isHovered: boolean = false;
   get isHovered(): boolean {
     return this._isHovered;
   }
