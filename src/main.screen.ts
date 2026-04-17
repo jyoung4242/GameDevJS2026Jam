@@ -37,27 +37,28 @@ export class MainScreen extends LitElement {
       color: white;
       font-size: 24px;
       transform-origin: 0 0;
-      // transform: translate(0, 0) scale(calc(var(--ex-pixel-ratio)), calc(var(--ex-pixel-ratio)));
     }
 
     .toggle-shop {
-      // visibility: hidden;
       opacity: 0;
       pointer-events: none;
+      z-index: -1;
       transition: opacity .5s ease-in-out, top .5s ease-in-out; 
     }
 
     .toggle-inventory {
-      visibility: hidden;
       opacity: 0;
-      transition: opacity 1s ease-in-out; 
+      pointer-events: none;
+      z-index: -1;
+      transition: opacity .5s ease-in-out, top .5s ease-in-out; 
     }
 
 
     .toggle-tower-details {
-      visibility: hidden;
       opacity: 0;
-      transition: opacity 1s ease-in-out; 
+      pointer-events: none;
+      z-index: -1;
+      transition: opacity .5s ease-in-out, top .5s ease-in-out; 
     }
 
     .header {
@@ -145,6 +146,25 @@ export class MainScreen extends LitElement {
     .shop .part-offer {
       width: 128px;
       height: 128px;
+    }
+
+    .inventory {
+      height: 65%;
+      .inventory-content {
+        flex: 1 1 auto;
+        min-height: 256px;
+        display: flex;
+        gap: 5px;
+        padding: 20px;
+        border: solid 1px black;
+        border-radius: 16px;
+        box-shadow: 4px 7px 7px -7px #000 inset, 0px -2px 28px 0px #000 inset;
+      }
+
+      .done {
+        background-color: red;
+        color: white;
+      }
     }
 
     .stats {
@@ -266,21 +286,22 @@ export class MainScreen extends LitElement {
     };
 
     const toggleShopStyles = {
-      // visibility: this.isShopVisible ? 'visible' : 'hidden',
       opacity: this.isShopVisible ? 1 : 0,
+      'z-index': this.isShopVisible ? 10: 5,
       top: this.isShopVisible ? '20%' : '100%'
     }
 
     const toggleInventoryStyles = {
-      visibility: this.isInventoryVisible ? 'visible' : 'hidden',
       opacity: this.isInventoryVisible ? 1 : 0,
+      'z-index': this.isInventoryVisible ? 10: 5,
+      top: this.isInventoryVisible ? '20%' : '100%'
     }
 
 
     const toggleTowerDetailsStyles = {
-      visibility: this.isTowerDetailsVisible ? 'visible' : 'hidden',
       opacity: this.isTowerDetailsVisible ? 1 : 0,
-
+      'z-index': this.isTowerDetailsVisible ? 10: 5,
+      top: this.isTowerDetailsVisible ? '20%' : '100%'
     }
 
     return html`
@@ -323,6 +344,12 @@ export class MainScreen extends LitElement {
       <div class="inventory toggle-inventory" style=${styleMap(toggleInventoryStyles)}>
         <h2>Inventory</h2>
 
+        <div class="inventory-content">
+
+
+        </div>
+        <button class="done" @click=${this.hideInventory}>Done</button>
+
       </div>
 
       <div class="tower-details toggle-tower-details" style=${styleMap(toggleTowerDetailsStyles)}>
@@ -334,7 +361,7 @@ export class MainScreen extends LitElement {
         <button @click=${this.startNextWave}>Start Wave</button>
         <button @click=${this.showShop}>Shop</button>
         <button @click=${this.showInventory}>Inventory</button>
-        <button>Settings</button>
+        <!-- <button>Settings</button> -->
         <div class="stats">
           <div class="money">
               <span class="icon">💰</span>
