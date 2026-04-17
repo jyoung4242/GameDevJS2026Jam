@@ -91,7 +91,7 @@ export class MainScreen extends LitElement {
       position: absolute;
       top: 100%;
       width: 80%;
-      height: 60%;
+      height: 0;
       background-color: gray;
 
 
@@ -288,20 +288,23 @@ export class MainScreen extends LitElement {
     const toggleShopStyles = {
       opacity: this.isShopVisible ? 1 : 0,
       'z-index': this.isShopVisible ? 10: 5,
-      top: this.isShopVisible ? '20%' : '100%'
+      top: this.isShopVisible ? '20%' : '100%',
+      height: this.isShopVisible ? '60%' : '0%'
     }
 
     const toggleInventoryStyles = {
       opacity: this.isInventoryVisible ? 1 : 0,
       'z-index': this.isInventoryVisible ? 10: 5,
-      top: this.isInventoryVisible ? '20%' : '100%'
+      top: this.isInventoryVisible ? '20%' : '100%',
+      height: this.isInventoryVisible ? '60%' : '0%'
     }
 
 
     const toggleTowerDetailsStyles = {
       opacity: this.isTowerDetailsVisible ? 1 : 0,
       'z-index': this.isTowerDetailsVisible ? 10: 5,
-      top: this.isTowerDetailsVisible ? '20%' : '100%'
+      top: this.isTowerDetailsVisible ? '20%' : '100%',
+      height: this.isTowerDetailsVisible ? '60%' : '0%'
     }
 
     return html`
@@ -309,7 +312,7 @@ export class MainScreen extends LitElement {
       <div class="header">
         <div class="top-right">
             <h2>Wave: ${this.waveManager?.level}</h2>
-            <h3>♥️${this.health}</h3>
+            <h3><span>♥️</span><span>${this.health}</span></h3>
         </div>
       </div>
 
