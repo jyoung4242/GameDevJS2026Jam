@@ -62,6 +62,9 @@ export class GameField extends Actor {
     }
     type.pos = spawnPoint!;
     type.actions.clearActions();
+    type.hp = type.hpMax;
+    type.bt?.reset();
+    type.targetTower = null;
     this.addChild(type);
   }
 

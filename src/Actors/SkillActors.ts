@@ -4,7 +4,7 @@ import { GameField } from "./GameField";
 import { TowerManager } from "../Lib/TowerManager";
 import { Enemy } from "./enemies";
 import { weaponColliderGroup } from "../CollisionGroups";
-import { BehaviorTreeComponent, createBehaviorTree } from "../Components/BehaviorTree";
+import { BehaviorTreeComponent, createBehaviorTree } from "../Components/originalBehaviorTree";
 import { ApproachEnemy, FindEnemy, FireWeapon, Hover } from "../Actions/droneActions";
 
 export class TowerWeapon extends Actor {

@@ -7,10 +7,11 @@ import { EnemyTypes, EnemyWaveController } from "../Lib/enemyWaveController";
 import { LootComponent, Rarity } from "../Components/LootComponent";
 import { BurstShells, DroneEngine, LaserOptics, MissleChassis, PowerCell, PowerCore, Servos } from "./Loot";
 import { PositionNodeData } from "../Lib/mapGeneration";
-import { BehaviorTreeComponent, createBehaviorTree } from "../Components/BehaviorTree";
-import { FindClosestTower, MeleeAttackAction, MoveCloserToTower, RangedAttackAction } from "../Actions/enemyActions";
+import { ExFSM } from "../Lib/exFSM";
+import { ApproachingTower, AttackingTower, CalculatingPathToTower, FindingTargetTower, IdleState } from "../statemachines/enemyFSM";
 
 export abstract class Enemy extends Actor {
+  fsm: ExFSM;
   enemyType: EnemyTypes | null = null;
   waveManager: EnemyWaveController;
   gameField: GameField;
@@ -19,9 +20,10 @@ export abstract class Enemy extends Actor {
   targetTower: Tower | null = null;
   nodePath: PositionNode<PositionNodeData>[] = [];
   hp: number = 1;
+  hpMax: number = 1;
   strength: number = 1;
   speed: number = 1;
-  bt: BehaviorTreeComponent | null = null;
+  // bt: BehaviorTreeComponent | null = null;
   range: number = 1;
 
   constructor(
@@ -48,6 +50,13 @@ export abstract class Enemy extends Actor {
     this.waveManager = waveManager;
     this.gameField = gamefield;
     this.towerManager = TowerManager;
+    this.fsm = new ExFSM();
+  }
+
+  resetEnemy() {
+    this.hp = this.hpMax;
+    this.actions.clearActions();
+    this.graphics.current!.tint = Color.White;
   }
 
   onInitialize(engine: Engine): void {
@@ -84,12 +93,15 @@ export abstract class Enemy extends Actor {
   }
 
   targetRangeCheck() {
+    // console.log("targetRange", this.targetTower!.pos.distance(this.pos), this.range);
+
     if (!this.targetTower) return false;
     //return false if out of range, return true if it is less than range
     return this.targetTower.pos.distance(this.pos) < this.range;
   }
 
   targetCheck() {
+    // console.log("target tower", this.targetTower);
     return this.targetTower != null;
   }
 
@@ -124,27 +136,49 @@ export class TankEnemy extends Enemy {
     this.enemyType = "tank";
     this.graphics.color = Color.Red;
     this.speed = 80; //10
-    this.strength = 8;
+    this.strength = 5;
     this.hp = 25;
+    this.hpMax = 25;
     this.range = 80;
+
+    this.fsm.register(
+      new IdleState(this),
+      new FindingTargetTower(this),
+      new AttackingTower(this, 100),
+      new ApproachingTower(this),
+      new CalculatingPathToTower(this),
+    );
   }
 
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
-    this.bt = createBehaviorTree(this, "Selector")
-      .sequence("Has Target Tower")
-      .condition("Target Exists and Alive", () => this.targetCheck())
-      .selector("Has Target within Melee Range")
-      .sequence("In Attack Range")
-      .condition("In Range?", () => this.targetRangeCheck())
-      .action("MeleeAttackTower", new MeleeAttackAction(this, 2000))
-      .end()
-      .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
-      .end()
-      .end()
-      .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
-      .build();
-    this.addComponent(this.bt);
+    // this.bt = createBehaviorTree(this, "Selector")
+    //   .sequence("Has Target Tower")
+    //   .condition("Target Exists and Alive", () => this.targetCheck())
+    //   .selector("Has Target within Melee Range")
+    //   .sequence("In Attack Range")
+    //   .condition("In Range?", () => this.targetRangeCheck())
+    //   .action("MeleeAttackTower", new MeleeAttackAction(this, 3000))
+    //   .end()
+    //   .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
+    //   .end()
+    //   .end()
+    //   .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
+    //   .build();
+    // this.addComponent(this.bt);
+  }
+
+  onAdd(engine: Engine): void {
+    this.fsm.set("Idle");
+    this.nodePath = [];
+  }
+  onRemove(engine: Engine): void {
+    // this.bt?.reset();
+    this.graphics.material = null;
+  }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    this.fsm.update();
   }
 }
 export class RangedEnemy extends Enemy {
@@ -161,29 +195,52 @@ export class RangedEnemy extends Enemy {
     this.speed = 80; //30
     this.strength = 5;
     this.hp = 8;
+    this.hpMax = 8;
     this.range = 300;
+
+    this.fsm.register(
+      new IdleState(this),
+      new FindingTargetTower(this),
+      new AttackingTower(this, 100),
+      new ApproachingTower(this),
+      new CalculatingPathToTower(this),
+    );
   }
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
-    this.bt = createBehaviorTree(this, "Selector")
-      .sequence("Has Target Tower")
-      .condition("Target Exists and Alive", () => this.targetCheck())
-      .selector("Has Target within Melee Range")
-      .sequence("In Attack Range")
-      .condition("In Range?", () => this.targetRangeCheck())
-      .action("RangeAttackTower", new RangedAttackAction(this, 1250))
-      .end()
-      .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
-      .end()
-      .end()
-      .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
-      .build();
-    this.addComponent(this.bt);
+    // this.bt = createBehaviorTree(this, "Selector")
+    //   .sequence("Has Target Tower")
+    //   .condition("Target Exists and Alive", () => this.targetCheck())
+    //   .selector("Has Target within Attack Range")
+    //   .sequence("In Attack Range")
+    //   .condition("In Range?", () => this.targetRangeCheck())
+    //   .action("RangeAttackTower", new RangedAttackAction(this, 1250))
+    //   .end()
+    //   .action("Move closer to tower", new MoveCloserToTower(this, this.speed))
+    //   .end()
+    //   .end()
+    //   .action("Find Nearest Tower Action", new FindClosestTower(this.scene!, this))
+    //   .build();
+    // this.addComponent(this.bt);
+  }
+
+  onAdd(engine: Engine): void {
+    this.nodePath = [];
+    this.fsm.set("Idle");
+  }
+
+  onRemove(engine: Engine): void {
+    // this.bt?.reset();
+    this.graphics.material = null;
   }
 
   fireWeapon(target: Tower) {
     let burst = this.waveManager.gameField.addChild(new EnemyBurst(this, target));
     //reset burst position to tower position
+  }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    this.fsm.update();
   }
 }
 export class FastEnemy extends Enemy {
@@ -234,6 +291,8 @@ export class EnemyBurst extends Actor {
     // this.actions.meet(this.target, this.speed);
     this.vel = direction.scale(this.speed);
   }
+
+  onRemove(engine: Engine): void {}
 
   onCollisionStart(self: Collider, other: Collider, side: Side, contact: CollisionContact): void {
     if (other.owner instanceof Tower) {

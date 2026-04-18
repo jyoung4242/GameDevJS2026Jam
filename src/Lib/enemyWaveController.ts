@@ -1,13 +1,13 @@
-import { EventEmitter, GameEvent, Graph, PositionNode, Random, RentalPool, Vector } from "excalibur";
+import { Color, EventEmitter, GameEvent, Graph, PositionNode, Random, RentalPool, Vector } from "excalibur";
 import { TowerManager } from "./TowerManager";
 import { GameField } from "../Actors/GameField";
 import { Enemy, FastEnemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { LaserBeam, Missle, TowerBurst, TowerDrone, TowerWeapon } from "../Actors/SkillActors";
 import { PositionNodeData } from "./mapGeneration";
 
-const POOL_SIZE = 500;
-const STARTING_SPAWN_INTERVAL = 500; // in milliseconds
-const STARTING_NUM_ENEMIES = 5;
+const POOL_SIZE = 100;
+const STARTING_SPAWN_INTERVAL = 1000; // in milliseconds
+const STARTING_NUM_ENEMIES = 7;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
@@ -65,6 +65,10 @@ export class EnemyWaveController {
         () => EnemyFactory("tank", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
           enemy.targetTower = null;
+          enemy.hp = 25;
+          enemy.actions.clearActions();
+          enemy.nodePath = [];
+          enemy.graphics.current!.tint = Color.White;
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
           }
@@ -79,6 +83,10 @@ export class EnemyWaveController {
         () => EnemyFactory("fast", Vector.Zero, this, this._gameField, this._towerManager, this._navmap),
         enemy => {
           enemy.targetTower = null;
+          enemy.hp = 8;
+          enemy.actions.clearActions();
+          enemy.nodePath = [];
+          enemy.graphics.current!.tint = Color.White;
           if (enemy.parent) {
             enemy.parent.removeChild(enemy);
           }
@@ -213,11 +221,16 @@ export class EnemyWaveController {
   }
 
   chooseEnemeyType(): EnemyTypes {
-    return this.rng.pickOne(["ranged", "tank"]); //["fast", "tank", "ranged"]
+    return this.rng.pickOne(["tank", "ranged"]); //["fast", "tank", "ranged"]
   }
 
   returnEnemyToPool(enemy: Enemy) {
     let pool = this._enemyPools.get(enemy.enemyType!)!;
+    //reset everything on enemy prior to returning
+    enemy.hp = enemy.hpMax;
+    enemy.actions.clearActions();
+    enemy.graphics.current!.tint = Color.White;
+
     this._currentEnemies.delete(enemy);
     this._gameField.removeEnemy(enemy);
     pool.return(enemy);

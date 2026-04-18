@@ -19,7 +19,6 @@ export type BehaviorStatusType = keyof typeof BehaviorStatus;
 export interface BTConfig {
   owner: Actor;
   rootType?: "Sequence" | "Selector"; // default is Selector
-  debug?: boolean;
 }
 
 type BehaviorTreeEvents = {
@@ -34,58 +33,16 @@ export type ActionFunction = () => BTActions;
 
 //#endregion Types and Interfaces
 
-//#region Debug
-
-export interface DebugConfig {
-  debug: boolean;
-}
-
-/** One entry in the per-tick execution trace. */
-export interface TraceEntry {
-  name: string;
-  nodeType: string;
-  status: BehaviorStatusType;
-}
-
-/**
- * Shared debug context owned by BehaviorTreeComponent.
- * Nodes write into `currentTrace` each tick; the component
- * flushes and logs it at the end of every update.
- */
-export class BTDebugContext {
-  enabled: boolean;
-  currentTrace: TraceEntry[] = [];
-
-  constructor(enabled: boolean) {
-    this.enabled = enabled;
-  }
-
-  recordTrace(name: string, nodeType: string, status: BehaviorStatusType) {
-    if (!this.enabled) return;
-    this.currentTrace.push({ name, nodeType, status });
-  }
-
-  flushTrace() {
-    if (!this.enabled || this.currentTrace.length === 0) return;
-    const line = this.currentTrace.map(e => `${e.nodeType}[${e.name}]→${e.status}`).join(" | ");
-    console.log(`[BT Trace] ${line}`);
-    this.currentTrace = [];
-  }
-}
-
-//#endregion Debug
-
 //#region Component
 export class BehaviorTreeComponent extends Component {
   owner: Actor;
   private _root: SelectorNode | SequenceNode;
   interruptEmitter: EventEmitter = new EventEmitter<BehaviorTreeEvents>();
-  debugCtx: BTDebugContext;
 
   constructor(config: BTConfig) {
     super();
     this.owner = config.owner;
-    this.debugCtx = new BTDebugContext(config.debug ?? false);
+
     this._root = this.createRootNode(config.rootType || "Selector");
     this.interruptEmitter = new EventEmitter<BehaviorTreeEvents>();
   }
@@ -113,7 +70,6 @@ export class BehaviorTreeComponent extends Component {
 
   update(event: ActorEvents["preupdate"]) {
     this._root.update(event.engine, event.elapsed);
-    this.debugCtx.flushTrace();
   }
 
   private createRootNode(type: "Sequence" | "Selector"): SelectorNode | SequenceNode {
@@ -121,8 +77,8 @@ export class BehaviorTreeComponent extends Component {
   }
 
   // Builder entry points
-  static createTree(owner: Actor, rootType: "Sequence" | "Selector" = "Selector", debug = false): TreeBuilder {
-    return new TreeBuilder(owner, rootType, debug);
+  static createTree(owner: Actor, rootType: "Sequence" | "Selector" = "Selector"): TreeBuilder {
+    return new TreeBuilder(owner, rootType);
   }
 
   logTree(node: BaseNode = this._root, depth: number = 0): void {
@@ -145,27 +101,16 @@ export abstract class BaseNode {
   owner: Actor;
   name: string;
   parentComponent: BehaviorTreeComponent;
-  protected debugCtx: BTDebugContext;
 
   isInterrupted: boolean = false;
   isReset: boolean = false;
   interruptHandler?: () => void;
   resetHandler?: () => void;
 
-  // --- Debug hooks ---
-  /** Called the first time this node is visited after being in a non-Running state. */
-  onEnterCallback?: (node: BaseNode) => void;
-  /** Called when this node returns Success or Failure (exits). */
-  onExitCallback?: (node: BaseNode, status: BehaviorStatusType) => void;
-
-  private _lastStatus: BehaviorStatusType | null = null;
-  private _wasRunning = false;
-
   constructor(name: string, owner: Actor, parentComponent: BehaviorTreeComponent) {
     this.owner = owner;
     this.name = name;
     this.parentComponent = parentComponent;
-    this.debugCtx = parentComponent.debugCtx;
     this.parentComponent.interruptEmitter.on("interrupt", (this.interruptHandler = this.onInterrupt.bind(this)));
     this.parentComponent.interruptEmitter.on("reset", (this.resetHandler = this.onReset.bind(this)));
   }
@@ -176,7 +121,6 @@ export abstract class BaseNode {
 
   onReset() {
     this.isReset = true;
-    this._wasRunning = false;
   }
 
   destroy() {
@@ -186,54 +130,6 @@ export abstract class BaseNode {
     if (this.resetHandler) {
       this.parentComponent.interruptEmitter.off("reset", this.resetHandler);
     }
-  }
-
-  /**
-   * Wrap a node's raw status result with debug instrumentation:
-   * - Fires onEnter when a node transitions into Running for the first time.
-   * - Fires onExit when a node returns Success or Failure.
-   * - Logs status changes when debugCtx is enabled.
-   * - Records a trace entry.
-   *
-   * Subclasses call `this.wrapResult(rawStatus)` at the end of their update().
-   */
-  protected wrapResult(status: BehaviorStatusType): BehaviorStatusType {
-    const nodeType = this.constructor.name;
-
-    // onEnter: fired once when this node starts executing (transitions to Running)
-    if (!this._wasRunning && (status === BehaviorStatus.Running || status === BehaviorStatus.Success)) {
-      this._wasRunning = true;
-      if (this.onEnterCallback) {
-        this.onEnterCallback(this);
-      }
-      if (this.debugCtx.enabled) {
-        console.log(`[BT Enter] ${nodeType}[${this.name}]`);
-      }
-    }
-
-    // Status-change logging
-    if (this.debugCtx.enabled && status !== this._lastStatus) {
-      const prev = this._lastStatus ?? "—";
-      console.log(`[BT Status] ${nodeType}[${this.name}]: ${prev} → ${status}`);
-      this._lastStatus = status;
-    }
-
-    // Tick trace
-    this.debugCtx.recordTrace(this.name, nodeType, status);
-
-    // onExit: fired when node terminates this tick
-    if (status === BehaviorStatus.Success || status === BehaviorStatus.Failure) {
-      this._wasRunning = false;
-      this._lastStatus = null; // reset for next entry
-      if (this.onExitCallback) {
-        this.onExitCallback(this, status);
-      }
-      if (this.debugCtx.enabled) {
-        console.log(`[BT Exit] ${nodeType}[${this.name}] → ${status}`);
-      }
-    }
-
-    return status;
   }
 
   abstract update(engine: Engine, elapsed: number): BehaviorStatusType;
@@ -270,14 +166,13 @@ abstract class CompositeNode extends BaseNode {
 // define sequence and selector
 class SequenceNode extends CompositeNode {
   update(engine: Engine, elapsed: number): BehaviorStatusType {
-    //guard condition
-    if (this.children.length === 0) return this.wrapResult(BehaviorStatus.Failure);
+    //gaurd condition
+    if (this.children.length === 0) return BehaviorStatus.Failure;
 
     // handle interrupt
     if (this.isInterrupted) {
       this.isInterrupted = false;
-      this.currentIndex = 0;
-      return this.wrapResult(BehaviorStatus.Failure);
+      return BehaviorStatus.Failure;
     }
 
     // handle reset
@@ -285,7 +180,7 @@ class SequenceNode extends CompositeNode {
       this.isReset = false;
       this.isInterrupted = false;
       this.currentIndex = 0;
-      return this.wrapResult(BehaviorStatus.Ready);
+      return BehaviorStatus.Ready;
     }
 
     const result = this.children[this.currentIndex].update(engine, elapsed);
@@ -294,35 +189,31 @@ class SequenceNode extends CompositeNode {
       this.currentIndex++;
     } else if (result === BehaviorStatus.Failure) {
       this.currentIndex = 0;
-      return this.wrapResult(BehaviorStatus.Failure);
-    } else if (result === BehaviorStatus.Ready) {
-      // Child just reset this frame, try again next frame
-      return this.wrapResult(BehaviorStatus.Running);
+      return BehaviorStatus.Failure;
     }
 
     if (this.currentIndex >= this.children.length) {
       this.currentIndex = 0;
       // Reset children
-      // for (const child of this.children) {
-      //   child.onReset();
-      // }
-      return this.wrapResult(BehaviorStatus.Success);
+      for (const child of this.children) {
+        child.onReset();
+      }
+      return BehaviorStatus.Success;
     } else {
-      return this.wrapResult(BehaviorStatus.Running);
+      return BehaviorStatus.Running;
     }
   }
 }
 
 class SelectorNode extends CompositeNode {
   update(engine: Engine, elapsed: number): BehaviorStatusType {
-    //guard condition
-    if (this.children.length === 0) return this.wrapResult(BehaviorStatus.Failure);
+    //gaurd condition
+    if (this.children.length === 0) return BehaviorStatus.Failure;
 
     // handle interrupt
     if (this.isInterrupted) {
       this.isInterrupted = false;
-      this.currentIndex = 0;
-      return this.wrapResult(BehaviorStatus.Failure);
+      return BehaviorStatus.Failure;
     }
 
     // handle reset
@@ -330,7 +221,7 @@ class SelectorNode extends CompositeNode {
       this.isReset = false;
       this.isInterrupted = false;
       this.currentIndex = 0;
-      return this.wrapResult(BehaviorStatus.Ready);
+      return BehaviorStatus.Ready;
     }
 
     const result = this.children[this.currentIndex].update(engine, elapsed);
@@ -339,26 +230,23 @@ class SelectorNode extends CompositeNode {
       this.currentIndex++;
     } else if (result === BehaviorStatus.Success) {
       this.currentIndex = 0;
-      // // Reset children
-      // for (const child of this.children) {
-      //   child.onReset();
-      // }
-      return this.wrapResult(BehaviorStatus.Success);
-    } else if (result === BehaviorStatus.Ready) {
-      // Child just reset this frame, try again next frame
-      return this.wrapResult(BehaviorStatus.Running);
+      // Reset children
+      for (const child of this.children) {
+        child.onReset();
+      }
+      return BehaviorStatus.Success;
     }
 
     if (this.currentIndex >= this.children.length) {
       this.currentIndex = 0;
       // Reset children
-      // for (const child of this.children) {
-      //   child.onReset();
-      // }
-      return this.wrapResult(BehaviorStatus.Failure);
+      for (const child of this.children) {
+        child.onReset();
+      }
+      return BehaviorStatus.Failure;
     }
 
-    return this.wrapResult(BehaviorStatus.Running);
+    return BehaviorStatus.Running;
   }
 }
 
@@ -391,22 +279,16 @@ export class ActionNode extends BaseNode {
     // handle interrupt
     if (this.isInterrupted) {
       this.isInterrupted = false;
-      if (this.hasStarted) {
-        this.owner.actions.clearActions();
-        this.hasStarted = false;
-      }
-      return this.wrapResult(BehaviorStatus.Failure);
+      this.owner.actions.clearActions();
+      return BehaviorStatus.Failure;
     }
 
     // handle reset
     if (this.isReset) {
       this.isReset = false;
+      this.owner.actions.clearActions();
       this.isInterrupted = false;
-      if (this.hasStarted) {
-        this.owner.actions.clearActions();
-        this.hasStarted = false;
-      }
-      return this.wrapResult(BehaviorStatus.Ready);
+      return BehaviorStatus.Ready;
     }
 
     if (!this.hasStarted) {
@@ -418,10 +300,10 @@ export class ActionNode extends BaseNode {
     // Check if action is finished
     if (this.hasStarted && this.action.isComplete(this.owner)) {
       this.hasStarted = false; // reset action
-      return this.wrapResult(BehaviorStatus.Success);
+      return BehaviorStatus.Success;
     }
 
-    return this.wrapResult(BehaviorStatus.Running);
+    return BehaviorStatus.Running;
   }
 }
 
@@ -429,10 +311,9 @@ export abstract class ConditionNode extends BaseNode {
   abstract evaluate(): boolean;
 
   update(engine: Engine, elapsed: number): BehaviorStatusType {
-    // Always clear flags — conditions evaluate fresh every tick
-    this.isInterrupted = false;
-    this.isReset = false;
-    return this.wrapResult(this.evaluate() ? BehaviorStatus.Success : BehaviorStatus.Failure);
+    // Conditions should always evaluate fresh, even if interrupted
+    // (unless you want different behavior)
+    return this.evaluate() ? BehaviorStatus.Success : BehaviorStatus.Failure;
   }
 }
 
@@ -471,30 +352,30 @@ abstract class DecoratorNode extends BaseNode {
 
 export class InverterNode extends DecoratorNode {
   update(engine: Engine, elapsed: number): BehaviorStatusType {
-    if (!this.child) return this.wrapResult(BehaviorStatus.Failure);
+    if (!this.child) return BehaviorStatus.Failure;
 
     // handle interrupt
     if (this.isInterrupted) {
       this.isInterrupted = false;
-      return this.wrapResult(BehaviorStatus.Failure);
+      return BehaviorStatus.Failure;
     }
 
     // handle reset
     if (this.isReset) {
       this.isReset = false;
       this.isInterrupted = false;
-      return this.wrapResult(BehaviorStatus.Ready);
+      return BehaviorStatus.Ready;
     }
 
     const result = this.child.update(engine, elapsed);
 
     switch (result) {
       case BehaviorStatus.Success:
-        return this.wrapResult(BehaviorStatus.Failure);
+        return BehaviorStatus.Failure;
       case BehaviorStatus.Failure:
-        return this.wrapResult(BehaviorStatus.Success);
+        return BehaviorStatus.Success;
       default:
-        return this.wrapResult(result); // Running or Ready
+        return result; // Running or Ready
     }
   }
 }
@@ -509,21 +390,19 @@ export class RepeaterNode extends DecoratorNode {
   }
 
   update(engine: Engine, elapsed: number): BehaviorStatusType {
-    if (!this.child) return this.wrapResult(BehaviorStatus.Failure);
+    if (!this.child) return BehaviorStatus.Failure;
 
     // handle interrupt
     if (this.isInterrupted) {
       this.isInterrupted = false;
-      this.currentCount = 0;
-      return this.wrapResult(BehaviorStatus.Failure);
+      return BehaviorStatus.Failure;
     }
 
     // handle reset
     if (this.isReset) {
       this.isReset = false;
       this.isInterrupted = false;
-      this.currentCount = 0;
-      return this.wrapResult(BehaviorStatus.Ready);
+      return BehaviorStatus.Ready;
     }
 
     const result = this.child.update(engine, elapsed);
@@ -533,15 +412,15 @@ export class RepeaterNode extends DecoratorNode {
 
       if (this.times && this.currentCount >= this.times) {
         this.currentCount = 0;
-        return this.wrapResult(BehaviorStatus.Success);
+        return BehaviorStatus.Success;
       }
 
       // Reset child for next iteration
       this.child.onReset();
-      return this.wrapResult(BehaviorStatus.Running);
+      return BehaviorStatus.Running;
     }
 
-    return this.wrapResult(result);
+    return result;
   }
 }
 
@@ -555,9 +434,9 @@ export class TreeBuilder {
   private component: BehaviorTreeComponent;
   private owner: Actor;
 
-  constructor(owner: Actor, rootType: "Sequence" | "Selector" = "Selector", debug = false) {
+  constructor(owner: Actor, rootType: "Sequence" | "Selector" = "Selector") {
     this.owner = owner;
-    this.component = new BehaviorTreeComponent({ owner, rootType, debug });
+    this.component = new BehaviorTreeComponent({ owner, rootType });
   }
 
   // Methods to add children to the root node
@@ -645,24 +524,6 @@ abstract class BaseBuilder<T extends BaseNode> {
 
   end(): TreeBuilder | SequenceBuilder | SelectorBuilder | DecoratorBuilder {
     return (this.parentBuilder || new TreeBuilder(this.owner)) as TreeBuilder | SequenceBuilder | SelectorBuilder | DecoratorBuilder;
-  }
-
-  /**
-   * Register a callback fired when this node first begins executing.
-   * The callback receives the node instance.
-   */
-  onEnter(callback: (node: BaseNode) => void): this {
-    this.node.onEnterCallback = callback;
-    return this;
-  }
-
-  /**
-   * Register a callback fired when this node returns Success or Failure.
-   * The callback receives the node instance and its terminal status.
-   */
-  onExit(callback: (node: BaseNode, status: BehaviorStatusType) => void): this {
-    this.node.onExitCallback = callback;
-    return this;
   }
 }
 
@@ -787,8 +648,8 @@ export class DecoratorBuilder extends BaseBuilder<DecoratorNode> {
 
 //#region utilities
 // Convenience function for quick tree creation
-export function createBehaviorTree(owner: Actor, rootType?: "Sequence" | "Selector", debug = false): TreeBuilder {
-  return BehaviorTreeComponent.createTree(owner, rootType, debug);
+export function createBehaviorTree(owner: Actor, rootType?: "Sequence" | "Selector"): TreeBuilder {
+  return BehaviorTreeComponent.createTree(owner, rootType);
 }
 
 //#endregion utilities

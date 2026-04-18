@@ -338,6 +338,8 @@ export class HealthBar extends Actor {
   }
 
   takeDamage(damageAmount: number) {
+    // console.log("taking tower damage", damageAmount);
+
     this.currentHealth -= damageAmount;
     let percent = this.currentHealth / this.maxHealth;
     (this.graphics.current as HealthBarGraphic).updatePercent(percent);

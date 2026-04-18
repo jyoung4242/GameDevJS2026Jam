@@ -23,6 +23,7 @@ export class MeleeAttackAction implements Action {
   tower: Tower | null = null;
   cooldownTimer: number = 0;
   flashColor: Color = Color.White;
+  resetCooldown: number = 0;
   private _stopped: boolean = false;
 
   private _graphics: GraphicsComponent;
@@ -34,6 +35,7 @@ export class MeleeAttackAction implements Action {
     this.owner = owner;
     this.tower = owner.targetTower;
     this.cooldownTimer = cooldown;
+    this.resetCooldown = cooldown;
     this._graphics = owner.get(GraphicsComponent);
     this._duration = cooldown;
     this._material = owner.scene?.engine.graphicsContext.createMaterial({
@@ -63,13 +65,24 @@ export class MeleeAttackAction implements Action {
   }
 
   reset(): void {
+    console.log("resetting");
+
     this.isStarted = false;
     this.isRunning = false;
-    this.cooldownTimer = 0;
+    this.cooldownTimer = this.resetCooldown;
+    this._material?.update((shader: Shader) => {
+      shader.trySetUniformFloat("u_blend", 0 / this._total);
+    });
   }
 
   stop(): void {
     this.isRunning = false;
+    this._stopped = true;
+    this.isStarted = false;
+    this.cooldownTimer = this.resetCooldown;
+    this._material?.update((shader: Shader) => {
+      shader.trySetUniformFloat("u_blend", 0 / this._total);
+    });
   }
 
   update(elapsed: number): void {
@@ -83,6 +96,7 @@ export class MeleeAttackAction implements Action {
       this._total = this._duration;
       this._currentDuration = this._duration;
       this._graphics.material = this._material as Material;
+      this.cooldownTimer = this.resetCooldown;
     }
 
     if (!this._graphics) {
@@ -156,11 +170,13 @@ export class RangedAttackAction implements Action {
     this.isRunning = false;
     this.cooldownTimer = 0;
     this._stopped = false;
+    (this.owner as Enemy).graphics.material = null;
   }
 
   stop(): void {
     this.isRunning = false;
     this._stopped = true;
+    (this.owner as Enemy).graphics.material = null;
   }
 
   update(elapsed: number): void {
@@ -216,8 +232,19 @@ export class MoveCloserToTower implements Action {
   }
 
   public update(elapsed: number): void {
+    let owner = this._owner;
+    let nodepath = this._owner.nodePath;
+    let bt = this._owner.bt;
+    // console.log("in move closer", owner, nodepath);
+
     if (!this._started) {
       this._started = true;
+      if (!this._owner.nodePath || this._owner.nodePath.length == 0) {
+        // console.log("resetting bt", bt);
+        this.reset();
+        this._owner.bt?.reset();
+        return;
+      }
       this._end = this._owner.nodePath[0].pos;
       this._owner.nodePath.shift();
       this._start = new Vector(this._tx.pos.x, this._tx.pos.y);
@@ -278,10 +305,14 @@ export class FindClosestTower implements Action {
   }
 
   update(elapsed: number): void {
+    // console.log("in find closest tower");
+
     if (!this.isStarted) {
       this.isStarted = true;
       this.isRunning = true;
       let towers: Tower[] | undefined = this.scene.entities.filter(e => e instanceof Tower);
+      // console.log("towers", towers);
+
       if (!towers) return;
       // find closest tower
       let closestTower = null;
@@ -294,7 +325,12 @@ export class FindClosestTower implements Action {
         }
       }
 
-      if (!closestTower == null) return;
+      if (!closestTower == null) {
+        // console.log("find closest tower", towers, closestTower, closestDistance);
+        debugger;
+        this.owner.bt?.reset();
+        return;
+      }
 
       this.owner.targetTower = closestTower;
 
