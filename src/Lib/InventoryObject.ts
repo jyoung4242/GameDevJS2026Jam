@@ -4,8 +4,10 @@ import { LootCollectionEvents } from "../Actors/Loot";
 export class InventoryObject {
   static _scrapItems: Map<string, number> = new Map();
   static _money: number = 0;
+  static _events: EventEmitter<LootCollectionEvents>;
 
   static init(lootEventEmitter: EventEmitter<LootCollectionEvents>) {
+    InventoryObject._events = lootEventEmitter;
     InventoryObject.scrapItems.set("Missle Chassis", 0);
     InventoryObject.scrapItems.set("Laser Optics", 0);
     InventoryObject.scrapItems.set("Drone Engine", 0);
@@ -33,6 +35,7 @@ export class InventoryObject {
 
   static set money(newValue: number) {
     InventoryObject._money = newValue;
+    InventoryObject._events.emit('money', newValue);
   }
 
   static resetScrap() {

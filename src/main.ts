@@ -59,6 +59,8 @@ let lootCollector = new LootCollector();
 gField.addChild(lootCollector);
 gameInventory.init(lootCollector.eventEmitter);
 lootCollector.eventEmitter.on('LootCollected', () => mainScreenEl.requestUpdate());
+lootCollector.eventEmitter.on('Money', () => mainScreenEl.requestUpdate());
+gameInventory.money = 20;
 
 game.input.keyboard.on("press", (e: KeyEvent) => {
   if (e.key === Keys.Space) {

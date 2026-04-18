@@ -493,7 +493,7 @@ export class MainScreen extends LitElement {
         <div class="stats">
           <div class="money">
               <span class="icon">💰</span>
-              <span class="value">${InventoryObject._money}</span>
+              <span class="value">${InventoryObject.money}</span>
           </div>
           <div class="energy">
             <span class="icon" style="color:yellow">🗲</span>

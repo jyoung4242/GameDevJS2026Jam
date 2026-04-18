@@ -4,6 +4,7 @@ import { Resources } from "../resources";
 
 export type LootCollectionEvents = {
   LootCollected: LootCollectedEvent;
+  Money: number;
 };
 
 export type LootType = keyof typeof LootType;
