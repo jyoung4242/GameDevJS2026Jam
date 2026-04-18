@@ -3,6 +3,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { EnemyWaveController } from "./Lib/enemyWaveController";
 import { Resources } from "./resources";
+import { TowerManager } from "./Lib/TowerManager";
+import { InventoryObject } from "./Lib/InventoryObject";
 
 @customElement('main-screen')
 export class MainScreen extends LitElement {
@@ -211,6 +213,9 @@ export class MainScreen extends LitElement {
   height: number = 600;
   pixelRatio: number = 1.0;
   waveManager!: EnemyWaveController;
+  towerManager!: TowerManager;
+  inventory!: InventoryObject;
+
   isShopVisible: boolean = false;
   isInventoryVisible: boolean = false;
   isTowerDetailsVisible: boolean = false;
@@ -238,6 +243,15 @@ export class MainScreen extends LitElement {
   public setWaveManager(waveManager: EnemyWaveController) {
     this.waveManager = waveManager;
     this.requestUpdate();
+  }
+
+  public setTowerManager(towerManager: TowerManager) {
+    this.towerManager = towerManager;
+    this.requestUpdate();
+  }
+
+  public setInventory(gameInventory: InventoryObject) {
+    this.inventory = gameInventory;
   }
 
   public startNextWave() {
