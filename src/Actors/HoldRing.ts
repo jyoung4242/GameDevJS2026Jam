@@ -41,7 +41,6 @@ export class HoldingRingGraphic extends Graphic {
 
   protected _drawImage(ex: ExcaliburGraphicsContext, x: number, y: number): void {
     if (!this.ctx) return;
-    console.log("drawing");
 
     const ctx = this.ctx;
     const cx = 100,
