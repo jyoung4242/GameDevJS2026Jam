@@ -1,8 +1,9 @@
 import { EventEmitter } from "excalibur";
-import { Loot, LootCollectedEvent, LootCollectionEvents } from "../Actors/Loot";
+import { LootCollectionEvents } from "../Actors/Loot";
 
 export class InventoryObject {
   static _scrapItems: Map<string, number> = new Map();
+  static _money: number = 0;
 
   static init(lootEventEmitter: EventEmitter<LootCollectionEvents>) {
     InventoryObject.scrapItems.set("Missle Chassis", 0);

@@ -72,6 +72,7 @@ export abstract class Loot extends Actor {
   }
 }
 export class MissleChassis extends Loot {
+  sellValue: number = 10;
   name: string = "Missle Chassis";
   constructor() {
     let pos: Vector = new Vector(0, 0);
@@ -84,6 +85,7 @@ export class MissleChassis extends Loot {
 }
 
 export class BurstShells extends Loot {
+  sellValue: number = 5;
   name: string = "Burst Shells";
   constructor() {
     let pos: Vector = new Vector(0, 0);
@@ -96,6 +98,7 @@ export class BurstShells extends Loot {
 }
 
 export class DroneEngine extends Loot {
+  sellValue: number = 10;
   name: string = "Drone Engine";
   constructor() {
     let pos: Vector = new Vector(0, 0);
@@ -108,6 +111,7 @@ export class DroneEngine extends Loot {
 }
 
 export class LaserOptics extends Loot {
+  sellValue: number = 10;
   name: string = "Laser Optics";
   constructor() {
     let pos: Vector = new Vector(0, 0);
@@ -121,6 +125,7 @@ export class LaserOptics extends Loot {
 
 export class PowerCore extends Loot {
   name: string = "Power Core";
+  sellValue: number = 10;
   constructor() {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(25, 25);
@@ -132,6 +137,7 @@ export class PowerCore extends Loot {
 }
 
 export class PowerCell extends Loot {
+  sellValue: number = 5;
   name: string = "Power Cell";
   constructor() {
     let pos: Vector = new Vector(0, 0);
@@ -144,6 +150,7 @@ export class PowerCell extends Loot {
 }
 
 export class Servos extends Loot {
+  sellValue: number = 8;
   name: string = "Servos";
   constructor() {
     let pos: Vector = new Vector(0, 0);
