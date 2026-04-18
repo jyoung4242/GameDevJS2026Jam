@@ -6,6 +6,7 @@ import { Resources } from "../resources";
 import { PowerTowerMenu } from "../UI/PowerTowerUI";
 import { WeoponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
+import { HoldRingActor } from "./HoldRing";
 
 const STARTING_TOWER_CAPACITY = 3;
 
@@ -40,6 +41,9 @@ export class PowerPlantTower extends Tower {
   ui: PowerTowerMenu | null = null;
   manager: TowerManager;
   otherTowers: OtherTower[] = [];
+  isHolding: boolean = false;
+  holdingRing: HoldRingActor | null = null;
+
   private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
   constructor(pos: Vector, manager: TowerManager) {
     super(pos, manager);
@@ -51,7 +55,13 @@ export class PowerPlantTower extends Tower {
     super.onInitialize(engine);
     this.on("pointerdown", () => {
       this._holdFired = false;
+      this.isHolding = true;
+      //show holdring
+      console.log("clicked");
 
+      this.holdingRing = new HoldRingActor();
+      this.addChild(this.holdingRing);
+      this.isHolding = true;
       this._holdTimer = window.setTimeout(() => {
         this._holdFired = true;
         this.onHold?.();
@@ -59,6 +69,7 @@ export class PowerPlantTower extends Tower {
     });
 
     this.on("pointerup", () => {
+      this.isHolding = false;
       if (this._holdTimer !== null) {
         clearTimeout(this._holdTimer);
         this._holdTimer = null;
@@ -82,6 +93,9 @@ export class PowerPlantTower extends Tower {
   onHold = () => {
     this.ui = new PowerTowerMenu(this);
     this.addChild(this.ui);
+    this.isHolding = false;
+    //remove holding ring
+    this.holdingRing?.kill();
   };
 
   onAdd(engine: Engine): void {

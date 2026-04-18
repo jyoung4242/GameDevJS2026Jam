@@ -27,6 +27,14 @@ export class InventoryObject {
     return InventoryObject._scrapItems;
   }
 
+  static get money() {
+    return InventoryObject._money;
+  }
+
+  static set money(newValue: number) {
+    InventoryObject._money = newValue;
+  }
+
   static resetScrap() {
     InventoryObject.scrapItems.set("Missle Chassis", 0);
     InventoryObject.scrapItems.set("Laser Optics", 0);
