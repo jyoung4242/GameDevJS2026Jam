@@ -56,9 +56,6 @@ export class PowerPlantTower extends Tower {
     this.on("pointerdown", () => {
       this._holdFired = false;
       this.isHolding = true;
-      //show holdring
-      console.log("clicked");
-
       this.holdingRing = new HoldRingActor();
       this.addChild(this.holdingRing);
       this.isHolding = true;
@@ -101,8 +98,11 @@ export class PowerPlantTower extends Tower {
   };
 
   onAdd(engine: Engine): void {
-    this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
+    let bt = new BurstTowerSkill(this.manager.ewc!);
+    this.skillComponents.push(bt);
     this.addComponent(this.skillComponents[0]);
+    bt.setState("active");
+
     this.tw.towerEmitter.on("towerDestroyed", this.handleTowerDestroyed);
   }
 
@@ -190,6 +190,9 @@ export class OtherTower extends Tower {
 
     // set 'burst' to active
     (this.skillComponents.get("burst") as BurstTowerSkill).setState("active");
+    (this.skillComponents.get("missle") as BurstTowerSkill).setState("inactive");
+    (this.skillComponents.get("drone") as BurstTowerSkill).setState("inactive");
+    (this.skillComponents.get("beam") as BurstTowerSkill).setState("inactive");
 
     let entities = engine.currentScene.entities;
     //find power plant

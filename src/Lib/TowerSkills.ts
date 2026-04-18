@@ -25,6 +25,7 @@ export abstract class TowerSkill extends Component {
   detectionRange: number = 0;
   ewc: EnemyWaveController;
   isActionTriggered: boolean = false;
+  isRunning: boolean = false;
 
   constructor(enemyWaveController: EnemyWaveController) {
     super();
@@ -74,14 +75,12 @@ export abstract class TowerSkill extends Component {
   update = (event: ActorEvents["preupdate"]): void => {
     let { elapsed, engine } = event;
 
+    if (this.status === "inactive") return;
     if (!this.preUpdateCheck()) return;
 
-    // inactive state
-    if (this.status === "inactive") {
-      if (this.preUpdateCheck()) {
-        this.setState("active");
-        this.currentTimer = 0;
-      }
+    if (!this.isRunning) {
+      this.currentTimer = 0;
+      this.isRunning = true;
     }
 
     this.currentTimer += elapsed;
