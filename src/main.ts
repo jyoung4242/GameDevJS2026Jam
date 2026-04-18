@@ -41,7 +41,6 @@ await game.start(loader);
 mainScreenEl.visible = true;
 
 const gameInventory = InventoryObject;
-gameInventory.money = 20;
 let gField = new GameField(Vector.Zero, vec(1792, 992), tileMap);
 game.add(gField);
 gField.addChild(tileMap);
@@ -61,6 +60,7 @@ gField.addChild(lootCollector);
 gameInventory.init(lootCollector.eventEmitter);
 lootCollector.eventEmitter.on('LootCollected', () => mainScreenEl.requestUpdate());
 lootCollector.eventEmitter.on('Money', () => mainScreenEl.requestUpdate());
+gameInventory.money = 20;
 
 game.input.keyboard.on("press", (e: KeyEvent) => {
   if (e.key === Keys.Space) {
