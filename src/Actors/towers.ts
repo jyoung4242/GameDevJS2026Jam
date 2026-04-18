@@ -70,6 +70,8 @@ export class PowerPlantTower extends Tower {
 
     this.on("pointerup", () => {
       this.isHolding = false;
+      this.holdingRing?.kill();
+
       if (this._holdTimer !== null) {
         clearTimeout(this._holdTimer);
         this._holdTimer = null;

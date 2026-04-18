@@ -5,7 +5,7 @@ export class HoldRingActor extends Actor {
   duration: number = 500;
   elapsed: number = 0;
   constructor() {
-    super({ width: 200, height: 200, pos: vec(100, 100), z: 100 });
+    super({ width: 200, height: 200, pos: vec(-100, -100), z: 100 });
     this.holdRing = new HoldingRingGraphic();
     this.graphics.use(this.holdRing);
   }
@@ -13,15 +13,8 @@ export class HoldRingActor extends Actor {
   onPreUpdate(engine: Engine, elapsed: number): void {
     this.elapsed += elapsed;
     const delta = Math.min(this.elapsed, this.duration);
-    this.holdRing.holdProgress += delta / 500; // 1200ms hold time
-  }
-
-  onAdd(engine: Engine): void {
-    console.log("added ring");
-  }
-
-  onRemove(engine: Engine): void {
-    console.log("removed ring");
+    const progress = delta / this.duration;
+    this.holdRing.holdProgress = progress; // 1200ms hold time
   }
 }
 
@@ -48,6 +41,7 @@ export class HoldingRingGraphic extends Graphic {
 
   protected _drawImage(ex: ExcaliburGraphicsContext, x: number, y: number): void {
     if (!this.ctx) return;
+    console.log("drawing");
 
     const ctx = this.ctx;
     const cx = 100,
@@ -97,7 +91,8 @@ export class HoldingRingGraphic extends Graphic {
       ctx.lineCap = "round";
       ctx.stroke();
     }
-
+    // === Draw canvas === (forcing canvas to update)
+    this.cnv.setAttribute("forceUpload", "true");
     // blit offscreen canvas into Excalibur's context
     ex.drawImage(this.cnv, x, y);
   }
