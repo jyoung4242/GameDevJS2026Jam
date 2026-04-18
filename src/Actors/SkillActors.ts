@@ -1,5 +1,5 @@
 import { Actor, Collider, CollisionContact, CollisionType, Color, Engine, Side, toRadians, vec, Vector } from "excalibur";
-import { EnemyWaveController, WeoponTypes } from "../Lib/enemyWaveController";
+import { EnemyWaveController, WeaponTypes } from "../Lib/enemyWaveController";
 import { GameField } from "./GameField";
 import { TowerManager } from "../Lib/TowerManager";
 import { Enemy } from "./enemies";
@@ -8,7 +8,7 @@ import { BehaviorTreeComponent, createBehaviorTree } from "../Components/origina
 import { ApproachEnemy, FindEnemy, FireWeapon, Hover } from "../Actions/droneActions";
 
 export class TowerWeapon extends Actor {
-  type: WeoponTypes | undefined;
+  type: WeaponTypes | undefined;
   tm: TowerManager;
   ewc: EnemyWaveController;
   gf: GameField;
@@ -46,7 +46,7 @@ export class TowerBurst extends TowerWeapon {
   _direction: Vector = new Vector(0, 0);
   lifespan: number = 2000;
 
-  type: WeoponTypes = "burst";
+  type: WeaponTypes = "burst";
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
     super(waveManager, gamefield, TowerManager, pos, vec(8, 8));
     this.graphics.color = Color.White;
@@ -95,7 +95,7 @@ export class Missle extends TowerWeapon {
   maxVelocity: number = 250;
   target: Enemy | undefined;
   lifespan: number = 2000;
-  type: WeoponTypes = "missle";
+  type: WeaponTypes = "missle";
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
     super(waveManager, gamefield, TowerManager, pos, vec(24, 9));
     this.graphics.color = Color.Black;
@@ -140,7 +140,7 @@ export class Missle extends TowerWeapon {
 }
 
 export class LaserBeam extends TowerWeapon {
-  type: WeoponTypes = "beam";
+  type: WeaponTypes = "beam";
   lifespan: number = 3000;
   sweepAngle: number = 0;
   direction: Vector = new Vector(0, 0);
@@ -193,7 +193,7 @@ export class LaserBeam extends TowerWeapon {
 }
 
 export class TowerDrone extends TowerWeapon {
-  type: WeoponTypes = "drone";
+  type: WeaponTypes = "drone";
   lifespan: number = 10000;
   bt: BehaviorTreeComponent;
   target: Enemy | null = null;

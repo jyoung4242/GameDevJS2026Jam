@@ -4,7 +4,7 @@ import { TowerDamagedEvent, TowerDestroyedEvent, TowerManager } from "../Lib/Tow
 import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
 import { Resources } from "../resources";
 import { PowerTowerMenu } from "../UI/PowerTowerUI";
-import { WeoponTypes } from "../Lib/enemyWaveController";
+import { WeaponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
 import { HoldRingActor } from "./HoldRing";
 
@@ -140,7 +140,7 @@ export class OtherTower extends Tower {
   status: "powered" | "unpowered" = "powered";
   oldStatus: "powered" | "unpowered" = "unpowered";
   manager: TowerManager;
-  skillComponents: Map<WeoponTypes, TowerSkill> = new Map();
+  skillComponents: Map<WeaponTypes, TowerSkill> = new Map();
   direction: Vector = new Vector(0, 0);
   _isPlacing: boolean = false;
 
@@ -166,13 +166,13 @@ export class OtherTower extends Tower {
     }
   };
 
-  addSkill(skillString: WeoponTypes) {
+  addSkill(skillString: WeaponTypes) {
     //get current skill
     let skill = this.skillComponents.get(skillString)!;
     skill.levelUp();
   }
 
-  removeSkill(skillString: WeoponTypes) {
+  removeSkill(skillString: WeaponTypes) {
     let skill = this.skillComponents.get(skillString)!;
     skill.levelDown();
   }

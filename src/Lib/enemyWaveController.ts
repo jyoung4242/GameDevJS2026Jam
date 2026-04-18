@@ -11,7 +11,7 @@ const STARTING_NUM_ENEMIES = 7;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
-export type WeoponTypes = "burst" | "missle" | "beam" | "drone";
+export type WeaponTypes = "burst" | "missle" | "beam" | "drone";
 export type SpawnPoints = "top" | "bottom" | "left" | "right";
 
 export type WaveEvents = {
@@ -30,7 +30,7 @@ export class EnemyWaveController {
   private _numEnemeiesInWave: number = STARTING_NUM_ENEMIES;
   private _numberRemainaing: number = STARTING_NUM_ENEMIES;
   private _enemyPools: Map<EnemyTypes, RentalPool<Enemy>> = new Map();
-  private _weaponPools: Map<WeoponTypes, RentalPool<TowerWeapon>> = new Map();
+  private _weaponPools: Map<WeaponTypes, RentalPool<TowerWeapon>> = new Map();
   private _waveState: WaveState = "idle";
   private _currentEnemies: Set<Enemy> = new Set();
 
@@ -205,7 +205,7 @@ export class EnemyWaveController {
     this.waveEmitter.emit("waveSpawn", { enemyType, spawnPoint: spawnPoint });
   }
 
-  spawnWeapon(weaponType: WeoponTypes): TowerWeapon {
+  spawnWeapon(weaponType: WeaponTypes): TowerWeapon {
     let pool = this._weaponPools.get(weaponType)!;
     let weapon = pool.rent();
     return weapon;
