@@ -4,6 +4,7 @@ import { TowerDamagedEvent, TowerDestroyedEvent, TowerManager } from "../Lib/Tow
 import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDroneSkill, TowerSkill } from "../Lib/TowerSkills";
 import { Resources } from "../resources";
 import { PowerTowerMenu } from "../UI/PowerTowerUI";
+import { WeoponTypes } from "../Lib/enemyWaveController";
 
 const STARTING_TOWER_CAPACITY = 3;
 
@@ -122,7 +123,7 @@ export class OtherTower extends Tower {
   status: "powered" | "unpowered" = "powered";
   oldStatus: "powered" | "unpowered" = "unpowered";
   manager: TowerManager;
-  skillComponents: TowerSkill[] = [];
+  skillComponents: Map<WeoponTypes, TowerSkill> = new Map();
   direction: Vector = new Vector(0, 0);
   _isPlacing: boolean = false;
 
@@ -140,24 +141,30 @@ export class OtherTower extends Tower {
     }
   };
 
+  addSkill(skillString: WeoponTypes) {
+    //get current skill
+    let skill = this.skillComponents.get(skillString)!;
+    skill.levelUp();
+  }
+
+  removeSkill(skillString: WeoponTypes) {
+    let skill = this.skillComponents.get(skillString)!;
+    skill.levelDown();
+  }
+
   onAdd(engine: Engine): void {
-    // NOTE Debugging different skills here
-    this.skillComponents.push(new BurstTowerSkill(this.manager.ewc!));
-    // this.skillComponents.push(new HomingMissileTowerSkill(this.manager.ewc!));
-    // this.skillComponents.push(new LaserBeamTowerSkill(this.manager.ewc!));
-    // this.skillComponents.push(new LaunchDroneSkill(this.manager.ewc!));
+    this.skillComponents.set("burst", new BurstTowerSkill(this.manager.ewc!));
+    this.skillComponents.set("missle", new HomingMissileTowerSkill(this.manager.ewc!));
+    this.skillComponents.set("drone", new LaunchDroneSkill(this.manager.ewc!));
+    this.skillComponents.set("beam", new LaserBeamTowerSkill(this.manager.ewc!));
 
-    this.addComponent(this.skillComponents[0]);
-    this.skillComponents[0].setState("active");
+    this.addComponent(this.skillComponents.get("burst")!);
+    this.addComponent(this.skillComponents.get("missle")!);
+    this.addComponent(this.skillComponents.get("beam")!);
+    this.addComponent(this.skillComponents.get("drone")!);
 
-    // this.addComponent(this.skillComponents[1]);
-    // this.skillComponents[1].setState("active");
-
-    // this.addComponent(this.skillComponents[2]);
-    // this.skillComponents[2].setState("active");
-
-    // this.addComponent(this.skillComponents[3]);
-    // this.skillComponents[3].setState("active");
+    // set 'burst' to active
+    (this.skillComponents.get("burst") as BurstTowerSkill).setState("active");
 
     let entities = engine.currentScene.entities;
     //find power plant

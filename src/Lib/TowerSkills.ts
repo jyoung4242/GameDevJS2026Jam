@@ -38,6 +38,24 @@ export abstract class TowerSkill extends Component {
     }
   }
 
+  levelUp(): void {
+    if (this.level >= Object.keys(this.progressionLookup).length) return;
+    this.level += 1;
+    if (this.level === 1) {
+      this.setState("active");
+    }
+    this.updateSkillsByLevel();
+  }
+
+  levelDown(): void {
+    if (this.level < 1) return;
+    this.level -= 1;
+    if (this.level < 1) {
+      this.setState("inactive");
+    }
+    this.updateSkillsByLevel();
+  }
+
   onAdd = (owner: Entity): void => {
     this.level = 1;
     this.updateSkillsByLevel();
