@@ -4,10 +4,11 @@ import { GameField } from "../Actors/GameField";
 import { Enemy, FastEnemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { LaserBeam, Missle, TowerBurst, TowerDrone, TowerWeapon } from "../Actors/SkillActors";
 import { PositionNodeData } from "./mapGeneration";
+import { EndOfWavePanel } from "../UI/EndOfWaveUI";
 
 const POOL_SIZE = 100;
 const STARTING_SPAWN_INTERVAL = 1000; // in milliseconds
-const STARTING_NUM_ENEMIES = 7;
+const STARTING_NUM_ENEMIES = 1;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
@@ -243,6 +244,8 @@ export class EnemyWaveController {
     //  check for no more enemies
     if (this._currentEnemies.size === 0 && this._numberRemainaing === 0) {
       this.endCurrentWave();
+      // trigger UI wave end here
+      this.gameField.addChild(new EndOfWavePanel());
     }
 
     if (this._waveState === "active" && this._spawnTimer >= this._spawnInterval) {
