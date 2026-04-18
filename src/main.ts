@@ -4,7 +4,7 @@ import { EnemyWaveController } from "./Lib/enemyWaveController";
 import { TowerManager } from "./Lib/TowerManager";
 import "./style.css";
 
-import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent } from "excalibur";
+import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent, Random } from "excalibur";
 import { buildTileGraph, buildTileMap, generateMapData } from "./Lib/mapGeneration";
 import "./main.screen";
 import { MainScreen } from "./main.screen";
@@ -22,11 +22,15 @@ const game = new Engine({
   pixelArt: true,
 });
 
+const random = new Random();
+
 
 // TODO move to scene
 const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
 let topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
 mainScreenEl.setPos(topLeft.x, topLeft.y);
+mainScreenEl.setRandom(random);
+mainScreenEl.generateOffer();
 
 // Map Generation
 const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
@@ -42,7 +46,7 @@ game.add(gField);
 gField.addChild(tileMap);
 
 let towerManager = new TowerManager(gField);
-let waveManager = new EnemyWaveController(towerManager, gField, navMap.graph);
+let waveManager = new EnemyWaveController(towerManager, gField, navMap.graph, random);
 waveManager.init();
 towerManager.createTower("power", new Vector(900, 500));
 gField.registerWaveManager(waveManager);

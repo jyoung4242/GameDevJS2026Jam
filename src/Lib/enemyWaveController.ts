@@ -21,7 +21,7 @@ export type WaveEvents = {
 };
 
 export class EnemyWaveController {
-  private rng: Random = new Random();
+  private rng: Random;
   private _towerManager: TowerManager; // to reference tower instances to the enemies
   private _gameField: GameField; // to reference the game field for spawning enemies
 
@@ -39,10 +39,11 @@ export class EnemyWaveController {
 
   public waveEmitter: EventEmitter<WaveEvents> = new EventEmitter();
 
-  constructor(towerManager: TowerManager, gameField: GameField, navmap: Graph<PositionNodeData>) {
+  constructor(towerManager: TowerManager, gameField: GameField, navmap: Graph<PositionNodeData>, random: Random) {
     this._towerManager = towerManager;
     this._gameField = gameField;
     this._navmap = navmap;
+    this.rng = random;
   }
 
   get tmanager() {

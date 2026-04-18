@@ -7,6 +7,7 @@ import { TowerManager } from "./Lib/TowerManager";
 import { InventoryObject } from "./Lib/InventoryObject";
 import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
+import { Random } from "excalibur";
 
 @customElement('main-screen')
 export class MainScreen extends LitElement {
@@ -245,6 +246,7 @@ export class MainScreen extends LitElement {
   waveManager!: EnemyWaveController;
   towerManager!: TowerManager;
   inventory!: InventoryObject;
+  random!: Random;
 
   isShopVisible: boolean = false;
   isInventoryVisible: boolean = false;
@@ -252,6 +254,10 @@ export class MainScreen extends LitElement {
 
   // override to disable shadow dom for --ex-pixel-ratio
   // override createRenderRoot() { return this; }
+
+  public setRandom(random: Random) {
+    this.random = random;
+  }
 
   public setPos(x: number, y: number) {
     this.left = x;
@@ -287,6 +293,7 @@ export class MainScreen extends LitElement {
   public startNextWave() {
     if (this.waveManager) {
       this.waveManager.startNewWave();
+      this.generateOffer();
     }
     this.requestUpdate();
   }
@@ -349,9 +356,16 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
+  public possibleItems = ["item 1", "item 2", "item 3", "item 4", "item 5", "item 6"];
+  public currentOffer: string[] = [];
+  public generateOffer() {
+    this.currentOffer = this.random.pickSet(this.possibleItems, 3);
+  }
+
   public reroll() {
     Resources.ShopPurchase.play(.4);
     this.rerollCost = this.rerollCost + this.rerollScale;
+    this.generateOffer();
     this.requestUpdate();
   }
 
@@ -408,9 +422,12 @@ export class MainScreen extends LitElement {
 
           <div class="actions">
             <div class="offer">
-              <button class="part-offer">Firing Speed</button>
-              <button class="part-offer">Damage</button>
-              <button class="part-offer">Max Health</button>
+              ${this.currentOffer.map(offer => {
+                return html`<button class="part-offer">${offer}</button>`
+              })}
+              <!-- <button class="part-offer">Firing Speed</button> -->
+              <!-- <button class="part-offer">Damage</button> -->
+              <!-- <button class="part-offer">Max Health</button> -->
             </div>
 
             <div class="sell">
@@ -420,10 +437,10 @@ export class MainScreen extends LitElement {
               <ul class="content">
               ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
 
-      if (number) {
-        return html`<li>${type}:${number}</li>`;
-      }
-    })}
+                if (number) {
+                  return html`<li>${type}:${number}</li>`;
+                }
+              })}
               </ul>
             </div>
           </div>
