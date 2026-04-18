@@ -115,10 +115,15 @@ export class MainScreen extends LitElement {
       }
     }
 
+    .shop {
+      width: 100%;
+      height: 80%;
+    }
+
     .shop .shop-content {
       flex: 1 1 auto;
       display: flex;
-    }
+    } 
 
     .shop .options {
       flex: 1 1 auto;
@@ -167,7 +172,8 @@ export class MainScreen extends LitElement {
     }
 
     .inventory {
-      height: 65%;
+      width: 100%;
+      height: 80%;
       h2 {
 
       }
@@ -189,6 +195,7 @@ export class MainScreen extends LitElement {
     }
 
     .stats {
+      z-index: 11;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -225,6 +232,10 @@ export class MainScreen extends LitElement {
   @property()
   accessor visible: boolean = false;
 
+  @property()
+  accessor rerollCost: number = 2;
+
+  rerollScale = 3;
 
   left = 0;
   top = 0;
@@ -338,6 +349,12 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
+  public reroll() {
+    Resources.ShopPurchase.play(.4);
+    this.rerollCost = this.rerollCost + this.rerollScale;
+    this.requestUpdate();
+  }
+
   protected render(): unknown {
     const styles = {
       '--ex-pixel-ratio': `${this.pixelRatio}`,
@@ -352,14 +369,14 @@ export class MainScreen extends LitElement {
       opacity: this.isShopVisible ? 1 : 0,
       'z-index': this.isShopVisible ? 10 : 5,
       top: this.isShopVisible ? '20%' : '100%',
-      height: this.isShopVisible ? '60%' : '0%'
+      height: this.isShopVisible ? '80%' : '0%'
     }
 
     const toggleInventoryStyles = {
       opacity: this.isInventoryVisible ? 1 : 0,
       'z-index': this.isInventoryVisible ? 10 : 5,
       top: this.isInventoryVisible ? '20%' : '100%',
-      height: this.isInventoryVisible ? '65%' : '0%'
+      height: this.isInventoryVisible ? '80%' : '0%'
     }
 
 
@@ -384,7 +401,7 @@ export class MainScreen extends LitElement {
 
         <div class="shop-content">
           <div class="options">
-            <button class="reroll">Re-Roll $123</button>
+            <button class="reroll" @click=${this.reroll}>Re-Roll $${this.rerollCost}</button>
 
             <button class="done" @click=${this.hideShop}>Done</button>
           </div>
@@ -417,18 +434,32 @@ export class MainScreen extends LitElement {
       </div>
 
       <div class="inventory toggle-inventory" style=${styleMap(toggleInventoryStyles)}>
+        
         <h2>Inventory</h2>
 
-        <div class="inventory-content">
+        <button class="done" @click=${this.hideInventory}>Done</button>
+
+        <h3>Parts</h3>
+        <div class="content">
+
           <ul>
           ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
-      if (number) {
-        return html`<li>${type}:${number}</li>`;
-      }
-    })}
+            if (number) {
+              return html`<li>${type}:${number}</li>`;
+            }
+          })}
           </ul>
         </div>
-        <button class="done" @click=${this.hideInventory}>Done</button>
+        <h3>Scrap</h3>
+        <div class="content">
+          <ul>
+          ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
+            if (number) {
+              return html`<li>${type}:${number}</li>`;
+            }
+          })}
+          </ul>
+        </div>
 
       </div>
 
@@ -445,7 +476,7 @@ export class MainScreen extends LitElement {
         <div class="stats">
           <div class="money">
               <span class="icon">💰</span>
-              <span class="value">67</span>
+              <span class="value">${InventoryObject._money}</span>
           </div>
           <div class="energy">
             <span class="icon" style="color:yellow">🗲</span>
