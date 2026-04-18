@@ -48,11 +48,13 @@ towerManager.createTower("power", new Vector(900, 500));
 gField.registerWaveManager(waveManager);
 gField.registerTowerManager(towerManager);
 towerManager.registerEWC(waveManager);
+towerManager.towerEmitter.on('towerCreated', () => mainScreenEl.requestUpdate());
 
 //Wiring up loot collection to inventory
 let lootCollector = new LootCollector();
 gField.addChild(lootCollector);
 gameInventory.init(lootCollector.eventEmitter);
+lootCollector.eventEmitter.on('LootCollected', () => mainScreenEl.requestUpdate());
 
 game.input.keyboard.on("press", (e: KeyEvent) => {
   if (e.key === Keys.Space) {
@@ -70,6 +72,7 @@ const dimensions = game.getWorldBounds();
 mainScreenEl.setDimensions(dimensions.width, dimensions.height);
 mainScreenEl.setPixelRatio(game.pixelRatio);
 mainScreenEl.setWaveManager(waveManager);
+mainScreenEl.setTowerManager(towerManager);
 
 game.screen.events.on("resize", () => {
   const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));

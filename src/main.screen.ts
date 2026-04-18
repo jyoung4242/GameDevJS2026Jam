@@ -6,6 +6,7 @@ import { Resources } from "./resources";
 import { TowerManager } from "./Lib/TowerManager";
 import { InventoryObject } from "./Lib/InventoryObject";
 import { repeat } from "lit-html/directives/repeat.js";
+import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 
 @customElement('main-screen')
 export class MainScreen extends LitElement {
@@ -102,6 +103,16 @@ export class MainScreen extends LitElement {
         text-align: left;
         margin-bottom: 16px;
       }
+
+      .content {
+        flex: 1 1 auto;
+        display: flex;
+        gap: 5px;
+        padding: 20px;
+        border: solid 1px black;
+        border-radius: 16px;
+        box-shadow: 4px 7px 7px -7px #000 inset, 0px -2px 28px 0px #000 inset;
+      }
     }
 
     .shop .shop-content {
@@ -118,6 +129,10 @@ export class MainScreen extends LitElement {
 
       button {
         height: 64px;
+      }
+
+      li {
+        font-size: 10px;
       }
 
       .reroll {
@@ -293,6 +308,36 @@ export class MainScreen extends LitElement {
     this.hideInventory();
   }
 
+  public getTotalPower() {
+    if (!this.towerManager?.towers) return 0;
+    if (this.towerManager?.towers?.length === 0) return 0;
+
+    return this.towerManager.towers.reduce((acc, tower) => {
+      if (tower instanceof PowerPlantTower) {
+        return acc + STARTING_TOWER_CAPACITY;
+      }
+      return acc;
+    }, 0);
+  }
+
+  public getUsedPower() {
+    if (!this.towerManager?.towers) return 0;
+    if (this.towerManager?.towers?.length === 0) return 0;
+
+    return this.towerManager.towers.reduce((acc, tower) => {
+      if (tower instanceof PowerPlantTower) {
+        return acc;
+      }
+      return acc + 1;
+    }, 0);
+  }
+
+  public sellScrap() {
+    // TODO update bank
+    InventoryObject.resetScrap();
+    this.requestUpdate();
+  }
+
   protected render(): unknown {
     const styles = {
       '--ex-pixel-ratio': `${this.pixelRatio}`,
@@ -353,7 +398,16 @@ export class MainScreen extends LitElement {
 
             <div class="sell">
               <!-- Maybe things can become more valuable? -->
-              <button >Sell Scrap</button>
+              <button @click=${this.sellScrap}>Sell Scrap</button>
+
+              <ul class="content">
+              ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
+
+      if (number) {
+        return html`<li>${type}:${number}</li>`;
+      }
+    })}
+              </ul>
             </div>
           </div>
 
@@ -368,8 +422,10 @@ export class MainScreen extends LitElement {
         <div class="inventory-content">
           <ul>
           ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
-            return html`<li>${type}:${number}</li>`;
-          })}
+      if (number) {
+        return html`<li>${type}:${number}</li>`;
+      }
+    })}
           </ul>
         </div>
         <button class="done" @click=${this.hideInventory}>Done</button>
@@ -393,7 +449,7 @@ export class MainScreen extends LitElement {
           </div>
           <div class="energy">
             <span class="icon" style="color:yellow">🗲</span>
-            <span class="value">101</span>
+            <span class="value">${this.getUsedPower()}/${this.getTotalPower()}</span>
           </div>
         </div>
 

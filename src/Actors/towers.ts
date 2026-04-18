@@ -7,7 +7,7 @@ import { PowerTowerMenu } from "../UI/PowerTowerUI";
 import { WeoponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
 
-const STARTING_TOWER_CAPACITY = 3;
+export const STARTING_TOWER_CAPACITY = 3;
 
 export abstract class Tower extends Actor {
   healthBar: HealthBar;
