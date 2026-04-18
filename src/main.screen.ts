@@ -3,6 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { EnemyWaveController } from "./Lib/enemyWaveController";
 import { Resources } from "./resources";
+import { TowerManager } from "./Lib/TowerManager";
+import { InventoryObject } from "./Lib/InventoryObject";
+import { repeat } from "lit-html/directives/repeat.js";
 
 @customElement('main-screen')
 export class MainScreen extends LitElement {
@@ -97,7 +100,7 @@ export class MainScreen extends LitElement {
 
       h2 {
         text-align: left;
-        margin-bottom: 32px;
+        margin-bottom: 16px;
       }
     }
 
@@ -150,6 +153,9 @@ export class MainScreen extends LitElement {
 
     .inventory {
       height: 65%;
+      h2 {
+
+      }
       .inventory-content {
         flex: 1 1 auto;
         min-height: 256px;
@@ -211,6 +217,9 @@ export class MainScreen extends LitElement {
   height: number = 600;
   pixelRatio: number = 1.0;
   waveManager!: EnemyWaveController;
+  towerManager!: TowerManager;
+  inventory!: InventoryObject;
+
   isShopVisible: boolean = false;
   isInventoryVisible: boolean = false;
   isTowerDetailsVisible: boolean = false;
@@ -240,6 +249,15 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
+  public setTowerManager(towerManager: TowerManager) {
+    this.towerManager = towerManager;
+    this.requestUpdate();
+  }
+
+  public setInventory(gameInventory: InventoryObject) {
+    this.inventory = gameInventory;
+  }
+
   public startNextWave() {
     if (this.waveManager) {
       this.waveManager.startNewWave();
@@ -248,7 +266,7 @@ export class MainScreen extends LitElement {
   }
 
   public showShop() {
-    Resources.ShopOpen.play(.25); 
+    Resources.ShopOpen.play(.25);
     this.isShopVisible = true;
 
     this.requestUpdate();
@@ -287,22 +305,22 @@ export class MainScreen extends LitElement {
 
     const toggleShopStyles = {
       opacity: this.isShopVisible ? 1 : 0,
-      'z-index': this.isShopVisible ? 10: 5,
+      'z-index': this.isShopVisible ? 10 : 5,
       top: this.isShopVisible ? '20%' : '100%',
       height: this.isShopVisible ? '60%' : '0%'
     }
 
     const toggleInventoryStyles = {
       opacity: this.isInventoryVisible ? 1 : 0,
-      'z-index': this.isInventoryVisible ? 10: 5,
+      'z-index': this.isInventoryVisible ? 10 : 5,
       top: this.isInventoryVisible ? '20%' : '100%',
-      height: this.isInventoryVisible ? '60%' : '0%'
+      height: this.isInventoryVisible ? '65%' : '0%'
     }
 
 
     const toggleTowerDetailsStyles = {
       opacity: this.isTowerDetailsVisible ? 1 : 0,
-      'z-index': this.isTowerDetailsVisible ? 10: 5,
+      'z-index': this.isTowerDetailsVisible ? 10 : 5,
       top: this.isTowerDetailsVisible ? '20%' : '100%',
       height: this.isTowerDetailsVisible ? '60%' : '0%'
     }
@@ -348,8 +366,11 @@ export class MainScreen extends LitElement {
         <h2>Inventory</h2>
 
         <div class="inventory-content">
-
-
+          <ul>
+          ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
+            return html`<li>${type}:${number}</li>`;
+          })}
+          </ul>
         </div>
         <button class="done" @click=${this.hideInventory}>Done</button>
 
