@@ -5,6 +5,7 @@ import { BurstTowerSkill, HomingMissileTowerSkill, LaserBeamTowerSkill, LaunchDr
 import { Resources } from "../resources";
 import { PowerTowerMenu } from "../UI/PowerTowerUI";
 import { WeoponTypes } from "../Lib/enemyWaveController";
+import { TILE_SIZE } from "./GameField";
 
 const STARTING_TOWER_CAPACITY = 3;
 
@@ -135,6 +136,14 @@ export class OtherTower extends Tower {
   }
 
   clickHandler = (evt: PointerEvent) => {
+    const tileX = Math.floor(evt.worldPos.x / TILE_SIZE);
+    const tileY = Math.floor(evt.worldPos.y / TILE_SIZE);
+    const tile = this.tw.gf.tilemap.getTile(tileX, tileY);
+
+    if (tile && tile.solid) {
+      this.actions.flash(Color.Red, 500);
+      return;
+    }
     if (this._isPlacing) {
       this._isPlacing = false;
       this.pos = evt.worldPos;

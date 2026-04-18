@@ -1,13 +1,13 @@
-import { Actor, CollisionType, Color, Engine, PointerEvent, Random, ScreenElement, TileMap, Vector } from "excalibur";
-import { OtherTower, PowerPlantTower, Tower } from "./towers";
-import { EnemyTypes, EnemyWaveController, SpawnPoints } from "../Lib/enemyWaveController";
+import { Actor, CollisionType, Color, Engine, PointerEvent, Random, TileMap, Vector } from "excalibur";
+import { Tower } from "./towers";
+import { EnemyWaveController, SpawnPoints } from "../Lib/enemyWaveController";
 import { Enemy } from "./enemies";
 import { TowerManager } from "../Lib/TowerManager";
 
 const SPAWN_BUFFER = 100;
+export const TILE_SIZE = 32;
 
 export class GameField extends Actor {
-  readonly TILE_SIZE = 32;
   readonly MAX_SPAWN_ATTEMPTS = 10;
   tilemap: TileMap;
   rng: Random = new Random();
@@ -43,9 +43,11 @@ export class GameField extends Actor {
   touchHandler = (evt: PointerEvent) => {
     // this.towerManager!.createTower("other", evt.worldPos);
     // get mouse click position, check which Tile it's on, and confirm if solid
-    const tileX = Math.floor(evt.worldPos.x / this.TILE_SIZE);
-    const tileY = Math.floor(evt.worldPos.y / this.TILE_SIZE);
+    const tileX = Math.floor(evt.worldPos.x / TILE_SIZE);
+    const tileY = Math.floor(evt.worldPos.y / TILE_SIZE);
     const tile = this.tilemap.getTile(tileX, tileY);
+    console.log(tile);
+
     if (tile && tile.solid) return;
     this.towerManager!.createTower("other", evt.worldPos);
   };
@@ -63,7 +65,7 @@ export class GameField extends Actor {
     type.pos = spawnPoint!;
     type.actions.clearActions();
     type.hp = type.hpMax;
-    type.bt?.reset();
+    // type.bt?.reset();
     type.targetTower = null;
     this.addChild(type);
   }
@@ -105,8 +107,8 @@ export class GameField extends Actor {
   //   return new Vector(this.rng.integer(spawnXmin, spawnXmax), this.rng.integer(spawnYmin, spawnYmax));
   // }
   getEdgeVector(side: SpawnPoints): Vector | null {
-    const cols = Math.floor(this.width / this.TILE_SIZE);
-    const rows = Math.floor(this.height / this.TILE_SIZE);
+    const cols = Math.floor(this.width / TILE_SIZE);
+    const rows = Math.floor(this.height / TILE_SIZE);
 
     let tileXmin: number, tileXmax: number, tileYmin: number, tileYmax: number;
 
@@ -143,7 +145,7 @@ export class GameField extends Actor {
       const tile = this.tilemap.getTile(tx, ty);
 
       if (tile && !tile.solid) {
-        return new Vector(tx * this.TILE_SIZE + this.TILE_SIZE / 2, ty * this.TILE_SIZE + this.TILE_SIZE / 2);
+        return new Vector(tx * TILE_SIZE + TILE_SIZE / 2, ty * TILE_SIZE + TILE_SIZE / 2);
       }
     }
 
