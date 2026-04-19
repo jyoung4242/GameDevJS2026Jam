@@ -26,7 +26,7 @@ export abstract class Tower extends Actor {
     this.tw.towerEmitter.emit("towerDamaged", new TowerDamagedEvent(this));
     //renew health as a part of the demo
     if (this.healthBar.currentHealth <= 0) {
-      this.tw.towerEmitter.emit("towerDestroyed", new TowerDestroyedEvent(this));
+      this.tw.destroyTower(this);
       this.kill();
     }
   }
