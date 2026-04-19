@@ -40,7 +40,6 @@ export class MainScene extends Scene {
 
     this.tw.registerEWC(this.ewc);
     InventoryObject.init(this.loot.eventEmitter);
-    InventoryObject.money = 20;
 
     // setup UI
     this.mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
@@ -90,6 +89,8 @@ export class MainScene extends Scene {
     if (!this.gf?.hasChild(this.tmap!)) this.gf!.addChild(this.tmap!);
     if (!this.gf?.hasChild(this.loot!)) this.gf!.addChild(this.loot!);
     this.ewc!.reset();
+    InventoryObject.resetScrap();
+    InventoryObject.money = 20;
   }
 
   onDeactivate(context: SceneActivationContext) {
