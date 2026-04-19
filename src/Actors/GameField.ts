@@ -1,8 +1,9 @@
 import { Actor, CollisionType, Color, Engine, PointerEvent, Random, TileMap, Vector } from "excalibur";
 import { Tower } from "./towers";
 import { EnemyWaveController, SpawnPoints } from "../Lib/enemyWaveController";
-import { Enemy } from "./enemies";
+import { Enemy, EnemyBurst } from "./enemies";
 import { TowerManager } from "../Lib/TowerManager";
+import { TowerBurst } from "./SkillActors";
 
 const SPAWN_BUFFER = 100;
 export const TILE_SIZE = 32;
@@ -68,6 +69,15 @@ export class GameField extends Actor {
     // type.bt?.reset();
     type.targetTower = null;
     this.addChild(type);
+  }
+
+  reset() {
+    this.children.forEach(c => {
+      if (c instanceof Tower) this.removeChild(c);
+      if (c instanceof Enemy) this.removeChild(c);
+      if (c instanceof EnemyBurst) this.removeChild(c);
+      if (c instanceof TowerBurst) this.removeChild(c);
+    });
   }
 
   removeEnemy(enemy: Enemy) {

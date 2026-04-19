@@ -55,6 +55,10 @@ export class TowerManager {
     // do game over check
     if (this.towers.length === 0) this.towerEmitter.emit("allTowersDestroyed", new AllTowersDestroyed());
   }
+
+  resetTowers() {
+    this.towers = [];
+  }
 }
 
 export class TowerCreatedEvent extends GameEvent<TowerEvents> {

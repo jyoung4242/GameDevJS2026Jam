@@ -1,17 +1,9 @@
 // main.ts
-import { GameField } from "./Actors/GameField";
-import { EnemyWaveController } from "./Lib/enemyWaveController";
-import { TowerManager } from "./Lib/TowerManager";
 import "./style.css";
-
-import { Engine, DisplayMode, Vector, vec, Keys, KeyEvent, Random } from "excalibur";
-import { buildTileGraph, buildTileMap, generateMapData } from "./Lib/mapGeneration";
+import { Engine, DisplayMode } from "excalibur";
 import "./main.screen";
-import { MainScreen } from "./main.screen";
-import { LootCollector } from "./Actors/Loot";
 import { loader } from "./resources";
-import { InventoryObject } from "./Lib/InventoryObject";
-
+import { MainScene } from "./Scenes/main";
 
 const game = new Engine({
   canvasElementId: "game",
@@ -20,69 +12,10 @@ const game = new Engine({
   displayMode: DisplayMode.Fixed, // the display mode
   pixelRatio: 2,
   pixelArt: true,
+  scenes: {
+    main: new MainScene(),
+  },
 });
-
-const random = new Random();
-
-
-// TODO move to scene
-const mainScreenEl = document.getElementsByTagName("main-screen")[0]! as MainScreen;
-let topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
-mainScreenEl.setPos(topLeft.x, topLeft.y);
-mainScreenEl.setRandom(random);
-mainScreenEl.generateOffer();
-
-// Map Generation
-const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
-const tileMap = buildTileMap(mapData, { tileSize: 32 });
-const navMap = buildTileGraph(tileMap);
 
 await game.start(loader);
-mainScreenEl.visible = true;
-
-const gameInventory = InventoryObject;
-let gField = new GameField(Vector.Zero, vec(1792, 992), tileMap);
-game.add(gField);
-gField.addChild(tileMap);
-
-let towerManager = new TowerManager(gField);
-let waveManager = new EnemyWaveController(towerManager, gField, navMap.graph, random);
-waveManager.init();
-towerManager.createTower("power", new Vector(900, 500));
-gField.registerWaveManager(waveManager);
-gField.registerTowerManager(towerManager);
-towerManager.registerEWC(waveManager);
-towerManager.towerEmitter.on('towerCreated', () => mainScreenEl.requestUpdate());
-
-//Wiring up loot collection to inventory
-let lootCollector = new LootCollector();
-gField.addChild(lootCollector);
-gameInventory.init(lootCollector.eventEmitter);
-lootCollector.eventEmitter.on('LootCollected', () => mainScreenEl.requestUpdate());
-lootCollector.eventEmitter.on('Money', () => mainScreenEl.requestUpdate());
-gameInventory.money = 20;
-
-game.input.keyboard.on("press", (e: KeyEvent) => {
-  if (e.key === Keys.Space) {
-    waveManager.startNewWave();
-  }
-});
-
-game.onPreUpdate = (engine: Engine, dt: number) => waveManager.update(dt);
-// TODO move to scene
-// const topLeft = game.screen.contentArea.topLeft;
-topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
-mainScreenEl.setPos(topLeft.x, topLeft.y);
-
-const dimensions = game.getWorldBounds();
-mainScreenEl.setDimensions(dimensions.width, dimensions.height);
-mainScreenEl.setPixelRatio(game.pixelRatio);
-mainScreenEl.setWaveManager(waveManager);
-mainScreenEl.setTowerManager(towerManager);
-
-game.screen.events.on("resize", () => {
-  const topLeft = game.screen.screenToPageCoordinates(vec(0, 0));
-  mainScreenEl.setPos(topLeft.x, topLeft.y);
-});
-
-//push test
+game.goToScene("main");
