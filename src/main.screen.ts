@@ -1,6 +1,6 @@
 import { css, html, LitElement, PropertyDeclarations } from "lit";
-import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { customElement, property } from "lit/decorators.js";
+import { styleMap } from "lit/directives/style-map.js";
 import { EnemyWaveController } from "./Lib/enemyWaveController";
 import { Resources } from "./resources";
 import { TowerManager } from "./Lib/TowerManager";
@@ -9,7 +9,7 @@ import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 import { Random } from "excalibur";
 
-@customElement('main-screen')
+@customElement("main-screen")
 export class MainScreen extends LitElement {
   static styles = css`
     :host {
@@ -21,15 +21,17 @@ export class MainScreen extends LitElement {
       box-sizing: border-box;
     }
 
-    h2, h3 {
+    h2,
+    h3 {
       margin: 0;
       text-align: right;
     }
-  
+
     button {
       font-family: "PressStart2P", sans-serif;
       color: black;
       height: 32px;
+      user-select: none;
     }
 
     .container {
@@ -42,28 +44,34 @@ export class MainScreen extends LitElement {
       color: white;
       font-size: 24px;
       transform-origin: 0 0;
+      user-select: none;
     }
 
     .toggle-shop {
       opacity: 0;
       pointer-events: none;
       z-index: -1;
-      transition: opacity .5s ease-in-out, top .5s ease-in-out; 
+      transition:
+        opacity 0.5s ease-in-out,
+        top 0.5s ease-in-out;
     }
 
     .toggle-inventory {
       opacity: 0;
       pointer-events: none;
       z-index: -1;
-      transition: opacity .5s ease-in-out, top .5s ease-in-out; 
+      transition:
+        opacity 0.5s ease-in-out,
+        top 0.5s ease-in-out;
     }
-
 
     .toggle-tower-details {
       opacity: 0;
       pointer-events: none;
       z-index: -1;
-      transition: opacity .5s ease-in-out, top .5s ease-in-out; 
+      transition:
+        opacity 0.5s ease-in-out,
+        top 0.5s ease-in-out;
     }
 
     .header {
@@ -71,6 +79,7 @@ export class MainScreen extends LitElement {
       width: 100%;
       justify-content: flex-end;
       padding: 20px;
+      user-select: none;
     }
 
     .top-right {
@@ -88,8 +97,10 @@ export class MainScreen extends LitElement {
       left: 20px;
       bottom: 20px;
     }
-  
-    .shop, .inventory, .tower-details {
+
+    .shop,
+    .inventory,
+    .tower-details {
       padding: 20px;
       z-index: 10;
       pointer-events: auto;
@@ -98,7 +109,6 @@ export class MainScreen extends LitElement {
       width: 80%;
       height: 0;
       background-color: gray;
-
 
       h2 {
         text-align: left;
@@ -112,7 +122,9 @@ export class MainScreen extends LitElement {
         padding: 20px;
         border: solid 1px black;
         border-radius: 16px;
-        box-shadow: 4px 7px 7px -7px #000 inset, 0px -2px 28px 0px #000 inset;
+        box-shadow:
+          4px 7px 7px -7px #000 inset,
+          0px -2px 28px 0px #000 inset;
       }
     }
 
@@ -124,7 +136,7 @@ export class MainScreen extends LitElement {
     .shop .shop-content {
       flex: 1 1 auto;
       display: flex;
-    } 
+    }
 
     .shop .options {
       flex: 1 1 auto;
@@ -164,7 +176,9 @@ export class MainScreen extends LitElement {
       padding: 20px;
       border: solid 1px black;
       border-radius: 16px;
-      box-shadow: 4px 7px 7px -7px #000 inset, 0px -2px 28px 0px #000 inset;
+      box-shadow:
+        4px 7px 7px -7px #000 inset,
+        0px -2px 28px 0px #000 inset;
     }
 
     .shop .part-offer {
@@ -176,7 +190,6 @@ export class MainScreen extends LitElement {
       width: 100%;
       height: 80%;
       h2 {
-
       }
       .inventory-content {
         flex: 1 1 auto;
@@ -186,7 +199,9 @@ export class MainScreen extends LitElement {
         padding: 20px;
         border: solid 1px black;
         border-radius: 16px;
-        box-shadow: 4px 7px 7px -7px #000 inset, 0px -2px 28px 0px #000 inset;
+        box-shadow:
+          4px 7px 7px -7px #000 inset,
+          0px -2px 28px 0px #000 inset;
       }
 
       .done {
@@ -207,12 +222,13 @@ export class MainScreen extends LitElement {
       height: 100px;
       background-color: black;
 
-      .money, .energy {
+      .money,
+      .energy {
         display: flex;
         width: 100%;
         justify-content: space-between;
       }
-  
+
       .icon {
         // align-self: flex-start;
       }
@@ -220,7 +236,6 @@ export class MainScreen extends LitElement {
         // align-self: flex-end;
       }
     }
-
   `;
   static properties: PropertyDeclarations = { health: { type: Number } };
 
@@ -299,14 +314,14 @@ export class MainScreen extends LitElement {
   }
 
   public showShop() {
-    Resources.ShopOpen.play(.25);
+    Resources.ShopOpen.play(0.25);
     this.isShopVisible = true;
 
     this.requestUpdate();
   }
 
   public hideShop() {
-    Resources.ShopClose.play(.25);
+    Resources.ShopClose.play(0.25);
     this.isShopVisible = false;
     this.requestUpdate();
   }
@@ -363,7 +378,7 @@ export class MainScreen extends LitElement {
   }
 
   public reroll() {
-    Resources.ShopPurchase.play(.4);
+    Resources.ShopPurchase.play(0.4);
     this.rerollCost = this.rerollCost + this.rerollScale;
     this.generateOffer();
     this.requestUpdate();
@@ -371,8 +386,8 @@ export class MainScreen extends LitElement {
 
   protected render(): unknown {
     const styles = {
-      '--ex-pixel-ratio': `${this.pixelRatio}`,
-      visibility: this.visible ? 'visible' : 'hidden',
+      "--ex-pixel-ratio": `${this.pixelRatio}`,
+      visibility: this.visible ? "visible" : "hidden",
       left: `${this.left}px`,
       top: `${this.top}px`,
       width: `${this.width}px`,
@@ -381,36 +396,34 @@ export class MainScreen extends LitElement {
 
     const toggleShopStyles = {
       opacity: this.isShopVisible ? 1 : 0,
-      'z-index': this.isShopVisible ? 10 : 5,
-      top: this.isShopVisible ? '20%' : '100%',
-      height: this.isShopVisible ? '80%' : '0%'
-    }
+      "z-index": this.isShopVisible ? 10 : 5,
+      top: this.isShopVisible ? "20%" : "100%",
+      height: this.isShopVisible ? "80%" : "0%",
+    };
 
     const toggleInventoryStyles = {
       opacity: this.isInventoryVisible ? 1 : 0,
-      'z-index': this.isInventoryVisible ? 10 : 5,
-      top: this.isInventoryVisible ? '20%' : '100%',
-      height: this.isInventoryVisible ? '80%' : '0%'
-    }
-
+      "z-index": this.isInventoryVisible ? 10 : 5,
+      top: this.isInventoryVisible ? "20%" : "100%",
+      height: this.isInventoryVisible ? "80%" : "0%",
+    };
 
     const toggleTowerDetailsStyles = {
       opacity: this.isTowerDetailsVisible ? 1 : 0,
-      'z-index': this.isTowerDetailsVisible ? 10 : 5,
-      top: this.isTowerDetailsVisible ? '20%' : '100%',
-      height: this.isTowerDetailsVisible ? '60%' : '0%'
-    }
+      "z-index": this.isTowerDetailsVisible ? 10 : 5,
+      top: this.isTowerDetailsVisible ? "20%" : "100%",
+      height: this.isTowerDetailsVisible ? "60%" : "0%",
+    };
 
-    return html`
-    <div class="container" style=${styleMap(styles)}>
+    return html` <div class="container" style=${styleMap(styles)}>
       <div class="header">
         <div class="top-right">
-            <h2>Wave: ${this.waveManager?.level}</h2>
-            <h3><span>♥️</span><span>${this.health}</span></h3>
+          <h2>Wave: ${this.waveManager?.level}</h2>
+          <h3><span>♥️</span><span>${this.health}</span></h3>
         </div>
       </div>
 
-      <div class="shop toggle-shop" style=${styleMap(toggleShopStyles)} >
+      <div class="shop toggle-shop" style=${styleMap(toggleShopStyles)}>
         <h2>Shop</h2>
 
         <div class="shop-content">
@@ -423,7 +436,7 @@ export class MainScreen extends LitElement {
           <div class="actions">
             <div class="offer">
               ${this.currentOffer.map(offer => {
-                return html`<button class="part-offer">${offer}</button>`
+                return html`<button class="part-offer">${offer}</button>`;
               })}
               <!-- <button class="part-offer">Firing Speed</button> -->
               <!-- <button class="part-offer">Damage</button> -->
@@ -435,54 +448,58 @@ export class MainScreen extends LitElement {
               <button @click=${this.sellScrap}>Sell Scrap</button>
 
               <ul class="content">
-              ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
-
-                if (number) {
-                  return html`<li>${type}:${number}</li>`;
-                }
-              })}
+                ${repeat(
+                  InventoryObject.scrapItems,
+                  e => e[0],
+                  ([type, number]) => {
+                    if (number) {
+                      return html`<li>${type}:${number}</li>`;
+                    }
+                  },
+                )}
               </ul>
             </div>
           </div>
-
         </div>
-
-
       </div>
 
       <div class="inventory toggle-inventory" style=${styleMap(toggleInventoryStyles)}>
-        
         <h2>Inventory</h2>
 
         <button class="done" @click=${this.hideInventory}>Done</button>
 
         <h3>Parts</h3>
         <div class="content">
-
           <ul>
-          ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
-            if (number) {
-              return html`<li>${type}:${number}</li>`;
-            }
-          })}
+            ${repeat(
+              InventoryObject.scrapItems,
+              e => e[0],
+              ([type, number]) => {
+                if (number) {
+                  return html`<li>${type}:${number}</li>`;
+                }
+              },
+            )}
           </ul>
         </div>
         <h3>Scrap</h3>
         <div class="content">
           <ul>
-          ${repeat(InventoryObject.scrapItems, e => e[0], ([type, number]) => {
-            if (number) {
-              return html`<li>${type}:${number}</li>`;
-            }
-          })}
+            ${repeat(
+              InventoryObject.scrapItems,
+              e => e[0],
+              ([type, number]) => {
+                if (number) {
+                  return html`<li>${type}:${number}</li>`;
+                }
+              },
+            )}
           </ul>
         </div>
-
       </div>
 
       <div class="tower-details toggle-tower-details" style=${styleMap(toggleTowerDetailsStyles)}>
         <h2>Tower Details</h2>
-
       </div>
 
       <div class="bottom-left">
@@ -492,17 +509,15 @@ export class MainScreen extends LitElement {
         <!-- <button>Settings</button> -->
         <div class="stats">
           <div class="money">
-              <span class="icon">💰</span>
-              <span class="value">${InventoryObject.money}</span>
+            <span class="icon">💰</span>
+            <span class="value">${InventoryObject.money}</span>
           </div>
           <div class="energy">
             <span class="icon" style="color:yellow">🗲</span>
             <span class="value">${this.getUsedPower()}/${this.getTotalPower()}</span>
           </div>
         </div>
-
       </div>
-
-    </div>`
+    </div>`;
   }
 }

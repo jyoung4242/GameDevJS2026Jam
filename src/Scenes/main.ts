@@ -60,6 +60,7 @@ export class MainScene extends Scene {
 
     // setup events to refresh UI
     this.tw.towerEmitter.on("towerCreated", () => this.mainScreenEl!.requestUpdate());
+    this.tw.towerEmitter.on("towerDestroyed", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("allTowersDestroyed", () => this.gameOverTransition());
     this.loot.eventEmitter.on("LootCollected", () => this.mainScreenEl!.requestUpdate());
     this.loot.eventEmitter.on("Money", () => this.mainScreenEl!.requestUpdate());
