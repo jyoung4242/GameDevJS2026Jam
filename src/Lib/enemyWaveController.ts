@@ -210,6 +210,10 @@ export class EnemyWaveController {
     this._numberRemainaing = STARTING_NUM_ENEMIES;
   }
 
+  setNewNavMap(navmap: Graph<PositionNodeData>) {
+    this._navmap = navmap;
+  }
+
   spawnEnemy() {
     let enemyType = this.chooseEnemeyType();
     let pool = this._enemyPools.get(enemyType)!;

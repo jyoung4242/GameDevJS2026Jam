@@ -17,6 +17,7 @@ export class MainScene extends Scene {
   loot: LootCollector | null = null;
   mainScreenEl: MainScreen | null = null;
   tmap: TileMap | null = null;
+  firstTimeFlag: boolean = true;
 
   constructor() {
     super();
@@ -91,6 +92,15 @@ export class MainScene extends Scene {
     this.ewc!.reset();
     InventoryObject.resetScrap();
     InventoryObject.money = 20;
+    if (!this.firstTimeFlag) {
+      const mapData = generateMapData({ cols: 56, rows: 31, seed: Date.now() });
+      this.tmap = buildTileMap(mapData, { tileSize: 32 });
+      const navMap = buildTileGraph(this.tmap);
+      this.gf?.setNewTilemap(this.tmap!);
+      this.ewc?.setNewNavMap(navMap.graph);
+    } else {
+      this.firstTimeFlag = false;
+    }
   }
 
   onDeactivate(context: SceneActivationContext) {

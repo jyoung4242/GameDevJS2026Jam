@@ -108,6 +108,15 @@ export class GameField extends Actor {
     console.log(this.children);
   }
 
+  setNewTilemap(tilemap: TileMap) {
+    //remove tilemap from GF
+    this.removeChild(this.tilemap);
+    //set new tilemap
+    this.tilemap = tilemap;
+    //add tilemap to GF
+    this.addChild(this.tilemap);
+  }
+
   removeEnemy(enemy: Enemy) {
     this.removeChild(enemy);
   }
