@@ -1,9 +1,9 @@
 import { Actor, CollisionType, Color, Engine, PointerEvent, Random, TileMap, Vector } from "excalibur";
 import { Tower } from "./towers";
 import { EnemyWaveController, SpawnPoints } from "../Lib/enemyWaveController";
-import { Enemy, EnemyBurst } from "./enemies";
+import { Enemy, EnemyBurst, RangedEnemy, TankEnemy } from "./enemies";
 import { TowerManager } from "../Lib/TowerManager";
-import { TowerBurst } from "./SkillActors";
+import { TowerBurst, TowerWeapon } from "./SkillActors";
 
 const SPAWN_BUFFER = 100;
 export const TILE_SIZE = 32;
@@ -72,12 +72,40 @@ export class GameField extends Actor {
   }
 
   reset() {
-    this.children.forEach(c => {
-      if (c instanceof Tower) this.removeChild(c);
-      if (c instanceof Enemy) this.removeChild(c);
-      if (c instanceof EnemyBurst) this.removeChild(c);
-      if (c instanceof TowerBurst) this.removeChild(c);
-    });
+    console.log(this.children);
+
+    //reverse for loop
+    for (let i = this.children.length - 1; i >= 0; i--) {
+      const c = this.children[i];
+      if (c instanceof Tower) {
+        console.log("removing tower", c);
+        this.removeChild(c);
+        c.kill();
+      } else if (c instanceof Enemy) {
+        console.log("removing enemy", c);
+        this.wm!.returnEnemyToPool(c);
+      } else if (c instanceof TowerWeapon) {
+        console.log("removing weapon", c);
+        this.wm!.returnWeaponToPool(c);
+      }
+    }
+
+    // this.children.forEach(c => {
+    //   console.log(c);
+    //   if (c instanceof Tower) {
+    //     console.log("removing tower", c);
+
+    //     this.removeChild(c);
+    //     c.kill();
+    //   } else if (c instanceof Enemy) {
+    //     console.log("removing enemy", c);
+    //     this.wm!.returnEnemyToPool(c);
+    //   } else if (c instanceof TowerWeapon) {
+    //     console.log("removing weapon", c);
+    //     this.wm!.returnWeaponToPool(c);
+    //   }
+    // });
+    console.log(this.children);
   }
 
   removeEnemy(enemy: Enemy) {

@@ -50,7 +50,6 @@ export class TowerManager {
   destroyTower(tower: Tower) {
     this.towers = this.towers.filter(t => t !== tower);
     this.towerEmitter.emit("towerDestroyed", new TowerDestroyedEvent(tower));
-    console.log("tower destroyed", tower, this.towers);
 
     // do game over check
     if (this.towers.length === 0) this.towerEmitter.emit("allTowersDestroyed", new AllTowersDestroyed());

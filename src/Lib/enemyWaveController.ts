@@ -19,6 +19,7 @@ export type WaveEvents = {
   waveStart: WaveStartEvent;
   waveEnd: WaveEndEvent;
   waveSpawn: WaveSpawnEvent;
+  waveReset: WaveResetEvent;
 };
 
 export class EnemyWaveController {
@@ -196,6 +197,19 @@ export class EnemyWaveController {
     this._numberRemainaing = this._numEnemeiesInWave;
   }
 
+  reset() {
+    console.log(`
+    **************************************
+    Resetting Wave Controller
+    **************************************`);
+    this.waveEmitter.emit("waveReset");
+    this._waveState = "idle";
+    this._currentLevel = 1;
+    this._spawnInterval = STARTING_SPAWN_INTERVAL;
+    this._numEnemeiesInWave = STARTING_NUM_ENEMIES;
+    this._numberRemainaing = STARTING_NUM_ENEMIES;
+  }
+
   spawnEnemy() {
     let enemyType = this.chooseEnemeyType();
     let pool = this._enemyPools.get(enemyType)!;
@@ -271,6 +285,12 @@ export class WaveEndEvent extends GameEvent<WaveEvents> {
 }
 
 export class WaveSpawnEvent extends GameEvent<WaveEvents> {
+  constructor() {
+    super();
+  }
+}
+
+export class WaveResetEvent extends GameEvent<WaveEvents> {
   constructor() {
     super();
   }

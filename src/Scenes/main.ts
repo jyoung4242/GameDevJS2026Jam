@@ -87,11 +87,17 @@ export class MainScene extends Scene {
     console.log("resetting level and adding children");
 
     this.tw!.createTower("power", new Vector(900, 500));
-    this.gf!.addChild(this.tmap!);
-    this.gf!.addChild(this.loot!);
+    if (!this.gf?.hasChild(this.tmap!)) this.gf!.addChild(this.tmap!);
+    if (!this.gf?.hasChild(this.loot!)) this.gf!.addChild(this.loot!);
+    this.ewc!.reset();
   }
 
-  onDeactivate(context: SceneActivationContext) {}
+  onDeactivate(context: SceneActivationContext) {
+    // remove all towers and enemies
+    this.tw?.resetTowers();
+    //ensure gf has no tower children
+    this.gf!.reset();
+  }
 
   onPreUpdate(engine: Engine, elapsed: number): void {
     this.ewc!.update(elapsed);
