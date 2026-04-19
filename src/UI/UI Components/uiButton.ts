@@ -57,7 +57,7 @@ export type UIButtonEvents = {
  */
 export type UIButtonConfig = BaseUIConfig & {
   /** Callback invoked when the button is clicked. */
-  callback?: () => void;
+  callback?: (evt: PointerEvent | KeyEvent, button: UIButton) => void;
   /** Radius of the rounded corners of the button (pixels). */
   buttonRadius?: number;
   /** Text to display when idle. */
@@ -149,7 +149,7 @@ export class UIButton extends InteractiveUIComponent<UIButtonConfig, UIButtonEve
   /** Internal flag to ignore immediate pointerleave after pointerup. */
   private ignoreLeave = false;
   /** Callback invoked on click. */
-  private callback: () => void;
+  private callback: (evt: PointerEvent | KeyEvent, button: UIButton) => void;
 
   /**
    * Create a new UIButton.
@@ -158,7 +158,7 @@ export class UIButton extends InteractiveUIComponent<UIButtonConfig, UIButtonEve
   constructor(buttonConfig: UIButtonConfig) {
     let localConfig = { ...defaultButtonConfig, ...buttonConfig };
     super(localConfig);
-    this.callback = localConfig.callback;
+    this.callback = localConfig.callback ? localConfig.callback : () => {};
     this._config = localConfig;
     this.tabStopIndex = localConfig.tabStopIndex ?? -1;
     this.graphics.use(new UIButtonGraphic(this, vec(localConfig.width, localConfig.height), () => this.state, this._config));
@@ -211,7 +211,7 @@ export class UIButton extends InteractiveUIComponent<UIButtonConfig, UIButtonEve
     this.emitter.emit("UIButtonUp", { name: this.name, target: this, event: ekey });
     if (this.isPressed) {
       this.emitter.emit("UIButtonClicked", { name: this.name, target: this, event: ekey });
-      this.callback();
+      this.callback(ekey, this);
     }
     this.isPressed = false;
     this.updateState();
@@ -296,7 +296,7 @@ export class UIButton extends InteractiveUIComponent<UIButtonConfig, UIButtonEve
     this.emitter.emit("UIButtonUp", { name: this.name, target: this, event: evt });
     if (wasPressed && this.isHovered) {
       this.emitter.emit("UIButtonClicked", { name: this.name, target: this, event: evt });
-      this.callback();
+      this.callback(evt, this);
     }
   };
 
@@ -382,18 +382,20 @@ class UIButtonGraphic extends Graphic {
    * @param buttonConfig - Button configuration for styling and layout.
    */
   constructor(owner: UIButton, size: Vector, getState: () => UIButtonState, buttonConfig: UIButtonConfig) {
-    super({ width: size.x, height: size.y + buttonConfig.pressDepth + buttonConfig.buttonDepthOffset });
+    let pressdepth = buttonConfig.pressDepth ?? 4;
+    let buttonDepthOffset = buttonConfig.buttonDepthOffset ?? 4;
+    super({ width: size.x, height: size.y + pressdepth + buttonDepthOffset });
     this.owner = owner;
     this.size = size;
     this.config = buttonConfig;
     this.getState = getState;
     this.cnv = document.createElement("canvas");
     this.cnv.width = this.size.x;
-    this.cnv.height = this.size.y + buttonConfig.pressDepth + buttonConfig.buttonDepthOffset;
-    this.ctx = this.cnv.getContext("2d");
+    this.cnv.height = this.size.y + pressdepth + buttonDepthOffset;
+    this.ctx = this.cnv.getContext("2d") as CanvasRenderingContext2D;
     this.radius = buttonConfig.buttonRadius ?? this.radius;
-    this.depthPressed = buttonConfig.pressDepth ?? this.depthPressed;
-    this.depthOffset = buttonConfig.buttonDepthOffset ?? this.depthOffset;
+    this.depthPressed = pressdepth ?? this.depthPressed;
+    this.depthOffset = buttonDepthOffset ?? this.depthOffset;
     this.focusPosition = buttonConfig.focusIndicator ?? this.focusPosition;
     if (!this.ctx) return;
     if (buttonConfig.colors) this.colors = { ...this.colors, ...buttonConfig.colors };
@@ -501,10 +503,10 @@ class UIButtonGraphic extends Graphic {
         ? g.addColorStop(1, this.colors.hoverEnding.toString())
         : g.addColorStop(1, this.colors.hoverStarting.toString());
     } else if (state === "disabled") {
-      g.addColorStop(0, this.colors.disabledStarting.toString());
+      g.addColorStop(0, this.colors.disabledStarting!.toString());
       this.colors.disabledEnding
         ? g.addColorStop(1, this.colors.disabledEnding.toString())
-        : g.addColorStop(1, this.colors.disabledStarting.toString());
+        : g.addColorStop(1, this.colors.disabledStarting!.toString());
     } else {
       g.addColorStop(0, this.colors.mainStarting.toString());
       this.colors.mainEnding
@@ -562,7 +564,7 @@ export type UISpriteButtonConfig = BaseUIConfig & {
     disabled?: Sprite;
   };
   /** Callback invoked when the button is clicked. */
-  callback?: () => void;
+  callback?: (evt: PointerEvent | KeyEvent, button: UISpriteButton) => void;
   /** Radius for rounded corners. */
   buttonRadius?: number;
   /** Text for idle state. */
@@ -610,7 +612,7 @@ const defaultSpriteButtonConfig: UISpriteButtonConfig = {
  * Behaves similarly to `UIButton` but renders provided sprites per state.
  */
 export class UISpriteButton
-  extends InteractiveUIComponent<UIButtonConfig, UIButtonEvents>
+  extends InteractiveUIComponent<UISpriteButtonConfig, UIButtonEvents>
   implements IFocusable, IHoverable, IClickable
 {
   /** Current button state. */
@@ -622,7 +624,7 @@ export class UISpriteButton
   /** Ignore pointerleave immediately after pointerup. */
   private ignoreLeave = false;
   /** Click callback. */
-  private callback: () => void;
+  private callback: (evt: PointerEvent | KeyEvent, button: UISpriteButton) => void;
 
   /**
    * Create a new UISpriteButton.
@@ -631,7 +633,7 @@ export class UISpriteButton
   constructor(buttonConfig: UISpriteButtonConfig) {
     let localConfig = { ...defaultSpriteButtonConfig, ...buttonConfig };
     super(localConfig);
-    this.callback = localConfig.callback;
+    this.callback = localConfig.callback ? localConfig.callback : () => {};
     this._config = localConfig;
     this.graphics.use(new UISpriteButtonGraphic(this, vec(localConfig.width, localConfig.height), () => this.state, this._config));
     this.tabStopIndex = localConfig.tabStopIndex ?? -1;
@@ -689,7 +691,7 @@ export class UISpriteButton
     this.emitter.emit("UIButtonUp", { name: this.name, target: this, event: ekey });
     if (this.isPressed) {
       this.emitter.emit("UIButtonClicked", { name: this.name, target: this, event: ekey });
-      this.callback();
+      this.callback(ekey, this);
     }
     this.isPressed = false;
     this.updateState();
@@ -776,7 +778,7 @@ export class UISpriteButton
     this.emitter.emit("UIButtonUp", { name: this.name, target: this, event: evt });
     if (wasPressed && this.isHovered) {
       this.emitter.emit("UIButtonClicked", { name: this.name, target: this, event: evt });
-      this.callback();
+      this.callback(evt as PointerEvent, this);
     }
   };
 
@@ -868,7 +870,7 @@ class UISpriteButtonGraphic extends Graphic {
     hovered: Sprite | null;
     pressed: Sprite | null;
     disabled: Sprite | null;
-  };
+  } = { idle: null, hovered: null, pressed: null, disabled: null };
   cnv: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   textOffset: Vector;
@@ -891,7 +893,7 @@ class UISpriteButtonGraphic extends Graphic {
     this.cnv = document.createElement("canvas");
     this.cnv.width = this.size.x;
     this.cnv.height = this.size.y;
-    this.ctx = this.cnv.getContext("2d");
+    this.ctx = this.cnv.getContext("2d") as CanvasRenderingContext2D;
     this.textOffset = localConfig.textOffset ?? vec(0, 0);
     this.radius = localConfig.buttonRadius ?? this.radius;
     this.depthPressed = localConfig.pressDepth ?? this.depthPressed;

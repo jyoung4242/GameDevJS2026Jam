@@ -1,4 +1,4 @@
-import { Color, Engine, Font, PointerEvent, PointerEvents, Subscription, vec } from "excalibur";
+import { Color, Engine, Font, KeyEvent, PointerEvent, PointerEvents, Subscription, vec } from "excalibur";
 import { UIPanel, UIPanelConfig } from "./UI Components/uiPanel";
 import { OtherTower, PowerPlantTower } from "../Actors/towers";
 import { UILabel, UILabelConfig } from "./UI Components/uiLabel";
@@ -35,6 +35,7 @@ export class PowerTowerMenu extends UIPanel {
   }
 
   closeMenu() {
+    (this.parent as PowerPlantTower).isUIShowing = false;
     this.kill();
   }
 }
@@ -88,6 +89,25 @@ const pt1ButtonConfig: UIButtonConfig = {
     color: Color.fromHex("#e8dfd3"),
     font: PixelFont,
   },
+  callback: (evt: PointerEvent | KeyEvent, button: UIButton) => {
+    let powerTowerParent = (button.parent as PowerTowerMenu).parent as PowerPlantTower;
+
+    //check how many towers are tied to parent
+    if (powerTowerParent.otherTowers.length >= 3) {
+      return;
+    }
+
+    let mousePos = button.scene?.engine.input.pointers.primary.lastWorldPos;
+    if (!mousePos) return;
+
+    let newTower: OtherTower = ((button.parent as PowerTowerMenu).parent as PowerPlantTower).tw!.createTower(
+      "other",
+      mousePos,
+    ) as OtherTower;
+    (newTower as OtherTower).isPlacing = true;
+    powerTowerParent.otherTowers.push(newTower);
+    (button.parent as PowerTowerMenu).closeMenu();
+  },
 };
 
 export class PTButton1 extends UIButton {
@@ -119,24 +139,4 @@ export class PTButton1 extends UIButton {
       if (this.closeHandler) this.closeHandler.close();
     }, 250);
   }
-
-  onClick = (evt: PointerEvent) => {
-    let powerTowerParent = (this.parent as PowerTowerMenu).parent as PowerPlantTower;
-
-    //check how many towers are tied to parent
-    if (powerTowerParent.otherTowers.length >= 3) {
-      return;
-    }
-
-    let mousePos = this.scene?.engine.input.pointers.primary.lastWorldPos;
-    if (!mousePos) return;
-
-    let newTower: OtherTower = ((this.parent as PowerTowerMenu).parent as PowerPlantTower).tw!.createTower(
-      "other",
-      mousePos,
-    ) as OtherTower;
-    (newTower as OtherTower).isPlacing = true;
-    powerTowerParent.otherTowers.push(newTower);
-    (this.parent as PowerTowerMenu).closeMenu();
-  };
 }

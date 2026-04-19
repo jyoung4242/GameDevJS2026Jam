@@ -43,6 +43,7 @@ export class PowerPlantTower extends Tower {
   otherTowers: OtherTower[] = [];
   isHolding: boolean = false;
   holdingRing: HoldRingActor | null = null;
+  isUIShowing: boolean = false;
 
   private _numTowerCapacity: number = STARTING_TOWER_CAPACITY;
   constructor(pos: Vector, manager: TowerManager) {
@@ -54,6 +55,7 @@ export class PowerPlantTower extends Tower {
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
     this.on("pointerdown", () => {
+      if (this.isUIShowing) return;
       this._holdFired = false;
       this.isHolding = true;
       this.holdingRing = new HoldRingActor();
@@ -91,6 +93,7 @@ export class PowerPlantTower extends Tower {
   onTap = () => {};
   onHold = () => {
     this.ui = new PowerTowerMenu(this);
+    this.isUIShowing = true;
     this.addChild(this.ui);
     this.isHolding = false;
     //remove holding ring
