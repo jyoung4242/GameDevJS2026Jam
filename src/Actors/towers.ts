@@ -60,7 +60,6 @@ export class PowerPlantTower extends Tower {
       this.isHolding = true;
       this.holdingRing = new HoldRingActor();
       this.addChild(this.holdingRing);
-      this.isHolding = true;
       this._holdTimer = window.setTimeout(() => {
         this._holdFired = true;
         this.onHold?.();

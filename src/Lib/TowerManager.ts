@@ -7,6 +7,7 @@ export type TowerEvents = {
   towerCreated: TowerCreatedEvent;
   towerDestroyed: TowerDestroyedEvent;
   towerDamaged: TowerDamagedEvent;
+  allTowersDestroyed: AllTowersDestroyed;
 };
 
 export class TowerManager {
@@ -50,6 +51,9 @@ export class TowerManager {
     this.towers = this.towers.filter(t => t !== tower);
     this.towerEmitter.emit("towerDestroyed", new TowerDestroyedEvent(tower));
     console.log("tower destroyed", tower, this.towers);
+
+    // do game over check
+    if (this.towers.length === 0) this.towerEmitter.emit("allTowersDestroyed", new AllTowersDestroyed());
   }
 }
 
@@ -67,6 +71,12 @@ export class TowerDestroyedEvent extends GameEvent<TowerEvents> {
 
 export class TowerDamagedEvent extends GameEvent<TowerEvents> {
   constructor(public tower: Tower) {
+    super();
+  }
+}
+
+export class AllTowersDestroyed extends GameEvent<TowerEvents> {
+  constructor() {
     super();
   }
 }
