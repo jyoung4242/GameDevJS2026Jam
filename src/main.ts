@@ -4,6 +4,7 @@ import { Engine, DisplayMode } from "excalibur";
 import "./main.screen";
 import { loader } from "./resources";
 import { MainScene } from "./Scenes/main";
+import { GameOverScene } from "./Scenes/gameover";
 
 const game = new Engine({
   canvasElementId: "game",
@@ -14,6 +15,7 @@ const game = new Engine({
   pixelArt: true,
   scenes: {
     main: new MainScene(),
+    gameover: new GameOverScene(),
   },
 });
 

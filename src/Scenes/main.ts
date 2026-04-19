@@ -7,6 +7,7 @@ import { InventoryObject } from "../Lib/InventoryObject";
 import { LootCollector } from "../Actors/Loot";
 import "../main.screen";
 import { MainScreen } from "../main.screen";
+import { GameOverPanel } from "../UI/gameoverBannerUI";
 
 export class MainScene extends Scene {
   rng: Random = new Random();
@@ -59,6 +60,7 @@ export class MainScene extends Scene {
 
     // setup events to refresh UI
     this.tw.towerEmitter.on("towerCreated", () => this.mainScreenEl!.requestUpdate());
+    this.tw.towerEmitter.on("allTowersDestroyed", () => this.gameOverTransition());
     this.loot.eventEmitter.on("LootCollected", () => this.mainScreenEl!.requestUpdate());
     this.loot.eventEmitter.on("Money", () => this.mainScreenEl!.requestUpdate());
     engine.screen.events.on("resize", () => {
@@ -66,6 +68,12 @@ export class MainScene extends Scene {
       this.mainScreenEl!.setPos(topLeft.x, topLeft.y);
     });
     this.add(this.gf);
+  }
+
+  gameOverTransition() {
+    this.mainScreenEl!.visible = false;
+    this.gf!.addChild(new GameOverPanel());
+    setTimeout(() => this.engine.goToScene("gameover"), 4000);
   }
 
   onActivate(context: SceneActivationContext<unknown, undefined>): void {
