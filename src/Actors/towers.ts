@@ -7,18 +7,25 @@ import { PowerTowerMenu } from "../UI/PowerTowerUI";
 import { WeaponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
 import { HoldRingActor } from "./HoldRing";
+import { MainScene } from "../Scenes/main";
 
 export const STARTING_TOWER_CAPACITY = 3;
 
 export abstract class Tower extends Actor {
   healthBar: HealthBar;
   tw: TowerManager;
+  _isSelected: boolean = false;
+  _isOldSelected: boolean = false;
 
   constructor(pos: Vector, manager: TowerManager) {
-    super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup, z: 2 });
+    super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup, z: 6 });
     this.tw = manager;
     this.healthBar = new HealthBar(vec(0, -60), vec(64, 32), 100);
     this.addChild(this.healthBar);
+  }
+
+  setSelected(v: boolean) {
+    this._isSelected = v;
   }
 
   takeDamage(damageAmount: number) {
@@ -28,6 +35,17 @@ export abstract class Tower extends Actor {
     if (this.healthBar.currentHealth <= 0) {
       this.tw.destroyTower(this);
       this.kill();
+    }
+  }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    // manage selected
+    if (this._isSelected !== this._isOldSelected) {
+      if (this._isSelected) {
+        this.actions.blink(500, 500, -1);
+      } else {
+        this.actions.clearActions();
+      }
     }
   }
 }
@@ -128,23 +146,29 @@ export class PowerPlantTower extends Tower {
     this.otherTowers = this.otherTowers.filter(t => t !== tower);
   }
 
-  getNumTowerCapacity() {
+  getNumTowerCapacity(): number {
     return this._numTowerCapacity;
   }
 
   get numOtherTowers() {
     return this.otherTowers.length;
   }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    super.onPreUpdate(engine, elapsed);
+  }
 }
 
 export class OtherTower extends Tower {
   powerTower?: PowerPlantTower;
-  status: "powered" | "unpowered" = "powered";
+  _status: "powered" | "unpowered" = "powered";
   oldStatus: "powered" | "unpowered" = "unpowered";
   manager: TowerManager;
   skillComponents: Map<WeaponTypes, TowerSkill> = new Map();
   direction: Vector = new Vector(0, 0);
   _isPlacing: boolean = false;
+  _isSelected: boolean = false;
+  _isOldSelected: boolean = false;
 
   constructor(pos: Vector, manager: TowerManager, powerTower?: PowerPlantTower) {
     super(pos, manager);
@@ -162,9 +186,15 @@ export class OtherTower extends Tower {
       this.actions.flash(Color.Red, 500);
       return;
     }
+    if (!this._isPlacing) {
+      this.status = "unpowered";
+    }
+
     if (this._isPlacing) {
       this._isPlacing = false;
       this.pos = evt.worldPos;
+      (this.scene as MainScene)._startWiring(this.powerTower!);
+      (this.scene as MainScene)._tryConnect(this.powerTower!, this, this.scene!.engine);
     }
   };
 
@@ -216,13 +246,14 @@ export class OtherTower extends Tower {
   }
 
   onPreUpdate(engine: Engine, elapsed: number): void {
+    super.onPreUpdate(engine, elapsed);
     if (!this.powerTower) {
-      this.status = "unpowered";
+      this._status = "unpowered";
     }
 
-    if (this.oldStatus !== this.status) {
+    if (this.oldStatus !== this._status) {
       if (this.status === "unpowered" || !this.powerTower) {
-        this.graphics.current!.tint = Color.DarkGray;
+        this.graphics.current!.tint = Color.fromHex("#454141");
       } else {
         this.graphics.current!.tint = Color.White;
       }
@@ -235,7 +266,17 @@ export class OtherTower extends Tower {
       if (mousePos) {
         this.pos = mousePos;
       }
+    } else {
+      this.graphics.opacity = 1;
     }
+  }
+
+  get status() {
+    return this._status;
+  }
+
+  set status(status: "powered" | "unpowered") {
+    this._status = status;
   }
 
   set isPlacing(isPlacing: boolean) {

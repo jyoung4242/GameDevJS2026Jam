@@ -8,7 +8,17 @@ import { LootComponent, Rarity } from "../Components/LootComponent";
 import { BurstShells, DroneEngine, LaserOptics, MissleChassis, PowerCell, PowerCore, Servos } from "./Loot";
 import { PositionNodeData } from "../Lib/mapGeneration";
 import { ExFSM } from "../Lib/exFSM";
-import { ApproachingTower, AttackingTower, CalculatingPathToTower, FindingTargetTower, IdleState } from "../statemachines/enemyFSM";
+import {
+  ApproachingTower,
+  AttackingTower,
+  FindingTargetTower,
+  IdleState,
+  FindingTargetSegment,
+  AttackingSegment,
+  ApproachingSegment,
+} from "../statemachines/enemyFSM";
+import { CableSegment } from "../Lib/powerChainsLib";
+import { AttackSegment, FindClosestSegment } from "../Actions/enemyActions";
 
 export abstract class Enemy extends Actor {
   fsm: ExFSM;
@@ -141,13 +151,7 @@ export class TankEnemy extends Enemy {
     this.hpMax = 25;
     this.range = 80;
 
-    this.fsm.register(
-      new IdleState(this),
-      new FindingTargetTower(this),
-      new AttackingTower(this, 100),
-      new ApproachingTower(this),
-      new CalculatingPathToTower(this),
-    );
+    this.fsm.register(new IdleState(this), new FindingTargetTower(this), new AttackingTower(this, 100), new ApproachingTower(this));
   }
 
   onInitialize(engine: Engine): void {
@@ -198,13 +202,7 @@ export class RangedEnemy extends Enemy {
     this.hpMax = 8;
     this.range = 300;
 
-    this.fsm.register(
-      new IdleState(this),
-      new FindingTargetTower(this),
-      new AttackingTower(this, 100),
-      new ApproachingTower(this),
-      new CalculatingPathToTower(this),
-    );
+    this.fsm.register(new IdleState(this), new FindingTargetTower(this), new AttackingTower(this, 100), new ApproachingTower(this));
   }
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
@@ -244,6 +242,7 @@ export class RangedEnemy extends Enemy {
   }
 }
 export class FastEnemy extends Enemy {
+  targetSegment: CableSegment | null = null;
   constructor(
     waveManager: EnemyWaveController,
     gamefield: GameField,
@@ -254,14 +253,45 @@ export class FastEnemy extends Enemy {
     super(waveManager, gamefield, TowerManager, pos, navmap, "circle");
     this.graphics.color = Color.Green;
     this.enemyType = "fast";
-    this.speed = 80; //75
-    this.strength = 8;
-    this.hp = 15;
+    this.speed = 100; //75
+    this.strength = 2;
+    this.hp = 5;
+    this.hpMax = 5;
+    this.range = 75;
   }
 
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
-    //put bt here
+    this.fsm.register(
+      new IdleState(this),
+      new FindingTargetSegment(this),
+      new AttackingSegment(this, 100),
+      new ApproachingSegment(this),
+    );
+  }
+
+  onAdd(engine: Engine): void {
+    this.nodePath = [];
+    this.fsm.set("Idle");
+  }
+
+  findNearestSegment() {
+    let nearest = null,
+      minDist = Infinity;
+    for (const actor of this.scene!.actors) {
+      if (!(actor instanceof CableSegment) || !actor.isAlive) continue;
+      const d = this.pos.distance(actor.pos);
+      if (d < minDist) {
+        minDist = d;
+        nearest = actor;
+      }
+    }
+    return nearest;
+  }
+
+  onPreUpdate(engine: Engine, elapsed: number): void {
+    super.onPreUpdate(engine, elapsed);
+    this.fsm.update();
   }
 }
 

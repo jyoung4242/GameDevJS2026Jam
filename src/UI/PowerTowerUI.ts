@@ -103,6 +103,7 @@ const pt1ButtonConfig: UIButtonConfig = {
     let newTower: OtherTower = ((button.parent as PowerTowerMenu).parent as PowerPlantTower).tw!.createTower(
       "other",
       mousePos,
+      powerTowerParent,
     ) as OtherTower;
     (newTower as OtherTower).isPlacing = true;
     powerTowerParent.otherTowers.push(newTower);

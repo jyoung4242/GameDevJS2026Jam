@@ -8,6 +8,10 @@ import { LootCollector } from "../Actors/Loot";
 import "../main.screen";
 import { MainScreen } from "../main.screen";
 import { GameOverPanel } from "../UI/gameoverBannerUI";
+import { OtherTower, PowerPlantTower, Tower } from "../Actors/towers";
+import { CableActor, PowerGraph } from "../Lib/powerChainsLib";
+
+const POWER_CAPACITY = 4;
 
 export class MainScene extends Scene {
   rng: Random = new Random();
@@ -18,6 +22,10 @@ export class MainScene extends Scene {
   mainScreenEl: MainScreen | null = null;
   tmap: TileMap | null = null;
   firstTimeFlag: boolean = true;
+  private _selectedSource: any;
+  private _mode: "idle" | "wiring" = "idle";
+  private _graph: PowerGraph = new PowerGraph();
+  private _cables: CableActor[] = [];
 
   constructor() {
     super();
@@ -112,5 +120,73 @@ export class MainScene extends Scene {
 
   onPreUpdate(engine: Engine, elapsed: number): void {
     this.ewc!.update(elapsed);
+  }
+
+  /*  Power Chain methods   */
+
+  _startWiring(source: PowerPlantTower) {
+    // if (this._selectedSource) this._selectedSource.setSelected(false);
+    // this._selectedSource = source;
+    // source.setSelected(true);
+    this._mode = "wiring";
+    const kind = source instanceof OtherTower ? "utility (daisy-chain)" : "power";
+    console.log(`${kind} tower selected — click a utility tower to connect`, "event");
+  }
+
+  _cancelWiring() {
+    if (this._selectedSource) this._selectedSource.setSelected(false);
+    this._selectedSource = null;
+    this._mode = "idle";
+    console.log("cancelled — click a power or powered utility tower to wire");
+  }
+
+  _tryConnect(source: Tower, target: Tower, engine: Engine) {
+    if (source === target) return;
+    console.log(source, target);
+
+    // Duplicate check using ex.Graph.areNodesConnected
+    if (this._graph.areTowersConnected(source, target)) {
+      console.log("⛔ already connected", "warn");
+      return;
+    }
+
+    // Cycle check (upstream walk via _parentEdge)
+    if (this._graph.wouldCreateCycle(source, target)) {
+      console.log("⛔ would create a power loop — not allowed", "warn");
+      return;
+    }
+
+    // Capacity check (countLoad via ex.Graph.bfs)
+    console.log(source);
+    if (!this._graph.canAcceptLoad(source)) {
+      const root = source instanceof PowerPlantTower ? source : this._graph.findRoot(source);
+      console.log(`⛔ power tower at capacity (${root?.getNumTowerCapacity() ?? POWER_CAPACITY} max)`, "warn");
+
+      return;
+    }
+
+    // ✓ Wire it up
+    const cable = new CableActor(source, target, this._graph, this);
+    this.add(cable);
+    this._cables.push(cable);
+    this._graph.addCableEdge(cable); // register directed edge in ex.Graph
+
+    const root = source instanceof PowerPlantTower ? source : this._graph.findRoot(source);
+    (target as OtherTower).status = "powered";
+
+    const isDaisy = source instanceof OtherTower;
+    console.log(
+      `✓ ${isDaisy ? "daisy-chained" : "direct"} — load: ${this._graph.countLoad(root as PowerPlantTower)}/${root?.getNumTowerCapacity()}`,
+      "event",
+    );
+  }
+
+  _refreshPowerState() {
+    let towers = this.entities.filter(e => e instanceof Tower);
+    for (const t of towers) {
+      if (!(t instanceof OtherTower)) continue;
+      const root = this._graph.findRoot(t);
+      t.status = root ? "powered" : "unpowered";
+    }
   }
 }

@@ -28,7 +28,7 @@ export class TowerManager {
     return this.towers[0];
   }
 
-  createTower(type: "power" | "other", pos: Vector): Tower {
+  createTower(type: "power" | "other", pos: Vector, powerTower?: PowerPlantTower): Tower {
     let tower: Tower;
 
     switch (type) {
@@ -36,7 +36,7 @@ export class TowerManager {
         tower = new PowerPlantTower(pos, this);
         break;
       case "other":
-        tower = new OtherTower(pos, this);
+        tower = new OtherTower(pos, this, powerTower);
         break;
     }
 
