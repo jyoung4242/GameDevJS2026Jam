@@ -48,6 +48,7 @@ export class MainScene extends Scene {
       throw new Error("Main Screen not found");
     }
 
+
     let topLeft = engine.screen.screenToPageCoordinates(vec(0, 0));
     this.mainScreenEl.setPos(topLeft.x, topLeft.y);
     this.mainScreenEl.setRandom(this.rng);
@@ -58,10 +59,15 @@ export class MainScene extends Scene {
     this.mainScreenEl.setWaveManager(this.ewc);
     this.mainScreenEl.setTowerManager(this.tw);
 
+
+    // TODO DELETE ME
+    // this.mainScreenEl.showTowerDetails();
+
     // setup events to refresh UI
     this.tw.towerEmitter.on("towerCreated", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("towerDestroyed", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("allTowersDestroyed", () => this.gameOverTransition());
+    this.tw.towerEmitter.on("towerSelected", () => this.mainScreenEl?.showTowerDetails());
     this.loot.eventEmitter.on("LootCollected", () => this.mainScreenEl!.requestUpdate());
     this.loot.eventEmitter.on("Money", () => this.mainScreenEl!.requestUpdate());
     engine.screen.events.on("resize", () => {

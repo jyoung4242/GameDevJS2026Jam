@@ -5,6 +5,7 @@ import { EnemyWaveController } from "./enemyWaveController";
 
 export type TowerEvents = {
   towerCreated: TowerCreatedEvent;
+  towerSelected: Tower;
   towerDestroyed: TowerDestroyedEvent;
   towerDamaged: TowerDamagedEvent;
   allTowersDestroyed: AllTowersDestroyed;

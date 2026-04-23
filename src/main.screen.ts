@@ -73,7 +73,7 @@ export class MainScreen extends LitElement {
       z-index: -1;
       transition:
         opacity 0.5s ease-in-out,
-        top 0.5s ease-in-out;
+        left 0.5s ease-in-out;
     }
 
     .header {
@@ -128,6 +128,33 @@ export class MainScreen extends LitElement {
         box-shadow:
           4px 7px 7px -7px #000 inset,
           0px -2px 28px 0px #000 inset;
+      }
+    }
+
+    .tower-details {
+      left: 100%;
+      height: 100%;
+      opacity: 0;
+      top: 0;
+
+      table {
+        border: solid 1px;
+        border-spacing: 0;
+      
+        td {
+          padding: 32px;
+          border: solid 1px;
+
+        }
+        td:hover {
+          background-color: white;
+        }
+
+      }
+
+      .done {
+        background-color: red;
+        color: white;
       }
     }
 
@@ -372,9 +399,21 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
+
+  public showTowerDetails() {
+    this.isTowerDetailsVisible = true;
+    this.requestUpdate();
+  }
+
+  public hideTowerDetails() {
+    this.isTowerDetailsVisible = false;
+    this.requestUpdate();
+  }
+
   public hideAll() {
     this.hideShop();
     this.hideInventory();
+    this.hideTowerDetails();
   }
 
   public getTotalPower() {
@@ -428,7 +467,6 @@ export class MainScreen extends LitElement {
       // TODO better bank update
 
       InventoryObject.money += this.random.d4() * count;
-
 
     }
 
@@ -493,8 +531,7 @@ export class MainScreen extends LitElement {
     const toggleTowerDetailsStyles = {
       opacity: this.isTowerDetailsVisible ? 1 : 0,
       "z-index": this.isTowerDetailsVisible ? 10 : 5,
-      top: this.isTowerDetailsVisible ? "20%" : "100%",
-      height: this.isTowerDetailsVisible ? "60%" : "0%",
+      left: this.isTowerDetailsVisible ? "50%" : "100%",
     };
 
     return html` <div class="container" style=${styleMap(styles)}>
@@ -586,6 +623,44 @@ export class MainScreen extends LitElement {
 
       <div class="tower-details toggle-tower-details" style=${styleMap(toggleTowerDetailsStyles)}>
         <h2>Tower Details</h2>
+
+        <button class="done" @click=${this.hideTowerDetails}>Done</button>
+        <div>Machinery</div>
+        <table>
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="bottom-left">
