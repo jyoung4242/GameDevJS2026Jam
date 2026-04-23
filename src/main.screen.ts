@@ -142,7 +142,7 @@ export class MainScreen extends LitElement {
         border-spacing: 0;
       
         td {
-          padding: 32px;
+          padding: 24px;
           border: solid 1px;
 
         }
@@ -634,9 +634,6 @@ export class MainScreen extends LitElement {
               <td></td>
               <td></td>
               <td></td>
-            </tr>
-
-            <tr>
               <td></td>
               <td></td>
               <td></td>
@@ -650,9 +647,32 @@ export class MainScreen extends LitElement {
               <td></td>
               <td></td>
               <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
             </tr>
 
             <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
