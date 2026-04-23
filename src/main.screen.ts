@@ -424,7 +424,14 @@ export class MainScreen extends LitElement {
   }
 
   public sellScrap() {
-    // TODO update bank
+    for (let [type, count] of InventoryObject.scrapItems.entries()) {
+      // TODO better bank update
+
+      InventoryObject.money += this.random.d4() * count;
+
+
+    }
+
     InventoryObject.resetScrap();
     this.requestUpdate();
   }
