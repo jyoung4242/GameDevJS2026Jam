@@ -1,13 +1,15 @@
 import { css, html, LitElement, PropertyDeclarations } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { EnemyWaveController } from "./Lib/enemyWaveController";
+import { EnemyWaveController, WeaponTypes } from "./Lib/enemyWaveController";
 import { Resources } from "./resources";
 import { TowerManager } from "./Lib/TowerManager";
 import { InventoryObject } from "./Lib/InventoryObject";
 import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 import { Random } from "excalibur";
+
+export type PartOffer = {type: WeaponTypes, display: string, price: number};
 
 @customElement("main-screen")
 export class MainScreen extends LitElement {
@@ -120,6 +122,7 @@ export class MainScreen extends LitElement {
         display: flex;
         gap: 5px;
         padding: 20px;
+        margin: 0;
         border: solid 1px black;
         border-radius: 16px;
         box-shadow:
@@ -157,6 +160,10 @@ export class MainScreen extends LitElement {
         background-color: greenyellow;
       }
 
+      .reroll:disabled {
+        background-color: rgba(239, 239, 239, 0.3);
+      }
+
       .done {
         background-color: red;
         color: white;
@@ -186,11 +193,40 @@ export class MainScreen extends LitElement {
       height: 128px;
     }
 
+    .offer {
+      width: 600px;
+      height: 170px;
+    }
+
+    .sell button {
+      margin: 5px;
+    }
+
+    .sell .content {
+      width: 600px;
+      height: 170px;
+    }
+
     .inventory {
       width: 100%;
       height: 80%;
-      h2 {
+      h2 { }
+      ul, li {
+        display: flex;
+        margin: 0;
+        list-style-type: none;
+
+        button {
+          height: 128px;
+          width: 128px;
+        }
       }
+      
+      .content {
+        width: 600px;
+        height: 170px;
+      }
+
       .inventory-content {
         flex: 1 1 auto;
         min-height: 256px;
@@ -314,7 +350,7 @@ export class MainScreen extends LitElement {
   }
 
   public showShop() {
-    Resources.ShopOpen.play(0.25);
+    Resources.ShopOpen.play(0.2);
     this.isShopVisible = true;
 
     this.requestUpdate();
@@ -365,23 +401,62 @@ export class MainScreen extends LitElement {
     }, 0);
   }
 
+  public buyPart(part: PartOffer) {
+    
+    let currentMoney = InventoryObject.money;
+    if (currentMoney >= part.price) {
+    
+      Resources.ShopPurchase.play(0.3);
+
+      const index = this.currentOffer.indexOf(part);
+      if (index > -1) {
+        this.currentOffer.splice(index, 1);
+      }
+      InventoryObject.money -= part.price;
+      InventoryObject.partItems.push(part);
+      
+
+      this.requestUpdate();
+    } else {
+
+      Resources.ShopClose.play(0.3); // TODO add nuh uh
+    }
+  }
+
   public sellScrap() {
     // TODO update bank
     InventoryObject.resetScrap();
     this.requestUpdate();
   }
-
-  public possibleItems = ["item 1", "item 2", "item 3", "item 4", "item 5", "item 6"];
-  public currentOffer: string[] = [];
+  
+  public possibleItems: PartOffer[] = [
+    {type: "burst", display: "Burst", price: 2}, 
+    {type: "missle", display: "Missle", price: 3}, 
+    {type: "beam", display: "Beam", price: 5}, 
+    {type: "drone", display: "Drone", price: 4}
+  ];
+  public currentOffer: PartOffer[] = [];
   public generateOffer() {
-    this.currentOffer = this.random.pickSet(this.possibleItems, 3);
+    this.currentOffer = this.random.pickSet(this.possibleItems, 2);
+  }
+
+  public rerollAvailable(): boolean {
+    return InventoryObject.money >= this.rerollCost;
   }
 
   public reroll() {
-    Resources.ShopPurchase.play(0.4);
-    this.rerollCost = this.rerollCost + this.rerollScale;
-    this.generateOffer();
-    this.requestUpdate();
+    let currentMoney = InventoryObject.money
+    if (this.rerollAvailable()) {
+      Resources.ShopPurchase.play(0.3);
+
+      InventoryObject.money = (currentMoney - this.rerollCost);
+
+      this.rerollCost = this.rerollCost + this.rerollScale;
+      this.generateOffer();
+      this.requestUpdate();
+    } else {
+      Resources.ShopClose.play(0.3); // TODO add nuh uh sound
+    }
   }
 
   protected render(): unknown {
@@ -428,7 +503,7 @@ export class MainScreen extends LitElement {
 
         <div class="shop-content">
           <div class="options">
-            <button class="reroll" @click=${this.reroll}>Re-Roll $${this.rerollCost}</button>
+            <button class="reroll" ?disabled=${InventoryObject.money < this.rerollCost} @click=${this.reroll}>Re-Roll $${this.rerollCost}</button>
 
             <button class="done" @click=${this.hideShop}>Done</button>
           </div>
@@ -436,7 +511,14 @@ export class MainScreen extends LitElement {
           <div class="actions">
             <div class="offer">
               ${this.currentOffer.map(offer => {
-                return html`<button class="part-offer">${offer}</button>`;
+                return html`<button 
+                  class="part-offer"
+                  .value=${offer.price}
+                  ?disabled=${InventoryObject.money < offer.price} 
+                  @click=${() => this.buyPart(offer)}>
+                  <div>${offer.display}</div>
+                  <div>$${offer.price}</div>
+                </button>`;
               })}
               <!-- <button class="part-offer">Firing Speed</button> -->
               <!-- <button class="part-offer">Damage</button> -->
@@ -449,14 +531,14 @@ export class MainScreen extends LitElement {
 
               <ul class="content">
                 ${repeat(
-                  InventoryObject.scrapItems,
-                  e => e[0],
-                  ([type, number]) => {
-                    if (number) {
-                      return html`<li>${type}:${number}</li>`;
-                    }
-                  },
-                )}
+      InventoryObject.scrapItems,
+      e => e[0],
+      ([type, number]) => {
+        if (number) {
+          return html`<li>${type}:${number}</li>`;
+        }
+      },
+    )}
               </ul>
             </div>
           </div>
@@ -471,12 +553,9 @@ export class MainScreen extends LitElement {
         <h3>Parts</h3>
         <div class="content">
           <ul>
-            ${repeat(
-              InventoryObject.scrapItems,
-              e => e[0],
-              ([type, number]) => {
-                if (number) {
-                  return html`<li>${type}:${number}</li>`;
+            ${InventoryObject.partItems.map(({type, price }) => {
+                if (price) {
+                  return html`<li><button>${type}</button></li>`;
                 }
               },
             )}

@@ -1,8 +1,10 @@
 import { EventEmitter } from "excalibur";
 import { LootCollectionEvents } from "../Actors/Loot";
+import { PartOffer } from "../main.screen";
 
 export class InventoryObject {
   static _scrapItems: Map<string, number> = new Map();
+  static _partItems: PartOffer[] = [];
   static _money: number = 0;
   static _events: EventEmitter<LootCollectionEvents>;
 
@@ -27,6 +29,10 @@ export class InventoryObject {
 
   static get scrapItems() {
     return InventoryObject._scrapItems;
+  }
+
+  static get partItems() {
+    return InventoryObject._partItems;
   }
 
   static get money() {
