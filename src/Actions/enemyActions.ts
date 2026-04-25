@@ -14,6 +14,7 @@ import {
 } from "excalibur";
 import { Tower } from "../Actors/towers";
 import { Enemy, RangedEnemy } from "../Actors/enemies";
+import { Resources } from "../resources";
 
 export class MeleeAttackAction implements Action {
   id: number = nextActionId();
@@ -91,8 +92,12 @@ export class MeleeAttackAction implements Action {
       this.isRunning = true;
       this.owner.vel = Vector.Zero;
       // flash Player
+      console.log("here in melee action", this.owner.targetTower);
+
       if (!this.owner.targetTower) return;
       this.owner.targetTower!.takeDamage(this.owner.strength);
+      console.log("playing sound");
+
       this._total = this._duration;
       this._currentDuration = this._duration;
       this._graphics.material = this._material as Material;
@@ -234,7 +239,7 @@ export class MoveCloserToTower implements Action {
   public update(elapsed: number): void {
     let owner = this._owner;
     let nodepath = this._owner.nodePath;
-    let bt = this._owner.bt;
+    // let bt = this._owner.bt;
     // console.log("in move closer", owner, nodepath);
 
     if (!this._started) {
@@ -242,7 +247,7 @@ export class MoveCloserToTower implements Action {
       if (!this._owner.nodePath || this._owner.nodePath.length == 0) {
         // console.log("resetting bt", bt);
         this.reset();
-        this._owner.bt?.reset();
+        // this._owner.bt?.reset();
         return;
       }
       this._end = this._owner.nodePath[0].pos;
@@ -328,7 +333,7 @@ export class FindClosestTower implements Action {
       if (!closestTower == null) {
         // console.log("find closest tower", towers, closestTower, closestDistance);
         debugger;
-        this.owner.bt?.reset();
+        // this.owner.bt?.reset();
         return;
       }
 

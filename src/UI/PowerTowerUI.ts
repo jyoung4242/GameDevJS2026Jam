@@ -5,6 +5,7 @@ import { UILabel, UILabelConfig } from "./UI Components/uiLabel";
 import { UIButton, UIButtonConfig } from "./UI Components/uiButton";
 import { GameField } from "../Actors/GameField";
 import { TowerManager } from "../Lib/TowerManager";
+import { Resources } from "../resources";
 
 const panelConfig: UIPanelConfig = {
   name: "PowerTowerMenu",
@@ -32,6 +33,7 @@ export class PowerTowerMenu extends UIPanel {
     this.addChild(this.lbl1);
     this.btn1 = new PTButton1();
     this.addChild(this.btn1);
+    Resources.cursorSound.play();
   }
 
   closeMenu() {
@@ -106,6 +108,7 @@ const pt1ButtonConfig: UIButtonConfig = {
     ) as OtherTower;
     (newTower as OtherTower).isPlacing = true;
     powerTowerParent.otherTowers.push(newTower);
+    Resources.selectSound.play();
     (button.parent as PowerTowerMenu).closeMenu();
   },
 };

@@ -165,9 +165,9 @@ export class OtherTower extends Tower {
     if (this._isPlacing) {
       this._isPlacing = false;
       this.pos = evt.worldPos;
+      Resources.placeTowerSound.play();
     } else {
-      this.manager.towerEmitter.emit('towerSelected', this);
-
+      this.manager.towerEmitter.emit("towerSelected", this);
     }
   };
 

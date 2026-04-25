@@ -9,7 +9,7 @@ import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 import { Random } from "excalibur";
 
-export type PartOffer = {type: WeaponTypes, display: string, price: number};
+export type PartOffer = { type: WeaponTypes; display: string; price: number };
 
 @customElement("main-screen")
 export class MainScreen extends LitElement {
@@ -140,16 +140,14 @@ export class MainScreen extends LitElement {
       table {
         border: solid 1px;
         border-spacing: 0;
-      
+
         td {
           padding: 24px;
           border: solid 1px;
-
         }
         td:hover {
           background-color: white;
         }
-
       }
 
       .done {
@@ -237,8 +235,10 @@ export class MainScreen extends LitElement {
     .inventory {
       width: 100%;
       height: 80%;
-      h2 { }
-      ul, li {
+      h2 {
+      }
+      ul,
+      li {
         display: flex;
         margin: 0;
         list-style-type: none;
@@ -248,7 +248,7 @@ export class MainScreen extends LitElement {
           width: 128px;
         }
       }
-      
+
       .content {
         width: 600px;
         height: 170px;
@@ -329,6 +329,7 @@ export class MainScreen extends LitElement {
   isShopVisible: boolean = false;
   isInventoryVisible: boolean = false;
   isTowerDetailsVisible: boolean = false;
+  private _lastHovered: EventTarget | null = null;
 
   // override to disable shadow dom for --ex-pixel-ratio
   // override createRenderRoot() { return this; }
@@ -342,6 +343,20 @@ export class MainScreen extends LitElement {
     this.top = y;
     this.requestUpdate();
   }
+
+  private _handleHover = (e: Event) => {
+    const btn = (e.target as HTMLElement).closest("button");
+    if (btn && btn !== this._lastHovered) {
+      this._lastHovered = btn;
+      Resources.cursorSound.play();
+    }
+  };
+
+  private _handleLeave = (e: Event) => {
+    if ((e.target as HTMLElement).closest("button")) {
+      this._lastHovered = null;
+    }
+  };
 
   public setDimensions(width: number, height: number) {
     this.width = width;
@@ -370,6 +385,7 @@ export class MainScreen extends LitElement {
 
   public startNextWave() {
     if (this.waveManager) {
+      Resources.selectSound.play();
       this.waveManager.startNewWave();
       this.generateOffer();
     }
@@ -395,10 +411,10 @@ export class MainScreen extends LitElement {
   }
 
   public hideInventory() {
+    Resources.selectSound.play();
     this.isInventoryVisible = false;
     this.requestUpdate();
   }
-
 
   public showTowerDetails() {
     this.isTowerDetailsVisible = true;
@@ -406,6 +422,7 @@ export class MainScreen extends LitElement {
   }
 
   public hideTowerDetails() {
+    Resources.selectSound.play();
     this.isTowerDetailsVisible = false;
     this.requestUpdate();
   }
@@ -441,10 +458,8 @@ export class MainScreen extends LitElement {
   }
 
   public buyPart(part: PartOffer) {
-    
     let currentMoney = InventoryObject.money;
     if (currentMoney >= part.price) {
-    
       Resources.ShopPurchase.play(0.3);
 
       const index = this.currentOffer.indexOf(part);
@@ -453,11 +468,9 @@ export class MainScreen extends LitElement {
       }
       InventoryObject.money -= part.price;
       InventoryObject.partItems.push(part);
-      
 
       this.requestUpdate();
     } else {
-
       Resources.ShopClose.play(0.3); // TODO add nuh uh
     }
   }
@@ -467,18 +480,17 @@ export class MainScreen extends LitElement {
       // TODO better bank update
 
       InventoryObject.money += this.random.d4() * count;
-
     }
 
     InventoryObject.resetScrap();
     this.requestUpdate();
   }
-  
+
   public possibleItems: PartOffer[] = [
-    {type: "burst", display: "Burst", price: 2}, 
-    {type: "missle", display: "Missle", price: 3}, 
-    {type: "beam", display: "Beam", price: 5}, 
-    {type: "drone", display: "Drone", price: 4}
+    { type: "burst", display: "Burst", price: 2 },
+    { type: "missle", display: "Missle", price: 3 },
+    { type: "beam", display: "Beam", price: 5 },
+    { type: "drone", display: "Drone", price: 4 },
   ];
   public currentOffer: PartOffer[] = [];
   public generateOffer() {
@@ -490,11 +502,11 @@ export class MainScreen extends LitElement {
   }
 
   public reroll() {
-    let currentMoney = InventoryObject.money
+    let currentMoney = InventoryObject.money;
     if (this.rerollAvailable()) {
       Resources.ShopPurchase.play(0.3);
 
-      InventoryObject.money = (currentMoney - this.rerollCost);
+      InventoryObject.money = currentMoney - this.rerollCost;
 
       this.rerollCost = this.rerollCost + this.rerollScale;
       this.generateOffer();
@@ -547,19 +559,33 @@ export class MainScreen extends LitElement {
 
         <div class="shop-content">
           <div class="options">
-            <button class="reroll" ?disabled=${InventoryObject.money < this.rerollCost} @click=${this.reroll}>Re-Roll $${this.rerollCost}</button>
+            <button
+              class="reroll"
+              ?disabled=${InventoryObject.money < this.rerollCost}
+              @click=${this.reroll}
+              @mouseover=${this._handleHover}
+              @mouseleave=${this._handleLeave}
+            >
+              > Re-Roll $${this.rerollCost}
+            </button>
 
-            <button class="done" @click=${this.hideShop}>Done</button>
+            <button class="done" @click=${this.hideShop} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
+              >Done
+            </button>
           </div>
 
           <div class="actions">
             <div class="offer">
               ${this.currentOffer.map(offer => {
-                return html`<button 
+                return html`<button
                   class="part-offer"
                   .value=${offer.price}
-                  ?disabled=${InventoryObject.money < offer.price} 
-                  @click=${() => this.buyPart(offer)}>
+                  ?disabled=${InventoryObject.money < offer.price}
+                  @click=${() => this.buyPart(offer)}
+                  @mouseover=${this._handleHover}
+                  @mouseleave=${this._handleLeave}
+                >
+                  >
                   <div>${offer.display}</div>
                   <div>$${offer.price}</div>
                 </button>`;
@@ -571,18 +597,18 @@ export class MainScreen extends LitElement {
 
             <div class="sell">
               <!-- Maybe things can become more valuable? -->
-              <button @click=${this.sellScrap}>Sell Scrap</button>
+              <button @click=${this.sellScrap} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>>Sell Scrap</button>
 
               <ul class="content">
                 ${repeat(
-      InventoryObject.scrapItems,
-      e => e[0],
-      ([type, number]) => {
-        if (number) {
-          return html`<li>${type}:${number}</li>`;
-        }
-      },
-    )}
+                  InventoryObject.scrapItems,
+                  e => e[0],
+                  ([type, number]) => {
+                    if (number) {
+                      return html`<li>${type}:${number}</li>`;
+                    }
+                  },
+                )}
               </ul>
             </div>
           </div>
@@ -592,17 +618,18 @@ export class MainScreen extends LitElement {
       <div class="inventory toggle-inventory" style=${styleMap(toggleInventoryStyles)}>
         <h2>Inventory</h2>
 
-        <button class="done" @click=${this.hideInventory}>Done</button>
+        <button class="done" @click=${this.hideInventory} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
+          >Done
+        </button>
 
         <h3>Parts</h3>
         <div class="content">
           <ul>
-            ${InventoryObject.partItems.map(({type, price }) => {
-                if (price) {
-                  return html`<li><button>${type}</button></li>`;
-                }
-              },
-            )}
+            ${InventoryObject.partItems.map(({ type, price }) => {
+              if (price) {
+                return html`<li><button>${type}</button></li>`;
+              }
+            })}
           </ul>
         </div>
         <h3>Scrap</h3>
@@ -624,7 +651,9 @@ export class MainScreen extends LitElement {
       <div class="tower-details toggle-tower-details" style=${styleMap(toggleTowerDetailsStyles)}>
         <h2>Tower Details</h2>
 
-        <button class="done" @click=${this.hideTowerDetails}>Done</button>
+        <button class="done" @click=${this.hideTowerDetails} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
+          >Done
+        </button>
         <div>Machinery</div>
         <table>
           <tbody>
@@ -684,9 +713,9 @@ export class MainScreen extends LitElement {
       </div>
 
       <div class="bottom-left">
-        <button @click=${this.startNextWave}>Start Wave</button>
-        <button @click=${this.showShop}>Shop</button>
-        <button @click=${this.showInventory}>Inventory</button>
+        <button @click=${this.startNextWave} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Start Wave</button>
+        <button @click=${this.showShop} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Shop</button>
+        <button @click=${this.showInventory} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Inventory</button>
         <!-- <button>Settings</button> -->
         <div class="stats">
           <div class="money">

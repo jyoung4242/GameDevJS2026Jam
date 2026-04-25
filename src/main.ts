@@ -1,6 +1,6 @@
 // main.ts
 import "./style.css";
-import { Engine, DisplayMode } from "excalibur";
+import { Engine, DisplayMode, SoundManager } from "excalibur";
 import "./main.screen";
 import { loader } from "./resources";
 import { MainScene } from "./Scenes/main";

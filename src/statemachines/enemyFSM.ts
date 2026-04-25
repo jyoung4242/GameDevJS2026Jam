@@ -2,6 +2,7 @@ import { ActionCompleteEvent, Color } from "excalibur";
 import { FindClosestTower, MoveCloserToTower } from "../Actions/enemyActions";
 import { Enemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { ExState } from "../Lib/exFSM";
+import { Resources } from "../resources";
 
 export class IdleState extends ExState {
   constructor(public owner: Enemy) {
@@ -106,6 +107,7 @@ export class AttackingTower extends ExState {
 
     if (this.owner instanceof TankEnemy) {
       this.owner.targetTower?.takeDamage(this.owner.strength);
+      Resources.tankShotSound.play();
     } else if (this.owner instanceof RangedEnemy) {
       (this.owner as RangedEnemy).fireWeapon(this.owner.targetTower!);
     }
