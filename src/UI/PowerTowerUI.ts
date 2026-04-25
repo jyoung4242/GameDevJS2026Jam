@@ -3,8 +3,6 @@ import { UIPanel, UIPanelConfig } from "./UI Components/uiPanel";
 import { OtherTower, PowerPlantTower } from "../Actors/towers";
 import { UILabel, UILabelConfig } from "./UI Components/uiLabel";
 import { UIButton, UIButtonConfig } from "./UI Components/uiButton";
-import { GameField } from "../Actors/GameField";
-import { TowerManager } from "../Lib/TowerManager";
 import { Resources } from "../resources";
 
 const panelConfig: UIPanelConfig = {

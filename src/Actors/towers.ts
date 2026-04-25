@@ -68,7 +68,10 @@ export class PowerPlantTower extends Tower {
 
     this.on("pointerup", () => {
       this.isHolding = false;
-      this.holdingRing?.kill();
+      if (this.holdingRing) {
+        this.holdingRing.kill();
+        this.holdingRing = null;
+      }
 
       if (this._holdTimer !== null) {
         clearTimeout(this._holdTimer);
@@ -97,6 +100,7 @@ export class PowerPlantTower extends Tower {
     this.isHolding = false;
     //remove holding ring
     this.holdingRing?.kill();
+    this.holdingRing = null;
   };
 
   onAdd(engine: Engine): void {
