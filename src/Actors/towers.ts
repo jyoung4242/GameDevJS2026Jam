@@ -154,7 +154,7 @@ export class OtherTower extends Tower {
 
   constructor(pos: Vector, manager: TowerManager, powerTower?: PowerPlantTower) {
     super(pos, manager);
-    this.graphics.color = Color.Orange;
+    this.graphics.use(Resources.otherTower.toSprite());
     this.powerTower = powerTower;
     this.manager = manager;
   }
