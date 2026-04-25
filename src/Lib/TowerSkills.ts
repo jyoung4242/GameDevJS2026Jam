@@ -164,6 +164,9 @@ export class BurstTowerSkill extends TowerSkill {
   }
 
   preUpdateCheck(): boolean {
+    if (this.owner instanceof OtherTower && this.owner.status == "unpowered") {
+      return false;
+    }
     let closestEnemy = FindFirstEnemeyWithinRange(this.ewc, this.owner as Tower, this);
     if (closestEnemy) {
       this.target = closestEnemy as Enemy;

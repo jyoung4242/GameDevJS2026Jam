@@ -9,7 +9,7 @@ import "../main.screen";
 import { MainScreen } from "../main.screen";
 import { GameOverPanel } from "../UI/gameoverBannerUI";
 import { OtherTower, PowerPlantTower, Tower } from "../Actors/towers";
-import { CableActor, PowerGraph } from "../Lib/powerChainsLib";
+import { CableActor, CableSegment, PowerGraph } from "../Lib/powerChainsLib";
 
 const POWER_CAPACITY = 4;
 
@@ -29,6 +29,10 @@ export class MainScene extends Scene {
 
   constructor() {
     super();
+  }
+
+  get Cables() {
+    return this._cables;
   }
 
   onInitialize(engine: Engine): void {
@@ -93,7 +97,7 @@ export class MainScene extends Scene {
     //ensure gf has no tower children
     this.gf!.reset();
     console.log("resetting level and adding children");
-
+    this.resetCables();
     this.tw!.createTower("power", new Vector(900, 500));
     if (!this.gf?.hasChild(this.tmap!)) this.gf!.addChild(this.tmap!);
     if (!this.gf?.hasChild(this.loot!)) this.gf!.addChild(this.loot!);
@@ -109,6 +113,14 @@ export class MainScene extends Scene {
     } else {
       this.firstTimeFlag = false;
     }
+  }
+
+  resetCables() {
+    this._graph.reset();
+    this._cables.forEach(c => c.kill());
+    this._cables = [];
+    // get segments
+    this.actors.filter(a => a instanceof CableSegment).forEach(a => a.kill());
   }
 
   onDeactivate(context: SceneActivationContext) {

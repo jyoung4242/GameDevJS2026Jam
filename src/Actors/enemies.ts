@@ -16,6 +16,7 @@ import {
   FindingTargetSegment,
   AttackingSegment,
   ApproachingSegment,
+  FastIdleState,
 } from "../statemachines/enemyFSM";
 import { CableSegment } from "../Lib/powerChainsLib";
 import { AttackSegment, FindClosestSegment } from "../Actions/enemyActions";
@@ -263,7 +264,7 @@ export class FastEnemy extends Enemy {
   onInitialize(engine: Engine): void {
     super.onInitialize(engine);
     this.fsm.register(
-      new IdleState(this),
+      new FastIdleState(this),
       new FindingTargetSegment(this),
       new AttackingSegment(this, 100),
       new ApproachingSegment(this),
@@ -272,7 +273,9 @@ export class FastEnemy extends Enemy {
 
   onAdd(engine: Engine): void {
     this.nodePath = [];
-    this.fsm.set("Idle");
+    console.log("fast onAdd");
+
+    this.fsm.set("FastIdle");
   }
 
   findNearestSegment() {
@@ -287,6 +290,12 @@ export class FastEnemy extends Enemy {
       }
     }
     return nearest;
+  }
+
+  targetRangeCheckSegment() {
+    if (!this.targetSegment) return false;
+    //return false if out of range, return true if it is less than range
+    return this.targetSegment.pos.distance(this.pos) < this.range;
   }
 
   onPreUpdate(engine: Engine, elapsed: number): void {

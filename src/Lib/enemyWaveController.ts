@@ -8,7 +8,7 @@ import { EndOfWavePanel } from "../UI/EndOfWaveUI";
 
 const POOL_SIZE = 100;
 const STARTING_SPAWN_INTERVAL = 1000; // in milliseconds
-const STARTING_NUM_ENEMIES = 7;
+const STARTING_NUM_ENEMIES = 10;
 
 export type WaveState = "idle" | "active" | "cleanup" | "gameover";
 export type EnemyTypes = "tank" | "fast" | "ranged";
@@ -241,7 +241,7 @@ export class EnemyWaveController {
   }
 
   chooseEnemeyType(): EnemyTypes {
-    return this.rng.pickOne(["tank", "ranged"]); //["fast", "tank", "ranged"]
+    return this.rng.pickOne(["fast"]); //["fast", "tank", "ranged"]
   }
 
   returnEnemyToPool(enemy: Enemy) {

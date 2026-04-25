@@ -1,5 +1,5 @@
 import { ActionCompleteEvent, Color } from "excalibur";
-import { FindClosestTower, MoveCloserToTower } from "../Actions/enemyActions";
+import { FindClosestSegment, FindClosestTower, MoveCloserToSegment, MoveCloserToTower } from "../Actions/enemyActions";
 import { Enemy, FastEnemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { ExState } from "../Lib/exFSM";
 
@@ -20,6 +20,26 @@ export class IdleState extends ExState {
     // console.log("in idle", this.owner.targetTower, this.owner.nodePath.length);
 
     if (this.owner.targetTower == null && this.owner.nodePath.length == 0) this.owner.fsm.set("FindingTower");
+  }
+}
+
+export class FastIdleState extends ExState {
+  constructor(public owner: Enemy) {
+    super("FastIdle");
+  }
+
+  enter(_previous: ExState | null, ..._params: any): void | Promise<void> {
+    // console.log("entering Fast Idle");
+  }
+
+  exit(_next: ExState | null, ..._params: any): void | Promise<void> {
+    // console.log("exiting Fast Idle");
+  }
+
+  update(..._params: any): void | Promise<void> {
+    // console.log("in idle", this.owner.targetTower, this.owner.nodePath.length);
+
+    if (this.owner.targetTower == null && this.owner.nodePath.length == 0) this.owner.fsm.set("FindingSegment");
   }
 }
 
@@ -52,25 +72,25 @@ export class FindingTargetTower extends ExState {
 
 export class FindingTargetSegment extends ExState {
   constructor(public owner: Enemy) {
-    super("FindingPath");
+    super("FindingSegment");
   }
 
   enter(_previous: ExState | null, ..._params: any): void | Promise<void> {
-    // console.log("entering FindingTower");
+    // console.log("entering FindingSegment");
     this.owner.on("actioncomplete", this.actionHandler);
-    this.owner.actions.runAction(new FindClosestTower(this.owner.scene!, this.owner));
+    this.owner.actions.runAction(new FindClosestSegment(this.owner.scene!, this.owner));
   }
 
   exit(_next: ExState | null, ..._params: any): void | Promise<void> {
     this.owner.off("actioncomplete", this.actionHandler);
-    // console.log("exiting FindingTower");
+    // console.log("exiting FindingSegment");
   }
 
   actionHandler = (evt: ActionCompleteEvent) => {
     // if correct action
     // move to next state
-    if (evt.action instanceof FindClosestTower) {
-      this.owner.fsm.set("ApproachingTower");
+    if (evt.action instanceof FindClosestSegment) {
+      this.owner.fsm.set("ApproachingSegment");
     }
   };
 
@@ -107,19 +127,19 @@ export class ApproachingTower extends ExState {
 }
 
 export class ApproachingSegment extends ExState {
-  constructor(public owner: Enemy) {
+  constructor(public owner: FastEnemy) {
     super("ApproachingSegment");
   }
 
   enter(_previous: ExState | null, ..._params: any): void | Promise<void> {
-    // console.log("entering ApproachingTower");
+    // console.log("entering ApproachingSegment");
     this.owner.on("actioncomplete", this.actionHandler);
-    this.owner.actions.runAction(new MoveCloserToTower(this.owner, this.owner.speed));
+    this.owner.actions.runAction(new MoveCloserToSegment(this.owner, this.owner.speed));
   }
 
   actionHandler = (evt: ActionCompleteEvent) => {
-    if (evt.action instanceof MoveCloserToTower) {
-      if (this.owner.targetRangeCheck()) {
+    if (evt.action instanceof MoveCloserToSegment) {
+      if (this.owner.targetRangeCheckSegment()) {
         this.owner.fsm.set("AttackingSegment");
       } else {
         this.owner.fsm.set("ApproachingSegment");
@@ -129,7 +149,7 @@ export class ApproachingSegment extends ExState {
 
   exit(_next: ExState | null, ..._params: any): void | Promise<void> {
     this.owner.off("actioncomplete", this.actionHandler);
-    // console.log("exiting ApproachingTower");
+    // console.log("exiting ApproachingSegment");
   }
 
   update(..._params: any): void | Promise<void> {}
@@ -189,11 +209,12 @@ export class AttackingSegment extends ExState {
     public owner: Enemy,
     public cooldown: number,
   ) {
-    super("Attack Segment");
+    super("AttackingSegment");
   }
 
   enter(_previous: ExState | null, ..._params: any): void | Promise<void> {
     this.currentTik = 0;
+    // console.log("attacking segment");
 
     if (this.owner instanceof FastEnemy) {
       this.owner.targetSegment?.takeDamage(this.owner.strength);
@@ -203,6 +224,7 @@ export class AttackingSegment extends ExState {
 
   exit(_next: ExState | null, ..._params: any): void | Promise<void> {
     this.currentTik = 0;
+    // console.log("leaving attack segment");
   }
 
   towerCheck(): boolean {
