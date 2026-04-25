@@ -3,6 +3,7 @@ import { OtherTower, Tower } from "../Actors/towers";
 import { EnemyWaveController } from "./enemyWaveController";
 import { Enemy } from "../Actors/enemies";
 import { LaserBeam, Missle, TowerBurst, TowerDrone } from "../Actors/SkillActors";
+import { sndPlugin } from "../main";
 
 export type ProgressionMapEntry = {
   skillStrength: number;
@@ -161,6 +162,7 @@ export class BurstTowerSkill extends TowerSkill {
       burst.parent.removeChild(burst);
     }
     this.ewc.gameField.addChild(burst);
+    sndPlugin.playSound("laser");
   }
 
   preUpdateCheck(): boolean {

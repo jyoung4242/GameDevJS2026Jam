@@ -1,11 +1,19 @@
 // main.ts
 import "./style.css";
-import { Engine, DisplayMode, SoundManager } from "excalibur";
+import { Engine, DisplayMode } from "excalibur";
 import "./main.screen";
 import { loader } from "./resources";
 import { MainScene } from "./Scenes/main";
 import { GameOverScene } from "./Scenes/gameover";
 import { TitleScene } from "./Scenes/title";
+import { JsfxrResource } from "@excaliburjs/plugin-jsfxr";
+import { sounds } from "./Assets/sounds";
+
+export let sndPlugin = new JsfxrResource();
+sndPlugin.init(); //initializes the JSFXR library
+for (const sound in sounds) {
+  sndPlugin.loadSoundConfig(sound, sounds[sound]);
+}
 
 const game = new Engine({
   canvasElementId: "game",

@@ -9,6 +9,7 @@ import { BurstShells, DroneEngine, LaserOptics, MissleChassis, PowerCell, PowerC
 import { PositionNodeData } from "../Lib/mapGeneration";
 import { ExFSM } from "../Lib/exFSM";
 import { ApproachingTower, AttackingTower, CalculatingPathToTower, FindingTargetTower, IdleState } from "../statemachines/enemyFSM";
+import { sndPlugin } from "../main";
 
 export abstract class Enemy extends Actor {
   fsm: ExFSM;
@@ -86,6 +87,7 @@ export abstract class Enemy extends Actor {
 
   takeDamage(damageAmount: number) {
     this.hp -= damageAmount;
+    sndPlugin.playSound("enemyHit");
     if (this.hp <= 0) {
       this.get(LootComponent).dropOne(this.gameField, this.pos);
       this.waveManager.returnEnemyToPool(this);
@@ -235,6 +237,7 @@ export class RangedEnemy extends Enemy {
   }
 
   fireWeapon(target: Tower) {
+    sndPlugin.playSound("enemyShoot");
     let burst = this.waveManager.gameField.addChild(new EnemyBurst(this, target));
     //reset burst position to tower position
   }

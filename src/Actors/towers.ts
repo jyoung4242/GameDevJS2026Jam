@@ -7,6 +7,7 @@ import { PowerTowerMenu } from "../UI/PowerTowerUI";
 import { WeaponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
 import { HoldRingActor } from "./HoldRing";
+import { sndPlugin } from "../main";
 
 export const STARTING_TOWER_CAPACITY = 3;
 
@@ -26,6 +27,7 @@ export abstract class Tower extends Actor {
     this.tw.towerEmitter.emit("towerDamaged", new TowerDamagedEvent(this));
     //renew health as a part of the demo
     if (this.healthBar.currentHealth <= 0) {
+      sndPlugin.playSound("towerdeath");
       this.tw.destroyTower(this);
       this.kill();
     }

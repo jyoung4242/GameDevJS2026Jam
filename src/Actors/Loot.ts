@@ -1,6 +1,7 @@
 import { Actor, Vector, Color, CollisionType, ScreenElement, Engine, vec, GameEvent, EventEmitter } from "excalibur";
 import { lootColliderGroup } from "../CollisionGroups";
 import { Resources } from "../resources";
+import { sndPlugin } from "../main";
 
 export type LootCollectionEvents = {
   LootCollected: LootCollectedEvent;
@@ -67,8 +68,10 @@ export abstract class Loot extends Actor {
         pos: lootCollector?.pos ?? Vector.Zero,
       })
       .callMethod(() => {
+        sndPlugin.playSound("pickup");
         lootCollector?.eventEmitter.emit("LootCollected", this);
       })
+
       .die();
   }
 }
