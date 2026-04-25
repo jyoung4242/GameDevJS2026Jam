@@ -1,4 +1,4 @@
-import { Actor, Collider, CollisionContact, CollisionType, Color, Engine, Graph, PositionNode, Side, Vector } from "excalibur";
+import { Actor, Collider, CollisionContact, CollisionType, Color, Engine, Graph, PositionNode, Side, vec, Vector } from "excalibur";
 import { GameField } from "./GameField";
 import { TowerDestroyedEvent, TowerManager } from "../Lib/TowerManager";
 import { enemyBurstColliderGroup, enemyColliderGroup } from "../CollisionGroups";
@@ -10,6 +10,8 @@ import { PositionNodeData } from "../Lib/mapGeneration";
 import { ExFSM } from "../Lib/exFSM";
 import { ApproachingTower, AttackingTower, CalculatingPathToTower, FindingTargetTower, IdleState } from "../statemachines/enemyFSM";
 import { sndPlugin } from "../main";
+import { AnimationComponent } from "../Components/AnimationComponent";
+import { RangedEnemyAnimation } from "../Animations/enemyAnimations";
 
 export abstract class Enemy extends Actor {
   fsm: ExFSM;
@@ -26,6 +28,8 @@ export abstract class Enemy extends Actor {
   speed: number = 1;
   // bt: BehaviorTreeComponent | null = null;
   range: number = 1;
+  direction: "Left" | "Right" = "Right";
+  oldDirection: "Left" | "Right" = "Right";
 
   constructor(
     waveManager: EnemyWaveController,
@@ -184,6 +188,8 @@ export class TankEnemy extends Enemy {
   }
 }
 export class RangedEnemy extends Enemy {
+  ac: AnimationComponent<keyof typeof RangedEnemyAnimation>;
+
   constructor(
     waveManager: EnemyWaveController,
     gamefield: GameField,
@@ -192,13 +198,18 @@ export class RangedEnemy extends Enemy {
     navmap: Graph<PositionNodeData>,
   ) {
     super(waveManager, gamefield, TowerManager, pos, navmap, "circle");
-    this.graphics.color = Color.Blue;
+    this.graphics.color = Color.Transparent;
     this.enemyType = "ranged";
     this.speed = 80; //30
     this.strength = 5;
     this.hp = 8;
     this.hpMax = 8;
     this.range = 300;
+
+    this.ac = new AnimationComponent(RangedEnemyAnimation);
+    this.addComponent(this.ac);
+    this.ac.set("IdleLeft");
+    this.graphics.current!.scale = vec(3, 3);
 
     this.fsm.register(
       new IdleState(this),
@@ -243,6 +254,10 @@ export class RangedEnemy extends Enemy {
   }
 
   onPreUpdate(engine: Engine, elapsed: number): void {
+    if (this.vel.x != 0) {
+      this.direction = this.vel.x > 0 ? "Right" : "Left";
+    }
+
     this.fsm.update();
   }
 }

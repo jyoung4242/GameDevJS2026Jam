@@ -3,6 +3,8 @@ import { FindClosestTower, MoveCloserToTower } from "../Actions/enemyActions";
 import { Enemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { ExState } from "../Lib/exFSM";
 import { Resources } from "../resources";
+import { Tower } from "../Actors/towers";
+import { AnimationComponent } from "../Components/AnimationComponent";
 
 export class IdleState extends ExState {
   constructor(public owner: Enemy) {
@@ -64,6 +66,8 @@ export class CalculatingPathToTower extends ExState {
 }
 
 export class ApproachingTower extends ExState {
+  startingDirection: "Left" | "Right" = "Right";
+  currentDirection: "Left" | "Right" = "Right";
   constructor(public owner: Enemy) {
     super("ApproachingTower");
   }
@@ -72,6 +76,10 @@ export class ApproachingTower extends ExState {
     // console.log("entering ApproachingTower");
     this.owner.on("actioncomplete", this.actionHandler);
     this.owner.actions.runAction(new MoveCloserToTower(this.owner, this.owner.speed));
+    let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
+    let direction = this.owner.direction;
+    let animName = `Walk${direction}` as "WalkLeft" | "WalkRight";
+    if (animComp) animComp.set(animName);
   }
 
   actionHandler = (evt: ActionCompleteEvent) => {
@@ -89,11 +97,21 @@ export class ApproachingTower extends ExState {
     // console.log("exiting ApproachingTower");
   }
 
-  update(..._params: any): void | Promise<void> {}
+  update(..._params: any): void | Promise<void> {
+    // let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
+    // let direction = this.owner.direction;
+    // if (direction != this.currentDirection) {
+    //   this.currentDirection = direction;
+    //   let animName = `Walk${direction}` as "WalkLeft" | "WalkRight";
+    //   if (animComp) animComp.set(animName);
+    // }
+  }
 }
 
 export class AttackingTower extends ExState {
   currentTik: number = 0;
+  startingDirection: "Left" | "Right" = "Right";
+  currentDirection: "Left" | "Right" = "Right";
   constructor(
     public owner: Enemy,
     public cooldown: number,
@@ -109,10 +127,14 @@ export class AttackingTower extends ExState {
       this.owner.targetTower?.takeDamage(this.owner.strength);
       Resources.tankShotSound.play();
     } else if (this.owner instanceof RangedEnemy) {
+      let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
+      let direction = this.owner.direction;
+      let animName = `Attack${direction}` as "AttackLeft" | "AttackRight";
+      if (animComp) animComp.set(animName);
       (this.owner as RangedEnemy).fireWeapon(this.owner.targetTower!);
     }
 
-    this.owner.actions.flash(Color.White, this.cooldown * 16);
+    if (this.owner instanceof TankEnemy) this.owner.actions.flash(Color.White, this.cooldown * 16);
   }
 
   exit(_next: ExState | null, ..._params: any): void | Promise<void> {
@@ -128,6 +150,14 @@ export class AttackingTower extends ExState {
   }
 
   update(..._params: any): void | Promise<void> {
+    // let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
+    // let direction = this.owner.direction;
+    // if (direction != this.currentDirection) {
+    //   this.currentDirection = direction;
+    //   let animName = `Attack${direction}` as "AttackLeft" | "AttackRight";
+    //   if (animComp) animComp.set(animName);
+    // }
+
     this.currentTik++;
     if (this.currentTik >= this.cooldown) {
       // if tower still alive, redo state

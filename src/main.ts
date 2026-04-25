@@ -7,7 +7,7 @@ import { MainScene } from "./Scenes/main";
 import { GameOverScene } from "./Scenes/gameover";
 import { TitleScene } from "./Scenes/title";
 import { JsfxrResource } from "@excaliburjs/plugin-jsfxr";
-import { sounds } from "./Assets/sounds";
+import { sounds } from "./Assets/sounds/sounds";
 
 export let sndPlugin = new JsfxrResource();
 sndPlugin.init(); //initializes the JSFXR library
