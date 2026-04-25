@@ -5,6 +5,7 @@ import "./main.screen";
 import { loader } from "./resources";
 import { MainScene } from "./Scenes/main";
 import { GameOverScene } from "./Scenes/gameover";
+import { TitleScene } from "./Scenes/title";
 
 const game = new Engine({
   canvasElementId: "game",
@@ -14,10 +15,11 @@ const game = new Engine({
   pixelRatio: 2,
   pixelArt: true,
   scenes: {
+    title: new TitleScene(),
     main: new MainScene(),
     gameover: new GameOverScene(),
   },
 });
 
 await game.start(loader);
-game.goToScene("main");
+game.goToScene("title");

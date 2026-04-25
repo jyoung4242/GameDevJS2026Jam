@@ -8,6 +8,7 @@ import { LootCollector } from "../Actors/Loot";
 import "../main.screen";
 import { MainScreen } from "../main.screen";
 import { GameOverPanel } from "../UI/gameoverBannerUI";
+import { Resources } from "../resources";
 
 export class MainScene extends Scene {
   rng: Random = new Random();
@@ -48,7 +49,6 @@ export class MainScene extends Scene {
       throw new Error("Main Screen not found");
     }
 
-
     let topLeft = engine.screen.screenToPageCoordinates(vec(0, 0));
     this.mainScreenEl.setPos(topLeft.x, topLeft.y);
     this.mainScreenEl.setRandom(this.rng);
@@ -58,7 +58,6 @@ export class MainScene extends Scene {
     this.mainScreenEl.setPixelRatio(engine.pixelRatio);
     this.mainScreenEl.setWaveManager(this.ewc);
     this.mainScreenEl.setTowerManager(this.tw);
-
 
     // TODO DELETE ME
     // this.mainScreenEl.showTowerDetails();
