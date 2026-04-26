@@ -33,7 +33,7 @@ const TitleButtonConfig: UIButtonConfig = {
   name: "titleButton",
   width: 200,
   height: 80,
-  pos: vec(200, 280),
+  pos: vec(200, 290),
   z: 2,
   colors: {
     mainStarting: Color.fromHex("#c78635c8"),
@@ -54,7 +54,7 @@ const TitleButtonConfig: UIButtonConfig = {
     }),
   },
   callback: (evt: PointerEvent | KeyEvent, button: UIButton) => {
-    Resources.selectSound.play(.3);
+    Resources.selectSound.play(0.3);
     button.scene?.engine.goToScene("main");
   },
 };
@@ -98,6 +98,9 @@ Controls:
 Power Tower -> click and hold to bring up menu, then select Other tower to place tower
 Click to select placement of Tower, you cannot place on stone (gray tiles)
 
+Upgrading Towers: Select tower to upgrade
+Upgrade to by moving purchased parts into tower inventory
+
 Wave starts when you click 'Start Wave' button
 `;
 
@@ -106,7 +109,7 @@ const howToPlay: UILabelConfig = {
   name: "howToPlay",
   width: 600,
   height: 400,
-  pos: vec(15, 80),
+  pos: vec(15, 76),
   z: 2,
   colors: {
     backgroundStarting: Color.Transparent,
