@@ -211,6 +211,8 @@ export class MainScreen extends LitElement {
           position: relative;
           padding: 24px;
           border: solid 1px;
+          width: 50px;
+          height: 50px;
         }
 
         td.drop-ok {
@@ -896,11 +898,11 @@ export class MainScreen extends LitElement {
               @mouseover=${this._handleHover}
               @mouseleave=${this._handleLeave}
             >
-              > Re-Roll $${this.rerollCost}
+              Re-Roll $${this.rerollCost}
             </button>
 
             <button class="done" @click=${this.hideShop} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
-              >Done
+              Done
             </button>
           </div>
 
@@ -915,7 +917,6 @@ export class MainScreen extends LitElement {
                   @mouseover=${this._handleHover}
                   @mouseleave=${this._handleLeave}
                 >
-                  >
                   <div>${offer.display}</div>
                   <div>$${offer.price}</div>
                 </button>`;
@@ -927,7 +928,7 @@ export class MainScreen extends LitElement {
 
             <div class="sell">
               <!-- Maybe things can become more valuable? -->
-              <button @click=${this.sellScrap} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>>Sell Scrap</button>
+              <button @click=${this.sellScrap} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Sell Scrap</button>
 
               <ul class="content">
                 ${repeat(
@@ -949,7 +950,7 @@ export class MainScreen extends LitElement {
         <h2>Inventory</h2>
 
         <button class="done" @click=${this.hideInventory} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
-          >Done
+          Done
         </button>
 
         <h3>Parts</h3>
@@ -982,7 +983,7 @@ export class MainScreen extends LitElement {
         <h2>Tower Details</h2>
 
         <button class="done" @click=${this.hideTowerDetails} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
-          >Done
+          Done
         </button>
         <h3>Machinery</h3>
         <table>
