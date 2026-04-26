@@ -85,7 +85,19 @@ export class PowerPlantTower extends Tower {
       }
     });
 
+    const gameMain = document.getElementsByTagName('main')[0];
+    this.on("pointerenter", () => {
+      gameMain.style.cursor = 'pointer';
+
+    });
+
+
+    this.on("pointermove", () => {
+      gameMain.style.cursor = 'pointer';
+    });
+
     this.on("pointerleave", () => {
+      gameMain.style.cursor = 'auto';
       if (this._holdTimer !== null) {
         clearTimeout(this._holdTimer);
         this._holdTimer = null;
@@ -94,7 +106,7 @@ export class PowerPlantTower extends Tower {
     });
   }
 
-  onTap = () => {};
+  onTap = () => { };
   onHold = () => {
     this.ui = new PowerTowerMenu(this);
     this.isUIShowing = true;
@@ -176,6 +188,23 @@ export class OtherTower extends Tower {
       this.manager.towerEmitter.emit("towerSelected", this);
     }
   };
+
+  onInitialize(engine: Engine): void {
+    const gameMain = document.getElementsByTagName('main')[0];
+    this.on("pointerenter", () => {
+      gameMain.style.cursor = 'pointer';
+
+    });
+
+    this.on("pointermove", () => {
+      gameMain.style.cursor = 'pointer';
+    });
+
+    this.on("pointerleave", () => {
+      gameMain.style.cursor = 'auto';
+    });
+
+  }
 
   addSkill(skillString: WeaponTypes) {
     //get current skill
