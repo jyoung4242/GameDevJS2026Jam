@@ -879,7 +879,6 @@ export class MainScreen extends LitElement {
       <div class="header">
         <div class="top-right">
           <h2>Wave: ${this.waveManager?.level}</h2>
-          <h3><span>♥️</span><span>${this.health}</span></h3>
         </div>
       </div>
 
@@ -1053,7 +1052,7 @@ export class MainScreen extends LitElement {
       <div class="bottom-left">
         <button @click=${this.startNextWave} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Start Wave</button>
         <button @click=${this.showShop} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Shop</button>
-        <button @click=${this.showInventory} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Inventory</button>
+        <!-- <button @click=${this.showInventory} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>Inventory</button> -->
         <!-- <button>Settings</button> -->
         <div class="stats">
           <div class="money">

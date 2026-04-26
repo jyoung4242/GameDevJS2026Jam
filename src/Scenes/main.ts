@@ -68,6 +68,11 @@ export class MainScene extends Scene {
     this.tw.towerEmitter.on("towerSelected", (tower) => this.mainScreenEl?.showTowerDetails(tower));
     this.loot.eventEmitter.on("LootCollected", () => this.mainScreenEl!.requestUpdate());
     this.loot.eventEmitter.on("Money", () => this.mainScreenEl!.requestUpdate());
+
+    this.ewc.waveEmitter.on('waveEnd', () => {
+      this.mainScreenEl!.generateOffer();
+      this.mainScreenEl!.rerollCost = 2;
+    });
     engine.screen.events.on("resize", () => {
       const topLeft = engine.screen.screenToPageCoordinates(vec(0, 0));
       this.mainScreenEl!.setPos(topLeft.x, topLeft.y);
