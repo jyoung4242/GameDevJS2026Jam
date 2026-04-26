@@ -196,6 +196,17 @@ export class MainScreen extends LitElement {
           padding: 24px;
           border: solid 1px;
         }
+
+        td.drop-ok {
+          background: rgba(74, 226, 100, 0.25);
+          outline: 1px solid #3db85a;
+        }
+
+        td.drop-blocked {
+          background: rgba(226, 74, 74, 0.25);
+          outline: 1px solid #c0392b;
+        }
+
         td:hover {
           background-color: white;
         }
@@ -387,6 +398,8 @@ export class MainScreen extends LitElement {
   private _dragOffset: { x: number; y: number; };
   private _boundMouseMove: (e: MouseEvent, part: PartOffer) => void;
   private _boundMouseUp: (e: MouseEvent, part: PartOffer) => void;
+  private _occupiedCells: Set<string>;
+  private _lastHighlighted: any;
 
   constructor() {
     super();
@@ -395,6 +408,7 @@ export class MainScreen extends LitElement {
     this._dragOffset = { x: 0, y: 0 };
     this._boundMouseMove = this.partMouseMove.bind(this);
     this._boundMouseUp = this.partMouseUp.bind(this);
+    this._occupiedCells = new Set(); // tracks "row,col" strings
 
   }
   // override to disable shadow dom for --ex-pixel-ratio
@@ -618,9 +632,55 @@ export class MainScreen extends LitElement {
     if (!this._dragEl) return;
     this._dragEl.style.left = (e.clientX - this._dragOffset.x) + 'px';
     this._dragEl.style.top = (e.clientY - this._dragOffset.y) + 'px';
+
+
+    // Highlight drop target validity
+    const el = this.shadowRoot!.elementFromPoint(e.clientX, e.clientY);
+    const td = el?.closest('td');
+    const table = td?.closest('table');
+
+    // Clear previous highlight
+    if (this._lastHighlighted) {
+      this._lastHighlighted.forEach((c: any) => c.classList.remove('drop-ok', 'drop-blocked'));
+      this._lastHighlighted = null;
+    }
+
+    if (!td || !table) return;
+
+    const { width, height } = this._dragData;
+    const rows = Array.from(table.querySelectorAll('tr'));
+    let originRow = -1, originCol = -1;
+
+    rows.forEach((tr, r) => {
+      Array.from(tr.cells).forEach((cell, c) => {
+        if (cell === td) { originRow = r; originCol = c; }
+      });
+    });
+
+    if (originRow === -1) return;
+
+    let blocked = false;
+    const targets = [];
+
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        const cell = rows[r]?.cells[c];
+        if (!cell || this._occupiedCells.has(`${r},${c}`)) { blocked = true; break; }
+        targets.push(cell);
+      }
+      if (blocked) break;
+    }
+
+    const cls = blocked ? 'drop-blocked' : 'drop-ok';
+    targets.forEach(c => c.classList.add(cls));
+    this._lastHighlighted = targets;
   }
 
   partMouseUp(e: MouseEvent, part: PartOffer) {
+    if (this._lastHighlighted) {
+      this._lastHighlighted.forEach((c: any) => c.classList.remove('drop-ok', 'drop-blocked'));
+      this._lastHighlighted = null;
+    }
     document.removeEventListener('mousemove', this._boundMouseMove as any);
     document.removeEventListener('mouseup', this._boundMouseUp as any);
 
@@ -642,40 +702,54 @@ export class MainScreen extends LitElement {
     const table = td.closest('table');
     if (!table) return;
 
-    // Figure out col/row span needed
     const { width, height, type } = this._dragData;
-    const colSpan = width;   // each cell = 50px, button width = 50*width
-    const rowSpan = height;
+    const rows = Array.from(table.querySelectorAll('tr'));
 
-    // Place into the cell
+    // Find origin cell position
+    let originRow = -1, originCol = -1;
+    rows.forEach((tr, r) => {
+      Array.from(tr.cells).forEach((cell, c) => {
+        if (cell === td) { originRow = r; originCol = c; }
+      });
+    });
+
+    if (originRow === -1) return;
+
+    // Check every cell the part would cover
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        const key = `${r},${c}`;
+        if (this._occupiedCells.has(key) || !rows[r]?.cells[c]) {
+          return; // blocked — abort drop
+        }
+      }
+    }
+
+    // All clear — mark cells as occupied
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        this._occupiedCells.add(`${r},${c}`);
+      }
+    }
+
+    // Place the button
     const placed = document.createElement('button');
     placed.textContent = type;
     placed.className = 'placed-part';
     placed.style.width = (50 * width) + 'px';
     placed.style.height = (50 * height) + 'px';
 
-    td.colSpan = colSpan;
-    td.rowSpan = rowSpan;
+    td.colSpan = width;
+    td.rowSpan = height;
     td.appendChild(placed);
 
-    // Hide cells that are now covered (basic coverage)
-    this._coverCells(table, td, colSpan, rowSpan);
+    this._coverCells(rows, originRow, originCol, width, height, td);
   }
 
-  _coverCells(table: HTMLTableElement, originTd: HTMLTableCellElement, colSpan: number, rowSpan: number) {
-    const rows = Array.from(table.querySelectorAll('tr'));
-    let originRow = -1, originCol = -1;
-
-    // Find the origin cell's row and col index
-    rows.forEach((tr, r) => {
-      Array.from(tr.cells).forEach((cell, c) => {
-        if (cell === originTd) { originRow = r; originCol = c; }
-      });
-    });
-
+  _coverCells(rows: HTMLTableRowElement[], originRow: number, originCol: number, colSpan: number, rowSpan: number, originTd: HTMLTableCellElement) {
     for (let r = originRow; r < originRow + rowSpan; r++) {
       for (let c = originCol; c < originCol + colSpan; c++) {
-        if (r === originRow && c === originCol) continue; // skip origin
+        if (r === originRow && c === originCol) continue;
         const cell = rows[r]?.cells[c];
         if (cell) cell.style.display = 'none';
       }
