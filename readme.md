@@ -5,6 +5,13 @@
 A thrilling tower defense game built with [Excalibur.js](https://excaliburjs.com/) for the GameDev.js Jam 2026. Defend your base
 against relentless waves of enemies using strategic tower placement and powerful upgrades!
 
+## Screenshots
+
+<img src="./screenshot1.png" style="width: 250px; height:auto"  />
+<img src="./screenshot2.png" style="width: 250px; height:auto"  />
+<img src="./screenshot3.png" style="width: 250px; height:auto"  />
+<img src="./screenshot4.png" style="width: 250px; height:auto"  />
+
 ## Game Overview
 
 In **THE LAST STAND**, you command a power plant that generates energy to deploy various defensive towers. Protect your base from
