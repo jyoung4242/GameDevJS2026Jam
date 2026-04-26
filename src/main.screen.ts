@@ -180,10 +180,15 @@ export class MainScreen extends LitElement {
       opacity: 0;
       top: 0;
 
+      .content {
+        height: 180px;
+      }
+
 
       ul,li {
         display: flex;
         margin: 0;
+        padding: 0;
         list-style-type: none;
       }
 
@@ -618,8 +623,8 @@ export class MainScreen extends LitElement {
     this._dragEl = ghost;
     this._dragData = part;
     this._dragOffset = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - rect.left - btn.clientWidth/2,
+      y: e.clientY - rect.top  - btn.clientHeight/2,
     };
 
     document.addEventListener('mousemove', this._boundMouseMove as any);
