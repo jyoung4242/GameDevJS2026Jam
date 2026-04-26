@@ -26,7 +26,7 @@ export class MuteManager {
     Resources.sprocketSound.stop();
   }
   static unmute() {
-    Resources.sprocketSound.play();
+    Resources.sprocketSound.play(.3);
   }
 
   static get muteState(): boolean {

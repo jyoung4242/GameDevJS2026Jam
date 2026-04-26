@@ -57,7 +57,7 @@ sounds["laser"] = {
   p_lpf_resonance: 0,
   p_hpf_freq: 0.13340270907280194,
   p_hpf_ramp: 0,
-  sound_vol: 0.3,
+  sound_vol: 0.1,
   sample_rate: 44100,
   sample_size: 16,
 };
@@ -87,7 +87,7 @@ sounds["enemyHit"] = {
   p_lpf_resonance: 0.8716190951609633,
   p_hpf_freq: 0.000005968319004626838,
   p_hpf_ramp: -0.3469087761229566,
-  sound_vol: 0.2,
+  sound_vol: 0.1,
   sample_rate: 44100,
   sample_size: 16,
 };
@@ -147,7 +147,7 @@ sounds["enemyShoot"] = {
   p_lpf_resonance: 0,
   p_hpf_freq: 0.15500604136505447,
   p_hpf_ramp: 0,
-  sound_vol: 0.25,
+  sound_vol: 0.1,
   sample_rate: 44100,
   sample_size: 16,
 };

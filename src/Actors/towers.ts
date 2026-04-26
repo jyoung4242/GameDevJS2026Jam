@@ -185,7 +185,7 @@ export class OtherTower extends Tower {
     if (this._isPlacing) {
       this._isPlacing = false;
       this.pos = evt.worldPos;
-      Resources.placeTowerSound.play();
+      Resources.placeTowerSound.play(.1);
     } else {
       this.manager.towerEmitter.emit("towerSelected", this);
     }

@@ -204,6 +204,8 @@ export class MainScreen extends LitElement {
       table {
         border: solid 1px;
         border-spacing: 0;
+        width: calc(7 * 50px);
+        height: calc(4 * 50px);
 
         td {
           position: relative;

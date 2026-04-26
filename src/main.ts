@@ -30,7 +30,7 @@ export class MuteableEngine extends Engine {
     if (state) {
       Resources.sprocketSound.stop();
     } else {
-      Resources.sprocketSound.play();
+      Resources.sprocketSound.play(.1);
     }
   }
 
