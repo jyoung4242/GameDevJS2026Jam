@@ -9,6 +9,8 @@ import "../main.screen";
 import { MainScreen } from "../main.screen";
 import { GameOverPanel } from "../UI/gameoverBannerUI";
 import { Resources } from "../resources";
+import { MuteManager, UIMute } from "../UI/muteUI";
+import { MuteableEngine } from "../main";
 
 export class MainScene extends Scene {
   rng: Random = new Random();
@@ -33,7 +35,7 @@ export class MainScene extends Scene {
     // setup actors and managers
     this.gf = new GameField(Vector.Zero, vec(1792, 992), this.tmap);
     this.tw = new TowerManager(this.gf);
-    this.ewc = new EnemyWaveController(this.tw, this.gf, navMap.graph, this.rng);
+    this.ewc = new EnemyWaveController(engine as MuteableEngine, this.tw, this.gf, navMap.graph, this.rng);
     this.ewc.init();
     this.loot = new LootCollector();
 
@@ -59,9 +61,6 @@ export class MainScene extends Scene {
     this.mainScreenEl.setWaveManager(this.ewc);
     this.mainScreenEl.setTowerManager(this.tw);
 
-    // TODO DELETE ME
-    // this.mainScreenEl.showTowerDetails();
-
     // setup events to refresh UI
     this.tw.towerEmitter.on("towerCreated", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("towerDestroyed", () => this.mainScreenEl!.requestUpdate());
@@ -74,7 +73,7 @@ export class MainScene extends Scene {
       this.mainScreenEl!.setPos(topLeft.x, topLeft.y);
     });
     this.add(this.gf);
-    Resources.sprocketSound.play();
+    if (!(engine as MuteableEngine).mute) Resources.sprocketSound.play();
   }
 
   gameOverTransition() {

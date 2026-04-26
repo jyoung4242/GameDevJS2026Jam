@@ -9,6 +9,8 @@ import droneEngineDrop from "./Assets/images/Drop_DroneEngine_v2.png";
 import rangedEnemySource from "./Assets/images/rangedEnemy-Sheet.png";
 import otherTower from "./Assets/images/other tower.png";
 import tankEnemySource from "./Assets/images/Tank_Animated_v5-Sheet.png";
+import mute from "./Assets/images/mute.png";
+import unmute from "./Assets/images/unmute.png";
 
 //Sounds
 import cursorSound from "./Assets/sounds/cursor2.mp3";
@@ -34,6 +36,8 @@ export const Resources = {
   rangedEnemySS: new ImageSource(rangedEnemySource),
   otherTower: new ImageSource(otherTower),
   tankEnemySS: new ImageSource(tankEnemySource),
+  mute: new ImageSource(mute),
+  unmute: new ImageSource(unmute),
 
   // Shop
   ShopOpen: new Sound("./sounds/shop_open.mp3"),
