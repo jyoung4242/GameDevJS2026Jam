@@ -85,7 +85,9 @@ arsenal.
 - **Engine**: [Excalibur.js](https://excaliburjs.com/) - 2D game engine for TypeScript
 - **Build Tool**: [Vite](https://vitejs.dev/) - Fast build tool and dev server
 - **Language**: TypeScript
-- **Audio**: JSFXR plugin for procedural sound generation and custom music sounds
+- **Audio**:
+  - JSFXR plugin for procedural sound generation and custom sounds
+  - Abelton and Splice for music and custom sounds
 - **UI**:
   - Custom UI components with Lit
   - Excalibur Screen Elements UIFramework
