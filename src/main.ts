@@ -22,7 +22,7 @@ const game = new Engine({
   displayMode: DisplayMode.Fixed, // the display mode
   pixelRatio: 2,
   pixelArt: true,
-  backgroundColor: Color.fromHex("#302c2c"),
+  backgroundColor: Color.fromHex("#3b3838"),
   scenes: {
     title: new TitleScene(),
     main: new MainScene(),
