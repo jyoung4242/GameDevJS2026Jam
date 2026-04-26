@@ -69,7 +69,7 @@ export abstract class Loot extends Actor {
       })
       .callMethod(() => {
         // sndPlugin.playSound("pickup");
-        Resources.itemPickupSound.play();
+        Resources.itemPickupSound.play(.3);
         lootCollector?.eventEmitter.emit("LootCollected", this);
       })
 

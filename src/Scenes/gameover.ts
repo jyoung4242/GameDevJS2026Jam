@@ -9,7 +9,7 @@ export class GameOverScene extends Scene {
   }
 
   onActivate(context: SceneActivationContext<unknown, undefined>): void {
-    Resources.sprocketSound.play(.3);
+    Resources.sprocketSound.play(.1);
   }
 
   onDeactivate(context: SceneActivationContext) {

@@ -129,7 +129,7 @@ export class AttackingTower extends ExState {
 
     if (this.owner instanceof TankEnemy) {
       this.owner.targetTower?.takeDamage(this.owner.strength);
-      Resources.tankShotSound.play();
+      Resources.tankShotSound.play(.3);
     } else if (this.owner instanceof RangedEnemy) {
       let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
       let direction = this.owner.direction;

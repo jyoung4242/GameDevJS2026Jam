@@ -10,7 +10,7 @@ export class TitleScene extends Scene {
 
   onActivate(context: SceneActivationContext<unknown, undefined>): void {
     Resources.sprocketSound.loop = true;
-    Resources.sprocketSound.play(.3);
+    Resources.sprocketSound.play(.1);
   }
 
   onDeactivate(context: SceneActivationContext) {

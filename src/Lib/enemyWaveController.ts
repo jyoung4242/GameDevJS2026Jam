@@ -187,7 +187,7 @@ export class EnemyWaveController {
   }
 
   endCurrentWave() {
-    Resources.sprocketSound.play();
+    Resources.sprocketSound.play(.1);
     console.log(`
     **************************************
     Wave ${this._currentLevel} complete

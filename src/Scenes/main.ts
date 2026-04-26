@@ -74,7 +74,7 @@ export class MainScene extends Scene {
       this.mainScreenEl!.setPos(topLeft.x, topLeft.y);
     });
     this.add(this.gf);
-    Resources.sprocketSound.play();
+    Resources.sprocketSound.play(.1);
   }
 
   gameOverTransition() {

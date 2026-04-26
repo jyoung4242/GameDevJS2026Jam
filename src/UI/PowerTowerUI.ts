@@ -31,7 +31,7 @@ export class PowerTowerMenu extends UIPanel {
     this.addChild(this.lbl1);
     this.btn1 = new PTButton1();
     this.addChild(this.btn1);
-    Resources.cursorSound.play();
+    Resources.cursorSound.play(.3);
   }
 
   closeMenu() {
@@ -106,7 +106,7 @@ const pt1ButtonConfig: UIButtonConfig = {
     ) as OtherTower;
     (newTower as OtherTower).isPlacing = true;
     powerTowerParent.otherTowers.push(newTower);
-    Resources.selectSound.play();
+    Resources.selectSound.play(.3);
     (button.parent as PowerTowerMenu).closeMenu();
   },
 };
