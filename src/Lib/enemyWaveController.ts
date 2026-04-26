@@ -201,12 +201,12 @@ export class EnemyWaveController {
     **************************************
     Wave ${this._currentLevel} complete
     **************************************`);
-    this.waveEmitter.emit("waveEnd");
     this._waveState = "cleanup";
     this._currentLevel += 1;
     this._spawnInterval = this._spawnInterval * 0.9;
     this._numEnemeiesInWave = Math.floor(this._numEnemeiesInWave * 1.25);
     this._numberRemainaing = this._numEnemeiesInWave;
+    this.waveEmitter.emit("waveEnd");
   }
 
   reset() {
