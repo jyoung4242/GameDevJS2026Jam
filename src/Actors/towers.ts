@@ -225,8 +225,8 @@ export class OtherTower extends Tower {
     this.addComponent(this.skillComponents.get("drone")!);
 
     // set 'burst' to active
-    (this.skillComponents.get("burst") as BurstTowerSkill).setState("inactive");
-    (this.skillComponents.get("missle") as BurstTowerSkill).setState("active");
+    (this.skillComponents.get("burst") as BurstTowerSkill).setState("active");
+    (this.skillComponents.get("missle") as BurstTowerSkill).setState("inactive");
     (this.skillComponents.get("drone") as BurstTowerSkill).setState("inactive");
     (this.skillComponents.get("beam") as BurstTowerSkill).setState("inactive");
 
