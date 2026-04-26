@@ -21,7 +21,7 @@ const TitlePanelUIConfig: UIPanelConfig = {
 };
 
 export class TitlePanel extends UIPanel {
-  constructor() {
+  constructor(muteState: boolean = false) {
     super(TitlePanelUIConfig);
     this.addChild(new TitleButton());
     this.addChild(new titleLabel());

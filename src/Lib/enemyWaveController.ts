@@ -6,6 +6,7 @@ import { LaserBeam, Missle, TowerBurst, TowerDrone, TowerWeapon } from "../Actor
 import { PositionNodeData } from "./mapGeneration";
 import { EndOfWavePanel } from "../UI/EndOfWaveUI";
 import { Resources } from "../resources";
+import { MuteableEngine } from "../main";
 
 const POOL_SIZE = 100;
 const STARTING_SPAWN_INTERVAL = 1000; // in milliseconds
@@ -41,12 +42,20 @@ export class EnemyWaveController {
   private _spawnInterval: number = STARTING_SPAWN_INTERVAL;
 
   public waveEmitter: EventEmitter<WaveEvents> = new EventEmitter();
+  _engine: MuteableEngine | null = null;
 
-  constructor(towerManager: TowerManager, gameField: GameField, navmap: Graph<PositionNodeData>, random: Random) {
+  constructor(
+    engine: MuteableEngine,
+    towerManager: TowerManager,
+    gameField: GameField,
+    navmap: Graph<PositionNodeData>,
+    random: Random,
+  ) {
     this._towerManager = towerManager;
     this._gameField = gameField;
     this._navmap = navmap;
     this.rng = random;
+    this._engine = engine;
   }
 
   get tmanager() {
@@ -187,7 +196,7 @@ export class EnemyWaveController {
   }
 
   endCurrentWave() {
-    Resources.sprocketSound.play(.1);
+    if (!(this._engine as MuteableEngine).mute) Resources.sprocketSound.play(.1);
     console.log(`
     **************************************
     Wave ${this._currentLevel} complete
