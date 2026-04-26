@@ -13,7 +13,7 @@ export class GameOverScene extends Scene {
 
   onActivate(context: SceneActivationContext<unknown, undefined>): void {
     let engine = context.engine as MuteableEngine;
-    if (!(engine as MuteableEngine).mute) Resources.sprocketSound.play();
+    if (!(engine as MuteableEngine).mute) Resources.sprocketSound.play(.1);
   }
 
   onDeactivate(context: SceneActivationContext) {

@@ -73,7 +73,7 @@ export class MainScene extends Scene {
       this.mainScreenEl!.setPos(topLeft.x, topLeft.y);
     });
     this.add(this.gf);
-    if (!(engine as MuteableEngine).mute) Resources.sprocketSound.play();
+    if (!(engine as MuteableEngine).mute) Resources.sprocketSound.play(.1);
   }
 
   gameOverTransition() {

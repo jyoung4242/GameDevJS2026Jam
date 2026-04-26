@@ -54,7 +54,7 @@ const TitleButtonConfig: UIButtonConfig = {
     }),
   },
   callback: (evt: PointerEvent | KeyEvent, button: UIButton) => {
-    Resources.selectSound.play();
+    Resources.selectSound.play(.3);
     button.scene?.engine.goToScene("main");
   },
 };

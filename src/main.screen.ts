@@ -348,7 +348,7 @@ export class MainScreen extends LitElement {
     const btn = (e.target as HTMLElement).closest("button");
     if (btn && btn !== this._lastHovered) {
       this._lastHovered = btn;
-      Resources.cursorSound.play();
+      Resources.cursorSound.play(.3);
     }
   };
 
@@ -385,7 +385,7 @@ export class MainScreen extends LitElement {
 
   public startNextWave() {
     if (this.waveManager) {
-      Resources.selectSound.play();
+      Resources.selectSound.play(.3);
       this.waveManager.startNewWave();
       this.generateOffer();
     }
@@ -411,7 +411,7 @@ export class MainScreen extends LitElement {
   }
 
   public hideInventory() {
-    Resources.selectSound.play();
+    Resources.selectSound.play(.3);
     this.isInventoryVisible = false;
     this.requestUpdate();
   }
@@ -422,7 +422,7 @@ export class MainScreen extends LitElement {
   }
 
   public hideTowerDetails() {
-    Resources.selectSound.play();
+    Resources.selectSound.play(.3);
     this.isTowerDetailsVisible = false;
     this.requestUpdate();
   }

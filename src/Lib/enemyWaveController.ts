@@ -196,7 +196,7 @@ export class EnemyWaveController {
   }
 
   endCurrentWave() {
-    if (!(this._engine as MuteableEngine).mute) Resources.sprocketSound.play();
+    if (!(this._engine as MuteableEngine).mute) Resources.sprocketSound.play(.1);
     console.log(`
     **************************************
     Wave ${this._currentLevel} complete
