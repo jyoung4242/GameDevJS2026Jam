@@ -12,6 +12,9 @@ import { ApproachingTower, AttackingTower, CalculatingPathToTower, FindingTarget
 import { sndPlugin } from "../main";
 import { AnimationComponent } from "../Components/AnimationComponent";
 import { RangedEnemyAnimation } from "../Animations/enemyAnimations";
+import { TankEnemyAnimations } from "../Animations/tankAnimations";
+
+type enemyDirections = "Left" | "Right" | "Up" | "Down" | "LeftUp" | "LeftDown" | "RightUp" | "RightDown";
 
 export abstract class Enemy extends Actor {
   fsm: ExFSM;
@@ -28,8 +31,7 @@ export abstract class Enemy extends Actor {
   speed: number = 1;
   // bt: BehaviorTreeComponent | null = null;
   range: number = 1;
-  direction: "Left" | "Right" = "Right";
-  oldDirection: "Left" | "Right" = "Right";
+  direction: enemyDirections = "Right";
 
   constructor(
     waveManager: EnemyWaveController,
@@ -131,6 +133,7 @@ export abstract class Enemy extends Actor {
 }
 
 export class TankEnemy extends Enemy {
+  ac: AnimationComponent<keyof typeof TankEnemyAnimations>;
   constructor(
     waveManager: EnemyWaveController,
     gamefield: GameField,
@@ -140,12 +143,16 @@ export class TankEnemy extends Enemy {
   ) {
     super(waveManager, gamefield, TowerManager, pos, navmap, "box");
     this.enemyType = "tank";
-    this.graphics.color = Color.Red;
+    // this.graphics.color = Color.Red;
     this.speed = 80; //10
     this.strength = 5;
     this.hp = 25;
     this.hpMax = 25;
     this.range = 80;
+    this.ac = new AnimationComponent(TankEnemyAnimations);
+    this.addComponent(this.ac);
+    this.ac.set("Right");
+    console.log(this.ac);
 
     this.fsm.register(
       new IdleState(this),
@@ -184,6 +191,9 @@ export class TankEnemy extends Enemy {
   }
 
   onPreUpdate(engine: Engine, elapsed: number): void {
+    // set direction 8 ways
+    let myDireciton = vectorToDirection(this.vel);
+    if (myDireciton != "idle") this.ac.set(myDireciton);
     this.fsm.update();
   }
 }
@@ -319,4 +329,31 @@ export class EnemyBurst extends Actor {
       this.kill();
     }
   }
+}
+
+function vectorToDirection(vec: Vector): enemyDirections | "idle" {
+  // Handle no movement
+  const { x, y } = vec;
+  if (x === 0 && y === 0) {
+    return "idle";
+  }
+
+  // Normalize the vector
+  const length = Math.sqrt(x * x + y * y);
+  const nx = x / length;
+  const ny = y / length;
+
+  // Use angle to determine direction
+  const angle = Math.atan2(ny, nx) * (180 / Math.PI);
+
+  if (angle >= -22.5 && angle < 22.5) return "Right";
+  if (angle >= 22.5 && angle < 67.5) return "RightDown";
+  if (angle >= 67.5 && angle < 112.5) return "Down";
+  if (angle >= 112.5 && angle < 157.5) return "LeftDown";
+  if (angle >= 157.5 || angle < -157.5) return "Left";
+  if (angle >= -157.5 && angle < -112.5) return "LeftUp";
+  if (angle >= -112.5 && angle < -67.5) return "Up";
+  if (angle >= -67.5 && angle < -22.5) return "RightUp";
+
+  return "idle";
 }

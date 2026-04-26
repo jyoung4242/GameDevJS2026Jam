@@ -78,8 +78,12 @@ export class ApproachingTower extends ExState {
     this.owner.actions.runAction(new MoveCloserToTower(this.owner, this.owner.speed));
     let animComp = (this.owner as Tower | RangedEnemy | TankEnemy).get(AnimationComponent);
     let direction = this.owner.direction;
-    let animName = `Walk${direction}` as "WalkLeft" | "WalkRight";
-    if (animComp) animComp.set(animName);
+    if (this.owner instanceof RangedEnemy) {
+      let animName = `Walk${direction}` as "WalkLeft" | "WalkRight";
+      if (animComp) animComp.set(animName);
+    } else if (this.owner instanceof TankEnemy) {
+      if (animComp) animComp.set(direction);
+    }
   }
 
   actionHandler = (evt: ActionCompleteEvent) => {
