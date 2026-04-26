@@ -12,6 +12,7 @@ import tankEnemySource from "./Assets/images/Tank_Animated_v5-Sheet.png";
 import mute from "./Assets/images/mute.png";
 import unmute from "./Assets/images/unmute.png";
 import missle from "./Assets/images/missle.png";
+import drone from "./Assets/images/drone.png";
 
 //Sounds
 import cursorSound from "./Assets/sounds/cursor2.mp3";
@@ -40,6 +41,7 @@ export const Resources = {
   mute: new ImageSource(mute),
   unmute: new ImageSource(unmute),
   missle: new ImageSource(missle),
+  drone: new ImageSource(drone),
 
   // Shop
   ShopOpen: new Sound("./sounds/shop_open.mp3"),

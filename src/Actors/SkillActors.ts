@@ -204,7 +204,8 @@ export class TowerDrone extends TowerWeapon {
 
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
     super(waveManager, gamefield, TowerManager, pos, vec(20, 20), Vector.Zero);
-    this.graphics.color = Color.DarkGray;
+    // this.graphics.color = Color.DarkGray;
+    this.graphics.use(Resources.drone.toSprite());
     this.tm = TowerManager;
     this.ewc = waveManager;
     this.gf = gamefield;
