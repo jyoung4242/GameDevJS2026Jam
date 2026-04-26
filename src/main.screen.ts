@@ -756,6 +756,9 @@ export class MainScreen extends LitElement {
 
     // Persist placement on the tower
     this.currentTower!.placedParts.push({ type, row: originRow, col: originCol, width, height });
+    if (this.currentTower instanceof OtherTower) {
+      this.currentTower!.addSkill(type);
+    }
 
     // Check every cell the part would cover
     for (let r = originRow; r < originRow + height; r++) {

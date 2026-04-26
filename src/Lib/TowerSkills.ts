@@ -43,9 +43,7 @@ export abstract class TowerSkill extends Component {
   levelUp(): void {
     if (this.level >= Object.keys(this.progressionLookup).length) return;
     this.level += 1;
-    if (this.level === 1) {
-      this.setState("active");
-    }
+    this.setState("active");
     this.updateSkillsByLevel();
   }
 
