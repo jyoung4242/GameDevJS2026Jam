@@ -9,9 +9,9 @@ import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 import { Random } from "excalibur";
 
-export type PartOffer = { 
-  type: WeaponTypes; 
-  display: string; 
+export type PartOffer = {
+  type: WeaponTypes;
+  display: string;
   price: number;
   width: number;
   height: number;
@@ -41,6 +41,41 @@ export class MainScreen extends LitElement {
       color: black;
       height: 32px;
       user-select: none;
+    }
+
+    /* The floating ghost while dragging */
+    .drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.75;
+      cursor: grabbing;
+      background: #4a90e2;
+      color: white;
+      border: 2px dashed #fff;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: none;
+    }
+
+    /* Parts placed on the grid */
+    .placed-part {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      cursor: default;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .container {
@@ -145,14 +180,33 @@ export class MainScreen extends LitElement {
       opacity: 0;
       top: 0;
 
+
+      ul,li {
+        display: flex;
+        margin: 0;
+        list-style-type: none;
+      }
+
       table {
         border: solid 1px;
         border-spacing: 0;
 
         td {
+          position: relative;
           padding: 24px;
           border: solid 1px;
         }
+
+        td.drop-ok {
+          background: rgba(74, 226, 100, 0.25);
+          outline: 1px solid #3db85a;
+        }
+
+        td.drop-blocked {
+          background: rgba(226, 74, 74, 0.25);
+          outline: 1px solid #c0392b;
+        }
+
         td:hover {
           background-color: white;
         }
@@ -338,7 +392,25 @@ export class MainScreen extends LitElement {
   isInventoryVisible: boolean = false;
   isTowerDetailsVisible: boolean = false;
   private _lastHovered: EventTarget | null = null;
+  private _dragging: boolean;
+  private _dragEl: HTMLElement;
+  private _dragData: any;
+  private _dragOffset: { x: number; y: number; };
+  private _boundMouseMove: (e: MouseEvent, part: PartOffer) => void;
+  private _boundMouseUp: (e: MouseEvent, part: PartOffer) => void;
+  private _occupiedCells: Set<string>;
+  private _lastHighlighted: any;
 
+  constructor() {
+    super();
+    this._dragging = false;
+    this._dragEl = null as any;
+    this._dragOffset = { x: 0, y: 0 };
+    this._boundMouseMove = this.partMouseMove.bind(this);
+    this._boundMouseUp = this.partMouseUp.bind(this);
+    this._occupiedCells = new Set(); // tracks "row,col" strings
+
+  }
   // override to disable shadow dom for --ex-pixel-ratio
   // override createRenderRoot() { return this; }
 
@@ -529,6 +601,162 @@ export class MainScreen extends LitElement {
     }
   }
 
+  partDragStart(e: MouseEvent, part: PartOffer) {
+    const btn: HTMLButtonElement = e.currentTarget! as HTMLButtonElement;
+    const rect = btn.getBoundingClientRect();
+
+    // Clone the button to drag around
+    const ghost: HTMLElement = btn.cloneNode(true) as HTMLElement;
+    ghost.classList.add('drag-ghost');
+    ghost.style.width = btn.style.width;
+    ghost.style.height = btn.style.height;
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    document.body.appendChild(ghost);
+
+    this._dragging = true;
+    this._dragEl = ghost;
+    this._dragData = part;
+    this._dragOffset = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+
+    document.addEventListener('mousemove', this._boundMouseMove as any);
+    document.addEventListener('mouseup', this._boundMouseUp as any);
+    e.preventDefault();
+
+  }
+
+  partMouseMove(e: MouseEvent, part: PartOffer) {
+    if (!this._dragEl) return;
+    this._dragEl.style.left = (e.clientX - this._dragOffset.x) + 'px';
+    this._dragEl.style.top = (e.clientY - this._dragOffset.y) + 'px';
+
+
+    // Highlight drop target validity
+    const el = this.shadowRoot!.elementFromPoint(e.clientX, e.clientY);
+    const td = el?.closest('td');
+    const table = td?.closest('table');
+
+    // Clear previous highlight
+    if (this._lastHighlighted) {
+      this._lastHighlighted.forEach((c: any) => c.classList.remove('drop-ok', 'drop-blocked'));
+      this._lastHighlighted = null;
+    }
+
+    if (!td || !table) return;
+
+    const { width, height } = this._dragData;
+    const rows = Array.from(table.querySelectorAll('tr'));
+    let originRow = -1, originCol = -1;
+
+    rows.forEach((tr, r) => {
+      Array.from(tr.cells).forEach((cell, c) => {
+        if (cell === td) { originRow = r; originCol = c; }
+      });
+    });
+
+    if (originRow === -1) return;
+
+    let blocked = false;
+    const targets = [];
+
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        const cell = rows[r]?.cells[c];
+        if (!cell || this._occupiedCells.has(`${r},${c}`)) { blocked = true; break; }
+        targets.push(cell);
+      }
+      if (blocked) break;
+    }
+
+    const cls = blocked ? 'drop-blocked' : 'drop-ok';
+    targets.forEach(c => c.classList.add(cls));
+    this._lastHighlighted = targets;
+  }
+
+  partMouseUp(e: MouseEvent, part: PartOffer) {
+    if (this._lastHighlighted) {
+      this._lastHighlighted.forEach((c: any) => c.classList.remove('drop-ok', 'drop-blocked'));
+      this._lastHighlighted = null;
+    }
+    document.removeEventListener('mousemove', this._boundMouseMove as any);
+    document.removeEventListener('mouseup', this._boundMouseUp as any);
+
+    if (this._dragEl) {
+      this._dragEl.remove();
+      this._dragEl = null as any;
+    }
+
+    this._dragging = false;
+    this._tryDropOnTable(e);
+  }
+
+  _tryDropOnTable(e: MouseEvent) {
+    // Find which TD is under the cursor
+    const el = this.shadowRoot!.elementFromPoint(e.clientX, e.clientY);
+    const td = el?.closest('td');
+    if (!td) return;
+
+    const table = td.closest('table');
+    if (!table) return;
+
+    const { width, height, type } = this._dragData;
+    const rows = Array.from(table.querySelectorAll('tr'));
+
+    // Find origin cell position
+    let originRow = -1, originCol = -1;
+    rows.forEach((tr, r) => {
+      Array.from(tr.cells).forEach((cell, c) => {
+        if (cell === td) { originRow = r; originCol = c; }
+      });
+    });
+
+    if (originRow === -1) return;
+
+    // Check every cell the part would cover
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        const key = `${r},${c}`;
+        if (this._occupiedCells.has(key) || !rows[r]?.cells[c]) {
+          return; // blocked — abort drop
+        }
+      }
+    }
+
+    // All clear — mark cells as occupied
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        this._occupiedCells.add(`${r},${c}`);
+      }
+    }
+
+    // Place the button
+    const placed = document.createElement('button');
+    placed.textContent = type;
+    placed.className = 'placed-part';
+    placed.style.width = (50 * width) + 'px';
+    placed.style.height = (50 * height) + 'px';
+
+    td.colSpan = width;
+    td.rowSpan = height;
+    td.appendChild(placed);
+
+    this._coverCells(rows, originRow, originCol, width, height, td);
+  }
+
+  _coverCells(rows: HTMLTableRowElement[], originRow: number, originCol: number, colSpan: number, rowSpan: number, originTd: HTMLTableCellElement) {
+    for (let r = originRow; r < originRow + rowSpan; r++) {
+      for (let c = originCol; c < originCol + colSpan; c++) {
+        if (r === originRow && c === originCol) continue;
+        const cell = rows[r]?.cells[c];
+        if (cell) cell.style.display = 'none';
+      }
+    }
+  }
+
+
   protected render(): unknown {
     const styles = {
       "--ex-pixel-ratio": `${this.pixelRatio}`,
@@ -558,6 +786,7 @@ export class MainScreen extends LitElement {
       "z-index": this.isTowerDetailsVisible ? 10 : 5,
       left: this.isTowerDetailsVisible ? "50%" : "100%",
     };
+
 
     return html` <div class="container" style=${styleMap(styles)}>
       <div class="header">
@@ -590,7 +819,7 @@ export class MainScreen extends LitElement {
           <div class="actions">
             <div class="offer">
               ${this.currentOffer.map(offer => {
-                return html`<button
+      return html`<button
                   class="part-offer"
                   .value=${offer.price}
                   ?disabled=${InventoryObject.money < offer.price}
@@ -602,7 +831,7 @@ export class MainScreen extends LitElement {
                   <div>${offer.display}</div>
                   <div>$${offer.price}</div>
                 </button>`;
-              })}
+    })}
               <!-- <button class="part-offer">Firing Speed</button> -->
               <!-- <button class="part-offer">Damage</button> -->
               <!-- <button class="part-offer">Max Health</button> -->
@@ -614,14 +843,14 @@ export class MainScreen extends LitElement {
 
               <ul class="content">
                 ${repeat(
-                  InventoryObject.scrapItems,
-                  e => e[0],
-                  ([type, number]) => {
-                    if (number) {
-                      return html`<li>${type}:${number}</li>`;
-                    }
-                  },
-                )}
+      InventoryObject.scrapItems,
+      e => e[0],
+      ([type, number]) => {
+        if (number) {
+          return html`<li>${type}:${number}</li>`;
+        }
+      },
+    )}
               </ul>
             </div>
           </div>
@@ -639,24 +868,24 @@ export class MainScreen extends LitElement {
         <div class="content">
           <ul>
             ${InventoryObject.partItems.map(({ type, price }) => {
-              if (price) {
-                return html`<li><button>${type}</button></li>`;
-              }
-            })}
+      if (price) {
+        return html`<li><button>${type}</button></li>`;
+      }
+    })}
           </ul>
         </div>
         <h3>Scrap</h3>
         <div class="content">
           <ul>
             ${repeat(
-              InventoryObject.scrapItems,
-              e => e[0],
-              ([type, number]) => {
-                if (number) {
-                  return html`<li>${type}:${number}</li>`;
-                }
-              },
-            )}
+      InventoryObject.scrapItems,
+      e => e[0],
+      ([type, number]) => {
+        if (number) {
+          return html`<li>${type}:${number}</li>`;
+        }
+      },
+    )}
           </ul>
         </div>
       </div>
@@ -715,16 +944,20 @@ export class MainScreen extends LitElement {
         <h3>Parts</h3>
         <div class="content">
           <ul>
-            ${InventoryObject.partItems.map(({ type, price, width, height }) => {
-             const sizeStyles = {
-                width,
-                height
-
-              };
-              if (price) {
-                return html`<li><button style=${styleMap(sizeStyles)}>${type}</button></li>`;
-              }
-            })}
+            ${InventoryObject.partItems.map((part) => {
+      const sizeStyles = {
+        width: (50 * part.width) + 'px',
+        height: (50 * part.height) + 'px'
+      };
+      if (part.price) {
+        return html`<li>
+                  <button 
+                  style=${styleMap(sizeStyles)}
+                  @mousedown=${(e: MouseEvent) => this.partDragStart(e, part)}
+                >${part.type}</button>
+                </li>`;
+      }
+    })}
           </ul>
         </div>
 
