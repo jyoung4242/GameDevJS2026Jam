@@ -1,6 +1,6 @@
 // main.ts
 import "./style.css";
-import { Engine, DisplayMode } from "excalibur";
+import { Engine, DisplayMode, Color } from "excalibur";
 import "./main.screen";
 import { loader } from "./resources";
 import { MainScene } from "./Scenes/main";
@@ -22,6 +22,7 @@ const game = new Engine({
   displayMode: DisplayMode.Fixed, // the display mode
   pixelRatio: 2,
   pixelArt: true,
+  backgroundColor: Color.fromHex("#302c2c"),
   scenes: {
     title: new TitleScene(),
     main: new MainScene(),
