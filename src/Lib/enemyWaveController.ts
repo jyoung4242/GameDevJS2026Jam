@@ -5,6 +5,7 @@ import { Enemy, FastEnemy, RangedEnemy, TankEnemy } from "../Actors/enemies";
 import { LaserBeam, Missle, TowerBurst, TowerDrone, TowerWeapon } from "../Actors/SkillActors";
 import { PositionNodeData } from "./mapGeneration";
 import { EndOfWavePanel } from "../UI/EndOfWaveUI";
+import { Resources } from "../resources";
 
 const POOL_SIZE = 100;
 const STARTING_SPAWN_INTERVAL = 1000; // in milliseconds
@@ -173,6 +174,7 @@ export class EnemyWaveController {
   }
 
   startNewWave() {
+    Resources.sprocketSound.stop();
     this._waveState = "active";
     this.waveEmitter.emit("waveStart");
     this._spawnTimer = 0;
@@ -185,6 +187,7 @@ export class EnemyWaveController {
   }
 
   endCurrentWave() {
+    Resources.sprocketSound.play();
     console.log(`
     **************************************
     Wave ${this._currentLevel} complete

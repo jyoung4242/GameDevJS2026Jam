@@ -50,6 +50,8 @@ export const Resources = {
   sprocketSound: new Sound(sprocketSound),
 };
 
+Resources.sprocketSound.loop = true;
+
 export const loader = new Loader();
 
 export const rangedEnemySS = SpriteSheet.fromImageSource({
