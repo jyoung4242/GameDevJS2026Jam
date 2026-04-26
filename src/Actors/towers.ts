@@ -85,19 +85,17 @@ export class PowerPlantTower extends Tower {
       }
     });
 
-    const gameMain = document.getElementsByTagName('main')[0];
+    const gameMain = document.getElementsByTagName("main")[0];
     this.on("pointerenter", () => {
-      gameMain.style.cursor = 'pointer';
-
+      gameMain.style.cursor = "pointer";
     });
 
-
     this.on("pointermove", () => {
-      gameMain.style.cursor = 'pointer';
+      gameMain.style.cursor = "pointer";
     });
 
     this.on("pointerleave", () => {
-      gameMain.style.cursor = 'auto';
+      gameMain.style.cursor = "auto";
       if (this._holdTimer !== null) {
         clearTimeout(this._holdTimer);
         this._holdTimer = null;
@@ -106,7 +104,7 @@ export class PowerPlantTower extends Tower {
     });
   }
 
-  onTap = () => { };
+  onTap = () => {};
   onHold = () => {
     this.ui = new PowerTowerMenu(this);
     this.isUIShowing = true;
@@ -190,19 +188,18 @@ export class OtherTower extends Tower {
   };
 
   onInitialize(engine: Engine): void {
-    const gameMain = document.getElementsByTagName('main')[0];
+    const gameMain = document.getElementsByTagName("main")[0];
     this.on("pointerenter", () => {
-      gameMain.style.cursor = 'pointer';
+      gameMain.style.cursor = "pointer";
     });
 
     this.on("pointermove", () => {
-      gameMain.style.cursor = 'pointer';
+      gameMain.style.cursor = "pointer";
     });
 
     this.on("pointerleave", () => {
-      gameMain.style.cursor = 'auto';
+      gameMain.style.cursor = "auto";
     });
-
   }
 
   addSkill(skillString: WeaponTypes) {
@@ -228,8 +225,8 @@ export class OtherTower extends Tower {
     this.addComponent(this.skillComponents.get("drone")!);
 
     // set 'burst' to active
-    (this.skillComponents.get("burst") as BurstTowerSkill).setState("active");
-    (this.skillComponents.get("missle") as BurstTowerSkill).setState("inactive");
+    (this.skillComponents.get("burst") as BurstTowerSkill).setState("inactive");
+    (this.skillComponents.get("missle") as BurstTowerSkill).setState("active");
     (this.skillComponents.get("drone") as BurstTowerSkill).setState("inactive");
     (this.skillComponents.get("beam") as BurstTowerSkill).setState("inactive");
 

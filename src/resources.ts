@@ -11,6 +11,7 @@ import otherTower from "./Assets/images/other tower.png";
 import tankEnemySource from "./Assets/images/Tank_Animated_v5-Sheet.png";
 import mute from "./Assets/images/mute.png";
 import unmute from "./Assets/images/unmute.png";
+import missle from "./Assets/images/missle.png";
 
 //Sounds
 import cursorSound from "./Assets/sounds/cursor2.mp3";
@@ -38,6 +39,7 @@ export const Resources = {
   tankEnemySS: new ImageSource(tankEnemySource),
   mute: new ImageSource(mute),
   unmute: new ImageSource(unmute),
+  missle: new ImageSource(missle),
 
   // Shop
   ShopOpen: new Sound("./sounds/shop_open.mp3"),

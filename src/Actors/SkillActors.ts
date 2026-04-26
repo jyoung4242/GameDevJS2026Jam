@@ -6,6 +6,7 @@ import { Enemy } from "./enemies";
 import { weaponColliderGroup } from "../CollisionGroups";
 import { BehaviorTreeComponent, createBehaviorTree } from "../Components/originalBehaviorTree";
 import { ApproachEnemy, FindEnemy, FireWeapon, Hover } from "../Actions/droneActions";
+import { Resources } from "../resources";
 
 export class TowerWeapon extends Actor {
   type: WeaponTypes | undefined;
@@ -98,7 +99,9 @@ export class Missle extends TowerWeapon {
   type: WeaponTypes = "missle";
   constructor(waveManager: EnemyWaveController, gamefield: GameField, TowerManager: TowerManager, pos: Vector) {
     super(waveManager, gamefield, TowerManager, pos, vec(24, 9));
-    this.graphics.color = Color.Black;
+    // this.graphics.color = Color.Black;
+    this.graphics.use(Resources.missle.toSprite());
+    this.graphics.current!.scale = vec(1.5, 1.5);
     this.tm = TowerManager;
     this.ewc = waveManager;
     this.gf = gamefield;
