@@ -11,10 +11,13 @@ import otherTower from "./Assets/images/other tower.png";
 import tankEnemySource from "./Assets/images/Tank_Animated_v5-Sheet.png";
 
 //Sounds
-import cursorSound from "./Assets/sounds/cursor.mp3";
+import cursorSound from "./Assets/sounds/cursor2.mp3";
 import placeTowerSound from "./Assets/sounds/place_tower.mp3";
-import selectSound from "./Assets/sounds/select.mp3";
+import selectSound from "./Assets/sounds/select2.mp3";
 import tankShotSound from "./Assets/sounds/tank_shoot.mp3";
+import itemPickupSound from "./Assets/sounds/item_pickup.mp3";
+import missleSound from "./Assets/sounds/missile.mp3";
+import sprocketSound from "./Assets/sounds/sprocket science.mp3";
 
 //Fonts
 import pixelFont from "./Assets/PressStart2P-Regular.ttf?url";
@@ -36,10 +39,15 @@ export const Resources = {
   ShopOpen: new Sound("./sounds/shop_open.mp3"),
   ShopClose: new Sound("./sounds/shop_close.mp3"),
   ShopPurchase: new Sound("./sounds/purchase.mp3"),
+
+  // Sounds
   cursorSound: new Sound(cursorSound),
   placeTowerSound: new Sound(placeTowerSound),
   selectSound: new Sound(selectSound),
   tankShotSound: new Sound(tankShotSound),
+  itemPickupSound: new Sound(itemPickupSound),
+  missleSound: new Sound(missleSound),
+  sprocketSound: new Sound(sprocketSound),
 };
 
 export const loader = new Loader();

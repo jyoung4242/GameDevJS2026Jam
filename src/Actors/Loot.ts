@@ -68,7 +68,8 @@ export abstract class Loot extends Actor {
         pos: lootCollector?.pos ?? Vector.Zero,
       })
       .callMethod(() => {
-        sndPlugin.playSound("pickup");
+        // sndPlugin.playSound("pickup");
+        Resources.itemPickupSound.play();
         lootCollector?.eventEmitter.emit("LootCollected", this);
       })
 
