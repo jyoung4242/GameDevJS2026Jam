@@ -8,12 +8,15 @@ import { WeaponTypes } from "../Lib/enemyWaveController";
 import { TILE_SIZE } from "./GameField";
 import { HoldRingActor } from "./HoldRing";
 import { sndPlugin } from "../main";
+import { PartOffer, PlacedPart } from "../main.screen";
 
 export const STARTING_TOWER_CAPACITY = 3;
 
 export abstract class Tower extends Actor {
   healthBar: HealthBar;
   tw: TowerManager;
+  occupiedCells = new Set<string>(); // tracks "row,col" strings
+  placedParts: PlacedPart[] = [];
 
   constructor(pos: Vector, manager: TowerManager) {
     super({ pos, width: 32, height: 96, color: Color.Transparent, collisionGroup: towerColliderGroup, z: 2 });
@@ -32,6 +35,7 @@ export abstract class Tower extends Actor {
       this.kill();
     }
   }
+
 }
 
 export class PowerPlantTower extends Tower {

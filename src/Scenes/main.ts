@@ -65,7 +65,7 @@ export class MainScene extends Scene {
     this.tw.towerEmitter.on("towerCreated", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("towerDestroyed", () => this.mainScreenEl!.requestUpdate());
     this.tw.towerEmitter.on("allTowersDestroyed", () => this.gameOverTransition());
-    this.tw.towerEmitter.on("towerSelected", () => this.mainScreenEl?.showTowerDetails());
+    this.tw.towerEmitter.on("towerSelected", (tower) => this.mainScreenEl?.showTowerDetails(tower));
     this.loot.eventEmitter.on("LootCollected", () => this.mainScreenEl!.requestUpdate());
     this.loot.eventEmitter.on("Money", () => this.mainScreenEl!.requestUpdate());
     engine.screen.events.on("resize", () => {

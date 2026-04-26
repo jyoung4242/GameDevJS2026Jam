@@ -6,7 +6,7 @@ import { Resources } from "./resources";
 import { TowerManager } from "./Lib/TowerManager";
 import { InventoryObject } from "./Lib/InventoryObject";
 import { repeat } from "lit-html/directives/repeat.js";
-import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
+import { OtherTower, PowerPlantTower, STARTING_TOWER_CAPACITY, Tower } from "./Actors/towers";
 import { Random } from "excalibur";
 
 export type PartOffer = {
@@ -17,6 +17,15 @@ export type PartOffer = {
   height: number;
 
 };
+
+
+export type PlacedPart = {
+  type: WeaponTypes;
+  row: number;
+  col: number;
+  width: number;
+  height: number;
+}
 
 @customElement("main-screen")
 export class MainScreen extends LitElement {
@@ -180,10 +189,15 @@ export class MainScreen extends LitElement {
       opacity: 0;
       top: 0;
 
+      .content {
+        height: 180px;
+      }
+
 
       ul,li {
         display: flex;
         margin: 0;
+        padding: 0;
         list-style-type: none;
       }
 
@@ -393,6 +407,7 @@ export class MainScreen extends LitElement {
   isTowerDetailsVisible: boolean = false;
   private _lastHovered: EventTarget | null = null;
   private _dragging: boolean;
+  private _dragPart: PartOffer | null = null
   private _dragEl: HTMLElement;
   private _dragData: any;
   private _dragOffset: { x: number; y: number; };
@@ -400,6 +415,8 @@ export class MainScreen extends LitElement {
   private _boundMouseUp: (e: MouseEvent, part: PartOffer) => void;
   private _occupiedCells: Set<string>;
   private _lastHighlighted: any;
+  currentTower: Tower | null = null;
+
 
   constructor() {
     super();
@@ -499,16 +516,21 @@ export class MainScreen extends LitElement {
     this.requestUpdate();
   }
 
-  public showTowerDetails() {
-    this.hideAll();
-
-    this.isTowerDetailsVisible = true;
-    this.requestUpdate();
+  public showTowerDetails(tower: Tower) {
+    if (tower instanceof OtherTower) {
+      this.hideAll();
+      this._occupiedCells.clear();
+      this.currentTower = tower;
+      this.isTowerDetailsVisible = true;
+      this._restorePlacements();
+      this.requestUpdate();
+    }
   }
 
   public hideTowerDetails() {
     Resources.selectSound.play(.3);
     this.isTowerDetailsVisible = false;
+    this.currentTower = null;
     this.requestUpdate();
   }
 
@@ -618,8 +640,8 @@ export class MainScreen extends LitElement {
     this._dragEl = ghost;
     this._dragData = part;
     this._dragOffset = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - rect.left - btn.clientWidth / 2,
+      y: e.clientY - rect.top - btn.clientHeight / 2,
     };
 
     document.addEventListener('mousemove', this._boundMouseMove as any);
@@ -690,10 +712,10 @@ export class MainScreen extends LitElement {
     }
 
     this._dragging = false;
-    this._tryDropOnTable(e);
+    this._tryDropOnTable(e, this._dragData);
   }
 
-  _tryDropOnTable(e: MouseEvent) {
+  _tryDropOnTable(e: MouseEvent, part: PartOffer) {
     // Find which TD is under the cursor
     const el = this.shadowRoot!.elementFromPoint(e.clientX, e.clientY);
     const td = el?.closest('td');
@@ -714,6 +736,29 @@ export class MainScreen extends LitElement {
     });
 
     if (originRow === -1) return;
+
+
+    // Use tower's occupiedCells, not a local one
+    const occupied = this.currentTower!.occupiedCells;
+
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        if (occupied.has(`${r},${c}`) || !rows[r]?.cells[c]) return;
+      }
+    }
+
+    // Mark occupied on the tower
+    for (let r = originRow; r < originRow + height; r++) {
+      for (let c = originCol; c < originCol + width; c++) {
+        occupied.add(`${r},${c}`);
+      }
+    }
+
+    // Persist placement on the tower
+    this.currentTower!.placedParts.push({ type, row: originRow, col: originCol, width, height });
+    if (this.currentTower instanceof OtherTower) {
+      this.currentTower!.addSkill(type);
+    }
 
     // Check every cell the part would cover
     for (let r = originRow; r < originRow + height; r++) {
@@ -743,6 +788,12 @@ export class MainScreen extends LitElement {
     td.rowSpan = height;
     td.appendChild(placed);
 
+    const partIndex = InventoryObject.partItems.indexOf(part);
+    if (partIndex > -1) {
+      InventoryObject.partItems.splice(partIndex, 1);
+      this.requestUpdate();
+    }
+
     this._coverCells(rows, originRow, originCol, width, height, td);
   }
 
@@ -753,6 +804,42 @@ export class MainScreen extends LitElement {
         const cell = rows[r]?.cells[c];
         if (cell) cell.style.display = 'none';
       }
+    }
+  }
+
+
+  _restorePlacements() {
+    const table = this.shadowRoot!.querySelector('table');
+    if (!table) return;
+
+    const rows = Array.from(table.querySelectorAll('tr'));
+
+    // Clear all cells first
+    rows.forEach((tr: any) => {
+      Array.from(tr.cells).forEach((td: any) => {
+        td.innerHTML = '';
+        td.colSpan = 1;
+        td.rowSpan = 1;
+        td.style.display = '';
+      });
+    });
+
+    // Replay each stored placement
+    for (const { type, row, col, width, height } of this.currentTower!.placedParts) {
+      const td = rows[row]?.cells[col];
+      if (!td) continue;
+
+      const placed = document.createElement('button');
+      placed.textContent = type;
+      placed.className = 'placed-part';
+      placed.style.width = (50 * width) + 'px';
+      placed.style.height = (50 * height) + 'px';
+
+      td.colSpan = width;
+      td.rowSpan = height;
+      td.appendChild(placed);
+
+      this._coverCells(rows, row, col, width, height, td);
     }
   }
 
