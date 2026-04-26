@@ -9,7 +9,14 @@ import { repeat } from "lit-html/directives/repeat.js";
 import { PowerPlantTower, STARTING_TOWER_CAPACITY } from "./Actors/towers";
 import { Random } from "excalibur";
 
-export type PartOffer = { type: WeaponTypes; display: string; price: number };
+export type PartOffer = { 
+  type: WeaponTypes; 
+  display: string; 
+  price: number;
+  width: number;
+  height: number;
+
+};
 
 @customElement("main-screen")
 export class MainScreen extends LitElement {
@@ -134,6 +141,7 @@ export class MainScreen extends LitElement {
     .tower-details {
       left: 100%;
       height: 100%;
+      width: 50%;
       opacity: 0;
       top: 0;
 
@@ -384,6 +392,7 @@ export class MainScreen extends LitElement {
   }
 
   public startNextWave() {
+    this.hideAll();
     if (this.waveManager) {
       Resources.selectSound.play(.3);
       this.waveManager.startNewWave();
@@ -393,6 +402,7 @@ export class MainScreen extends LitElement {
   }
 
   public showShop() {
+    this.hideAll();
     Resources.ShopOpen.play(0.2);
     this.isShopVisible = true;
 
@@ -406,6 +416,7 @@ export class MainScreen extends LitElement {
   }
 
   public showInventory() {
+    this.hideAll();
     this.isInventoryVisible = true;
     this.requestUpdate();
   }
@@ -417,6 +428,8 @@ export class MainScreen extends LitElement {
   }
 
   public showTowerDetails() {
+    this.hideAll();
+
     this.isTowerDetailsVisible = true;
     this.requestUpdate();
   }
@@ -487,10 +500,10 @@ export class MainScreen extends LitElement {
   }
 
   public possibleItems: PartOffer[] = [
-    { type: "burst", display: "Burst", price: 2 },
-    { type: "missle", display: "Missle", price: 3 },
-    { type: "beam", display: "Beam", price: 5 },
-    { type: "drone", display: "Drone", price: 4 },
+    { type: "burst", display: "Burst", price: 2, width: 2, height: 3 },
+    { type: "missle", display: "Missle", price: 3, width: 1, height: 4 },
+    { type: "beam", display: "Beam", price: 5, width: 4, height: 1 },
+    { type: "drone", display: "Drone", price: 4, width: 3, height: 3 },
   ];
   public currentOffer: PartOffer[] = [];
   public generateOffer() {
@@ -654,7 +667,7 @@ export class MainScreen extends LitElement {
         <button class="done" @click=${this.hideTowerDetails} @mouseover=${this._handleHover} @mouseleave=${this._handleLeave}>
           >Done
         </button>
-        <div>Machinery</div>
+        <h3>Machinery</h3>
         <table>
           <tbody>
             <tr>
@@ -665,6 +678,13 @@ export class MainScreen extends LitElement {
               <td></td>
               <td></td>
               <td></td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -678,28 +698,9 @@ export class MainScreen extends LitElement {
               <td></td>
               <td></td>
               <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
             </tr>
 
             <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
               <td></td>
               <td></td>
               <td></td>
@@ -710,6 +711,23 @@ export class MainScreen extends LitElement {
             </tr>
           </tbody>
         </table>
+
+        <h3>Parts</h3>
+        <div class="content">
+          <ul>
+            ${InventoryObject.partItems.map(({ type, price, width, height }) => {
+             const sizeStyles = {
+                width,
+                height
+
+              };
+              if (price) {
+                return html`<li><button style=${styleMap(sizeStyles)}>${type}</button></li>`;
+              }
+            })}
+          </ul>
+        </div>
+
       </div>
 
       <div class="bottom-left">

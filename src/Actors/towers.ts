@@ -193,7 +193,6 @@ export class OtherTower extends Tower {
     const gameMain = document.getElementsByTagName('main')[0];
     this.on("pointerenter", () => {
       gameMain.style.cursor = 'pointer';
-
     });
 
     this.on("pointermove", () => {
