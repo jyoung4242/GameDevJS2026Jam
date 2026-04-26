@@ -149,9 +149,10 @@ export class PowerCell extends Loot {
     let pos: Vector = new Vector(0, 0);
     let dims: Vector = new Vector(20, 20);
     let shape: "circle" | "box" = "box";
-    let color: Color = Color.fromHex("#b44f36");
+    // let color: Color = Color.fromHex("#b44f36");
     super(pos, dims, shape);
-    this.graphics.color = color;
+    this.graphics.use(Resources.powercell.toSprite());
+    // this.graphics.color = color;
   }
 }
 
