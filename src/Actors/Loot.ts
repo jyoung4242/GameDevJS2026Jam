@@ -69,7 +69,7 @@ export abstract class Loot extends Actor {
       })
       .callMethod(() => {
         // sndPlugin.playSound("pickup");
-        Resources.itemPickupSound.play(.3);
+        Resources.itemPickupSound.play(0.3);
         lootCollector?.eventEmitter.emit("LootCollected", this);
       })
 
@@ -137,7 +137,8 @@ export class PowerCore extends Loot {
     let shape: "circle" | "box" = "box";
     let color: Color = Color.fromHex("#941e00");
     super(pos, dims, shape);
-    this.graphics.color = color;
+    // this.graphics.color = color;
+    this.graphics.use(Resources.powercore.toSprite());
   }
 }
 

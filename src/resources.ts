@@ -13,6 +13,7 @@ import mute from "./Assets/images/mute.png";
 import unmute from "./Assets/images/unmute.png";
 import missle from "./Assets/images/Missle.png";
 import drone from "./Assets/images/drone.png";
+import powercore from "./Assets/images/powercore.png";
 
 //Sounds
 import cursorSound from "./Assets/sounds/cursor2.mp3";
@@ -42,6 +43,7 @@ export const Resources = {
   unmute: new ImageSource(unmute),
   missle: new ImageSource(missle),
   drone: new ImageSource(drone),
+  powercore: new ImageSource(powercore),
 
   // Shop
   ShopOpen: new Sound("./sounds/shop_open.mp3"),
